@@ -47,7 +47,7 @@ public:
 
 	void addData(const T data)
 	{
-		CMutexLocker locker(m_mutex);
+		CMutexLocker locker(&m_mutex);
 
 		m_buffer[m_iPtr++] = data;
 
@@ -57,7 +57,7 @@ public:
 
 	T getData()
 	{
-		CMutexLocker locker(m_mutex);
+		CMutexLocker locker(&m_mutex);
 
 		if (m_iPtr == m_oPtr)
 			return NULL;
@@ -72,7 +72,7 @@ public:
 
 	void clear()
 	{
-		CMutexLocker locker(m_mutex);
+		CMutexLocker locker(&m_mutex);
 
 		m_iPtr  = 0U;
 		m_oPtr  = 0U;
@@ -80,16 +80,16 @@ public:
 		::memset(m_buffer, 0x00, m_length * sizeof(T));
 	}
 
-	bool isEmpty()
+	bool empty()
 	{
-		CMutexLocker locker(m_mutex);
+		CMutexLocker locker(&m_mutex);
 
 		return m_iPtr == m_oPtr;
 	}
 
 	T peek()
 	{
-		CMutexLocker locker(m_mutex);
+		CMutexLocker locker(&m_mutex);
 
 		if (m_iPtr == m_oPtr)
 			return NULL;
@@ -102,7 +102,7 @@ private:
 	T*                    m_buffer;
 	volatile unsigned int m_iPtr;
 	volatile unsigned int m_oPtr;
-	wxMutex               m_mutex;
+	recursive_mutex       m_mutex;
 };
 
 #endif
