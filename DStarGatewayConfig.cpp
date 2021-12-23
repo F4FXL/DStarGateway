@@ -153,9 +153,9 @@ bool CDStarGatewayConfig::loadGateway(Config & cfg)
 		return false;
 	}
 	CUtils::ToUpper(m_gateway.callsign);
-	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0");
+	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true);
 	get_value(cfg, "gateway.port", m_gateway.port, 1U, 65535U, 20010U);
-	std::cout << "GATEWAY: callsign='" << m_gateway.callsign << "' address='" << m_gateway.address << ":" << m_gateway.port << std::endl;
+	std::cout << "GATEWAY: callsign='" << m_gateway.callsign << "' listen address='" << m_gateway.address << ":" << m_gateway.port << std::endl;
 
 	return true;
 }
