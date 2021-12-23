@@ -24,27 +24,6 @@
 
 using namespace libconfig;
 
-typedef struct {
-	std::string callsign;
-	std::string address;
-	unsigned int port;
-} TGateway;
-
-typedef struct {
-	std::string band;
-	std::string callsign;
-	std::string reflector;
-	std::string address;
-	unsigned int port;
-} TRepeater;
-
-typedef struct {
-	std::string hostname;
-	std::string username;
-	std::string password;
-	bool isQuadNet;
-} TircDDB;
-
 class CDStarGatewayConfig {
 public:
 	CDStarGatewayConfig(const std::string &pathname);
