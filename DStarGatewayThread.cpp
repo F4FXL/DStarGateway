@@ -167,7 +167,7 @@ void CDStarGatewayThread::run()
 		printf("Unknown exception raised\n");
 	}
 
-	printf("Stopping the Smart Group Server thread\n");
+	printf("Stopping the DStarGateway thread\n");
 
 	// Unlink from all reflectors
 	CDExtraHandler::unlink();
