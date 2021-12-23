@@ -16,20 +16,23 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#include <assert.h>
+#include <cstring>
+#include <boost/algorithm/string.hpp>
 
+#include "Thread.h"
 #include "DPlusAuthenticator.h"
 #include "UDPReaderWriter.h"
 #include "DStarDefines.h"
 #include "Utils.h"
 #include "Defs.h"
 
-const wxString OPENDSTAR_HOSTNAME = wxT("auth.dstargateway.org");
+const std::string OPENDSTAR_HOSTNAME = "auth.dstargateway.org";
 const unsigned int OPENDSTAR_PORT = 20001U;
 
 const unsigned int TCP_TIMEOUT = 10U;
 
-CDPlusAuthenticator::CDPlusAuthenticator(const wxString& loginCallsign, const wxString& gatewayCallsign, const wxString& address, CCacheManager* cache) :
-wxThread(wxTHREAD_JOINABLE),
+CDPlusAuthenticator::CDPlusAuthenticator(const std::string& loginCallsign, const std::string& gatewayCallsign, const std::string& address, CCacheManager* cache) :
 m_loginCallsign(loginCallsign),
 m_gatewayCallsign(gatewayCallsign),
 m_address(address),
@@ -37,16 +40,16 @@ m_cache(cache),
 m_timer(1U, 6U * 3600U),		// 6 hours
 m_killed(false)
 {
-	wxASSERT(!loginCallsign.IsEmpty());
-	wxASSERT(!gatewayCallsign.IsEmpty());
-	wxASSERT(cache != NULL);
+	assert(!loginCallsign.empty());
+	assert(!gatewayCallsign.empty());
+	assert(cache != NULL);
 
-	m_gatewayCallsign.Truncate(LONG_CALLSIGN_LENGTH - 1U);
+	m_gatewayCallsign = m_gatewayCallsign.substr(LONG_CALLSIGN_LENGTH - 1U);
 
-	m_loginCallsign.Trim();
-	m_gatewayCallsign.Trim();
+	boost::trim(m_loginCallsign);
+	boost::trim(m_gatewayCallsign);
 
-	if (m_loginCallsign.IsEmpty())
+	if (m_loginCallsign.empty())
 		m_loginCallsign = m_gatewayCallsign;
 }
 
@@ -62,7 +65,7 @@ void CDPlusAuthenticator::start()
 
 void* CDPlusAuthenticator::Entry()
 {
-	wxLogMessage(wxT("Starting the D-Plus Authenticator thread"));
+	printf("Starting the D-Plus Authenticator thread");
 
 	authenticate(m_loginCallsign, OPENDSTAR_HOSTNAME, OPENDSTAR_PORT, '2', true);
 
@@ -81,14 +84,14 @@ void* CDPlusAuthenticator::Entry()
 		}
 	}
 	catch (std::exception& e) {
-		wxString message(e.what(), wxConvLocal);
-		wxLogError(wxT("Exception raised in the D-Plus Authenticator thread - \"%s\""), message.c_str());
+		std::string message(e.what());
+		printf("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		wxLogError(wxT("Unknown exception raised in the D-Plus Authenticator thread"));
+		printf("Unknown exception raised in the D-Plus Authenticator thread");
 	}
 
-	wxLogMessage(wxT("Stopping the D-Plus Authenticator thread"));
+	printf("Stopping the D-Plus Authenticator thread");
 
 	return NULL;
 }
@@ -100,7 +103,7 @@ void CDPlusAuthenticator::stop()
 	Wait();
 }
 
-bool CDPlusAuthenticator::authenticate(const wxString& callsign, const wxString& hostname, unsigned int port, unsigned char id, bool writeToCache)
+bool CDPlusAuthenticator::authenticate(const std::string& callsign, const std::string& hostname, unsigned int port, unsigned char id, bool writeToCache)
 {
 	CTCPReaderWriterClient socket(hostname, port, m_address);
 
@@ -116,8 +119,8 @@ bool CDPlusAuthenticator::authenticate(const wxString& callsign, const wxString&
 	buffer[2U] = 0x01U;
 	buffer[3U] = 0x00U;
 
-	for (unsigned int i = 0U; i < callsign.Len(); i++)
-		buffer[i + 4U] = callsign.GetChar(i);
+	for (unsigned int i = 0U; i < callsign.length(); i++)
+		buffer[i + 4U] = callsign[i];
 
 	buffer[12U] = 'D';
 	buffer[13U] = 'V';
@@ -157,34 +160,34 @@ bool CDPlusAuthenticator::authenticate(const wxString& callsign, const wxString&
 		// Ensure that we get exactly len - 2U bytes from the TCP stream
 		ret = read(socket, buffer + 2U, len - 2U);
 		if (!ret) {
-			wxLogError(wxT("Short read from %s:%u"), hostname.c_str(), port);
+			printf("Short read from %s:%u", hostname.c_str(), port);
 			break;
 		}
 
 		if ((buffer[1U] & 0xC0U) != 0xC0U || buffer[2U] != 0x01U) {
-			wxLogError(wxT("Invalid packet received from %s:%u"), hostname.c_str(), port);
-			CUtils::dump(wxT("Details:"), buffer, len);
+			printf("Invalid packet received from %s:%u", hostname.c_str(), port);
+			CUtils::dump("Details:", buffer, len);
 			break;
 		}
 	
 		for (unsigned int i = 8U; (i + 25U) < len; i += 26U) {
-			wxString address = wxString((char*)(buffer + i + 0U),  wxConvLocal, 16U);
-			wxString    name = wxString((char*)(buffer + i + 16U), wxConvLocal, LONG_CALLSIGN_LENGTH);
+			std::string address = std::string((char*)(buffer + i + 0U), 16U);
+			std::string name = std::string((char*)(buffer + i + 16U), LONG_CALLSIGN_LENGTH);
 
-			address.Trim();
-			name.Trim();
+			boost::trim(address);
+			boost::trim(name);
 
 			// Get the active flag
 			bool active = (buffer[i + 25U] & 0x80U) == 0x80U;
 
 			// An empty name or IP address or an inactive gateway/reflector is not written out
-			if (address.Len() > 0U && name.Len() > 0U && !name.Left(3U).IsSameAs(wxT("XRF")) && active && writeToCache){
-				if (name.Left(3U).IsSameAs(wxT("REF")))
-					wxLogMessage(wxT("D-Plus: %s\t%s"), name.c_str(), address.c_str());
+			if (address.length() > 0U && name.length() > 0U && !name.compare(0, 3, "XRF") == 0 && active && writeToCache){
+				if (name.compare(0, 3, "REF") == 0)
+					printf("D-Plus: %s\t%s", name.c_str(), address.c_str());
 
-				name.Append(wxT("        "));
-				name.Truncate(LONG_CALLSIGN_LENGTH - 1U);
-				name.Append(wxT("G"));
+				name += "        ";
+				name = name.substr(LONG_CALLSIGN_LENGTH - 1U);
+				name += "G";
 				m_cache->updateGateway(name, address, DP_DPLUS, false, true);
 			}
 		}
@@ -192,7 +195,7 @@ bool CDPlusAuthenticator::authenticate(const wxString& callsign, const wxString&
 		ret = read(socket, buffer + 0U, 2U);
 	}
 
-	wxLogMessage(wxT("Registered with %s using callsign %s"), hostname.c_str(), callsign.c_str());
+	printf("Registered with %s using callsign %s", hostname.c_str(), callsign.c_str());
 
 	socket.close();
 
@@ -201,7 +204,7 @@ bool CDPlusAuthenticator::authenticate(const wxString& callsign, const wxString&
 	return true;
 }
 
-bool CDPlusAuthenticator::poll(const wxString& callsign, const wxString& hostname, unsigned int port, unsigned char id)
+bool CDPlusAuthenticator::poll(const std::string& callsign, const std::string& hostname, unsigned int port, unsigned char id)
 {
 	CUDPReaderWriter socket(m_address, 0U);
 	bool ret = socket.open();
@@ -216,8 +219,8 @@ bool CDPlusAuthenticator::poll(const wxString& callsign, const wxString& hostnam
 	buffer[2U] = 0x01U;
 	buffer[3U] = 0x01U;
 
-	for (unsigned int i = 0U; i < callsign.Len(); i++)
-		buffer[i + 4U] = callsign.GetChar(i);
+	for (unsigned int i = 0U; i < callsign.length(); i++)
+		buffer[i + 4U] = callsign[i];
 
 	buffer[12U] = 'D';
 	buffer[13U] = 'V';
@@ -228,8 +231,8 @@ bool CDPlusAuthenticator::poll(const wxString& callsign, const wxString& hostnam
 	buffer[18U] = '9';
 	buffer[19U] = '9';
 
-	for (unsigned int i = 0U; i < callsign.Len(); i++)
-		buffer[i + 20U] = callsign.GetChar(i);
+	for (unsigned int i = 0U; i < callsign.length(); i++)
+		buffer[i + 20U] = callsign[i];
 
 	buffer[28U] = 'W';
 	buffer[29U] = '7';

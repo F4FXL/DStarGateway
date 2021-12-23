@@ -20,6 +20,7 @@
 #ifndef	DPlusAuthenticator_H
 #define	DPlusAuthenticator_H
 
+#include "Thread.h"
 #include "TCPReaderWriterClient.h"
 #include "CacheManager.h"
 #include "Timer.h"
@@ -27,9 +28,9 @@
 
 #include <netinet/in.h>
 
-class CDPlusAuthenticator : public wxThread {
+class CDPlusAuthenticator : public CThread {
 public:
-	CDPlusAuthenticator(const wxString& loginCallsign, const wxString& gatewayCallsign, const wxString& address, CCacheManager* cache);
+	CDPlusAuthenticator(const std::string& loginCallsign, const std::string& gatewayCallsign, const std::string& address, CCacheManager* cache);
 	virtual ~CDPlusAuthenticator();
 
 	virtual void  start();
@@ -39,15 +40,15 @@ public:
 	virtual void stop();
 
 private:
-	wxString       m_loginCallsign;
-	wxString       m_gatewayCallsign;
-	wxString       m_address;
+	std::string       m_loginCallsign;
+	std::string       m_gatewayCallsign;
+	std::string       m_address;
 	CCacheManager* m_cache;
 	CTimer         m_timer;
 	bool           m_killed;
 
-	bool poll(const wxString& callsign, const wxString& hostname, unsigned int port, unsigned char id);
-	bool authenticate(const wxString& callsign, const wxString& hostname, unsigned int port, unsigned char id, bool writeToCache);
+	bool poll(const std::string& callsign, const std::string& hostname, unsigned int port, unsigned char id);
+	bool authenticate(const std::string& callsign, const std::string& hostname, unsigned int port, unsigned char id, bool writeToCache);
 	bool read(CTCPReaderWriterClient& socket, unsigned char* buffer, unsigned int len) const;
 };
 
