@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/geoffrey/Documents/Dev/DStarGateway",
+            "binaryPath": "/home/geoffrey/Documents/Dev/DStarGateway/dstargateway",
+            "binaryArgs": []
+        }
+    ]
+}

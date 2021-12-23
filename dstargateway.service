@@ -1,0 +1,10 @@
+[Unit]
+Description=DStar Gateway
+After=systemd-user-session.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dstargateway /usr/local/etc/dstargeteway/dstargateway.cfg
+
+[Install]
+WantedBy=multi-user.target
