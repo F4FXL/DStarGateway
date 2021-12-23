@@ -32,6 +32,9 @@ removed/*
 #log files
 *.log
 
+#dynamically generated files
+GitVersion.h
+
 # Executables
 *.exe
 *.out
