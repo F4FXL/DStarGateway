@@ -26,7 +26,7 @@
 
 const unsigned int BUFFER_LENGTH = 1000U;
 
-CDPlusProtocolHandler::CDPlusProtocolHandler(unsigned int port, const wxString& addr) :
+CDPlusProtocolHandler::CDPlusProtocolHandler(unsigned int port, const std::string& addr) :
 m_socket(addr, port),
 m_type(DP_NONE),
 m_buffer(NULL),
@@ -89,7 +89,7 @@ bool CDPlusProtocolHandler::writePoll(const CPollData& poll)
 	unsigned int length = poll.getDPlusData(buffer, 10U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Poll"), buffer, length);
+	CUtils::dump("Sending Poll", buffer, length);
 #endif
 
 	return m_socket.write(buffer, length, poll.getYourAddress(), poll.getYourPort());
@@ -101,7 +101,7 @@ bool CDPlusProtocolHandler::writeConnect(const CConnectData& connect)
 	unsigned int length = connect.getDPlusData(buffer, 40U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Connect"), buffer, length);
+	CUtils::dump("Sending Connect", buffer, length);
 #endif
 
 	return m_socket.write(buffer, length, connect.getYourAddress(), connect.getYourPort());
@@ -141,7 +141,7 @@ bool CDPlusProtocolHandler::readPackets()
 				return false;
 			default:
 				// An unknown type
-				// CUtils::dump(wxT("Unknown packet type from D-Plus"), m_buffer, m_length);
+				// CUtils::dump("Unknown packet type from D-Plus", m_buffer, m_length);
 				return true;
 		}
 	} else {
@@ -157,7 +157,7 @@ bool CDPlusProtocolHandler::readPackets()
 			return false;
 		} else {
 			// An unknown type
-			CUtils::dump(wxT("Unknown packet type from D-Plus"), m_buffer, m_length);
+			CUtils::dump("Unknown packet type from D-Plus", m_buffer, m_length);
 			return true;
 		}
 	}

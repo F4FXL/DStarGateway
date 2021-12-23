@@ -26,13 +26,7 @@
 #include "AMBEData.h"
 #include "PollData.h"
 
-#if defined(__WINDOWS__)
-#include "Inaddr.h"
-#else
 #include <netinet/in.h>
-#endif
-
-#include <wx/wx.h>
 
 enum DPLUS_TYPE {
 	DP_NONE,
@@ -44,7 +38,7 @@ enum DPLUS_TYPE {
 
 class CDPlusProtocolHandler {
 public:
-	CDPlusProtocolHandler(unsigned int port, const wxString& addr = wxEmptyString);
+	CDPlusProtocolHandler(unsigned int port, const std::string& addr = "");
 	~CDPlusProtocolHandler();
 
 	bool open();
