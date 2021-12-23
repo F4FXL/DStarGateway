@@ -1,6 +1,7 @@
 /*
  *   Copyright (C) 2010-2013,2015 by Jonathan Naylor G4KLX
  *   Copyright (c) 2017-2018 by Thomas Early N7TAE
+ *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@
 #include "GroupHandler.h"
 #include "DExtraHandler.h"			// DEXTRA LINK
 #include "DCSHandler.h"				// DCS LINK
+// #include "DPlusHandler.h"
 #include "HeaderData.h"
 #include "G2Handler.h"
 #include "AMBEData.h"
@@ -58,7 +60,14 @@ m_remotePort(0U),
 m_remote(NULL)
 {
 	CHeaderData::initialise();
-	CG2Handler::initialise(0);
+	CG2Handler::initialise(MAX_ROUTES);
+	CDExtraHandler::initialise(MAX_DEXTRA_LINKS);
+	// CDPlusHandler::initialise(MAX_DPLUS_LINKS);
+	CDCSHandler::initialise(MAX_DCS_LINKS);
+	CRepeaterHandler::initialise(MAX_REPEATERS);
+	CStarNetHandler::initialise(MAX_STARNETS, m_name);
+	CCCSHandler::initialise(MAX_REPEATERS);
+	CAudioUnit::initialise();
 	printf("DStarGatewayThread created. DExtra channels: %d, DCS Channels: %d\n", countDExtra, countDCS);
 }
 
