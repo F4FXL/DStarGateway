@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 
+#include "DStarGatewayDefs.h"
 #include "DStarGatewayConfig.h"
 #include "DStarGatewayApp.h"
 #include "Version.h"
