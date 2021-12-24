@@ -17,15 +17,18 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "DPlusProtocolHandlerPool.h"
+#include <cassert>
 
-CDPlusProtocolHandlerPool::CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const wxString& addr) :
+#include "DPlusProtocolHandlerPool.h"
+#include "Log.h"
+
+CDPlusProtocolHandlerPool::CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const std::string& addr) :
 m_pool(NULL),
 m_n(n),
 m_index(0U)
 {
-	wxASSERT(port > 0U);
-	wxASSERT(n > 0U);
+	assert(port > 0U);
+	assert(n > 0U);
 
 	m_pool = new CDPlusProtocolHandlerEntry[n];
 
@@ -35,7 +38,7 @@ m_index(0U)
 		m_pool[i].m_inUse   = false;
 	}
 
-	wxLogMessage(wxT("Allocated UDP ports %u-%u to D-Plus"), port, port + n - 1U);
+	wxLogMessage("Allocated UDP ports %u-%u to D-Plus", port, port + n - 1U);
 }
 
 CDPlusProtocolHandlerPool::~CDPlusProtocolHandlerPool()
@@ -75,14 +78,14 @@ CDPlusProtocolHandler* CDPlusProtocolHandlerPool::getHandler(unsigned int port)
 		}
 	}
 
-	wxLogError(wxT("Cannot find a free D-Plus port in the pool"));
+	wxLogError("Cannot find a free D-Plus port in the pool");
 
 	return NULL;
 }
 
 void CDPlusProtocolHandlerPool::release(CDPlusProtocolHandler* handler)
 {
-	wxASSERT(handler != NULL);
+	assert(handler != NULL);
 
 	for (unsigned int i = 0U; i < m_n; i++) {
 		if (m_pool[i].m_handler == handler && m_pool[i].m_inUse) {
@@ -91,7 +94,7 @@ void CDPlusProtocolHandlerPool::release(CDPlusProtocolHandler* handler)
 		}
 	}
 
-	wxLogError(wxT("Trying to release an unused D-Plus port"));
+	wxLogError("Trying to release an unused D-Plus port");
 }
 
 DPLUS_TYPE CDPlusProtocolHandlerPool::read()

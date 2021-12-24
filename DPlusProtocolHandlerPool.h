@@ -20,8 +20,6 @@
 #ifndef DPlusProtocolHandlerPool_H
 #define	DPlusProtocolHandlerPool_H
 
-#include <wx/wx.h>
-
 #include "DPlusProtocolHandler.h"
 
 class CDPlusProtocolHandlerEntry {
@@ -33,7 +31,7 @@ public:
 
 class CDPlusProtocolHandlerPool {
 public:
-	CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const wxString& addr = wxEmptyString);
+	CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const std::string& addr = "");
 	~CDPlusProtocolHandlerPool();
 
 	bool open();
