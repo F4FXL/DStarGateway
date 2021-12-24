@@ -34,6 +34,7 @@
 class CUDPReaderWriter {
 public:
 	CUDPReaderWriter(const std::string& address, unsigned int port);
+	CUDPReaderWriter();
 	~CUDPReaderWriter();
 
 	static in_addr lookup(const std::string& hostName);

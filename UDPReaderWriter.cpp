@@ -29,6 +29,14 @@ m_fd(-1)
 {
 }
 
+CUDPReaderWriter::CUDPReaderWriter() :
+m_address(),
+m_port(0U),
+m_addr(),
+m_fd(-1)
+{
+}
+
 CUDPReaderWriter::~CUDPReaderWriter()
 {
 }
