@@ -17,19 +17,22 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
+#include <cstring>
+
 #include "RepeaterHandler.h"
 #include "DPlusHandler.h"
 #include "DStarDefines.h"
 #include "Utils.h"
-
-#include <wx/filename.h>
+#include "Log.h"
+#include "StringUtils.h"
 
 unsigned int               CDPlusHandler::m_maxReflectors = 0U;
 unsigned int               CDPlusHandler::m_maxDongles = 0U;
 CDPlusHandler**            CDPlusHandler::m_reflectors = NULL;
 
-wxString                   CDPlusHandler::m_gatewayCallsign;
-wxString                   CDPlusHandler::m_dplusLogin;
+std::string                   CDPlusHandler::m_gatewayCallsign;
+std::string                   CDPlusHandler::m_dplusLogin;
 CDPlusProtocolHandlerPool* CDPlusHandler::m_pool = NULL;
 CDPlusProtocolHandler*     CDPlusHandler::m_incoming = NULL;
 
@@ -42,10 +45,10 @@ CCallsignList*             CDPlusHandler::m_whiteList = NULL;
 CCallsignList*             CDPlusHandler::m_blackList = NULL;
 
 
-CDPlusHandler::CDPlusHandler(IReflectorCallback* handler, const wxString& repeater, const wxString& reflector, CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port) :
-m_repeater(repeater.Clone()),
-m_callsign(m_dplusLogin.Clone()),
-m_reflector(reflector.Clone()),
+CDPlusHandler::CDPlusHandler(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port) :
+m_repeater(repeater),
+m_callsign(m_dplusLogin),
+m_reflector(reflector),
 m_handler(protoHandler),
 m_yourAddress(address),
 m_yourPort(port),
@@ -63,9 +66,9 @@ m_dPlusSeq(0x00U),
 m_inactivityTimer(1000U, NETWORK_TIMEOUT),
 m_header(NULL)
 {
-	wxASSERT(protoHandler != NULL);
-	wxASSERT(handler != NULL);
-	wxASSERT(port > 0U);
+	assert(protoHandler != NULL);
+	assert(handler != NULL);
+	assert(port > 0U);
 
 	m_myPort = protoHandler->getPort();
 
@@ -75,8 +78,8 @@ m_header(NULL)
 	m_time = ::time(NULL);
 
 	m_callsign.resize(LONG_CALLSIGN_LENGTH, ' ');
-	wxChar band = m_repeater.GetChar(LONG_CALLSIGN_LENGTH - 1U);
-	m_callsign.SetChar(LONG_CALLSIGN_LENGTH - 1U, band);
+	auto band = m_repeater[LONG_CALLSIGN_LENGTH - 1U];
+	m_callsign[LONG_CALLSIGN_LENGTH - 1U] = band;
 }
 
 CDPlusHandler::CDPlusHandler(CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port) :
@@ -100,8 +103,8 @@ m_dPlusSeq(0x00U),
 m_inactivityTimer(1000U, NETWORK_TIMEOUT),
 m_header(NULL)
 {
-	wxASSERT(protoHandler != NULL);
-	wxASSERT(port > 0U);
+	assert(protoHandler != NULL);
+	assert(port > 0U);
 
 	m_myPort = protoHandler->getPort();
 
@@ -121,7 +124,7 @@ CDPlusHandler::~CDPlusHandler()
 
 void CDPlusHandler::initialise(unsigned int maxReflectors)
 {
-	wxASSERT(maxReflectors > 0U);
+	assert(maxReflectors > 0U);
 
 	m_maxReflectors = maxReflectors;
 
@@ -130,34 +133,34 @@ void CDPlusHandler::initialise(unsigned int maxReflectors)
 		m_reflectors[i] = NULL;
 }
 
-void CDPlusHandler::startAuthenticator(const wxString& address, CCacheManager* cache)
+void CDPlusHandler::startAuthenticator(const std::string& address, CCacheManager* cache)
 {
-	wxASSERT(cache != NULL);
+	assert(cache != NULL);
 
 	m_authenticator = new CDPlusAuthenticator(m_dplusLogin, m_gatewayCallsign, address, cache);
 	m_authenticator->start();
 }
 
-void CDPlusHandler::setCallsign(const wxString& callsign)
+void CDPlusHandler::setCallsign(const std::string& callsign)
 {
 	m_gatewayCallsign = callsign;
 }
 
 void CDPlusHandler::setDPlusProtocolHandlerPool(CDPlusProtocolHandlerPool* pool)
 {
-	wxASSERT(pool != NULL);
+	assert(pool != NULL);
 
 	m_pool = pool;
 }
 
 void CDPlusHandler::setDPlusProtocolIncoming(CDPlusProtocolHandler* handler)
 {
-	wxASSERT(handler != NULL);
+	assert(handler != NULL);
 
 	m_incoming = handler;
 }
 
-void CDPlusHandler::setDPlusLogin(const wxString& dplusLogin)
+void CDPlusHandler::setDPlusLogin(const std::string& dplusLogin)
 {
 	m_dplusLogin = dplusLogin;
 }
@@ -174,21 +177,21 @@ void CDPlusHandler::setMaxDongles(unsigned int maxDongles)
 
 void CDPlusHandler::setWhiteList(CCallsignList* list)
 {
-	wxASSERT(list != NULL);
+	assert(list != NULL);
 
 	m_whiteList = list;
 }
 
 void CDPlusHandler::setBlackList(CCallsignList* list)
 {
-	wxASSERT(list != NULL);
+	assert(list != NULL);
 
 	m_blackList = list;
 }
 
 void CDPlusHandler::getInfo(IReflectorCallback* handler, CRemoteRepeaterData& data)
 {
-	wxASSERT(handler != NULL);
+	assert(handler != NULL);
 
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
@@ -199,17 +202,17 @@ void CDPlusHandler::getInfo(IReflectorCallback* handler, CRemoteRepeaterData& da
 	}
 }
 
-wxString CDPlusHandler::getDongles()
+std::string CDPlusHandler::getDongles()
 {
-	wxString dongles;
+	std::string dongles;
 
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
 
 		if (reflector != NULL && reflector->m_direction == DIR_INCOMING) {
-			dongles.Append(wxT("P:"));
-			dongles.Append(reflector->m_reflector);
-			dongles.Append(wxT("  "));
+			dongles += "P:";
+			dongles += reflector->m_reflector;
+			dongles += "  ";
 		}
 	}
 
@@ -276,7 +279,7 @@ void CDPlusHandler::process(const CPollData& poll)
 	}	
 
 	// If we cannot find an existing link, we ignore the poll
-	wxLogMessage(wxT("Incoming poll from unknown D-Plus dongle"));
+	wxLogMessage(("Incoming poll from unknown D-Plus dongle"));
 }
 
 void CDPlusHandler::process(CConnectData& connect)
@@ -318,7 +321,7 @@ void CDPlusHandler::process(CConnectData& connect)
 		return;
 
 	if (type != CT_LINK1) {
-		wxLogMessage(wxT("Incoming D-Plus message from unknown source"));
+		wxLogMessage(("Incoming D-Plus message from unknown source"));
 		return;
 	}
 
@@ -349,12 +352,12 @@ void CDPlusHandler::process(CConnectData& connect)
 		CConnectData connect(CT_LINK1, yourAddress, yourPort);
 		m_incoming->writeConnect(connect);
 	} else {
-		wxLogError(wxT("No space to add new D-Plus dongle, ignoring"));
+		wxLogError("No space to add new D-Plus dongle, ignoring");
 		delete dplus;
 	}
 }
 
-void CDPlusHandler::link(IReflectorCallback* handler, const wxString& repeater, const wxString &gateway, const in_addr& address)
+void CDPlusHandler::link(IReflectorCallback* handler, const std::string& repeater, const std::string &gateway, const in_addr& address)
 {
 	CDPlusProtocolHandler* protoHandler = m_pool->getHandler();
 	if (protoHandler == NULL)
@@ -377,12 +380,12 @@ void CDPlusHandler::link(IReflectorCallback* handler, const wxString& repeater, 
 		protoHandler->writeConnect(connect);
 		m_stateChange = true;
 	} else {
-		wxLogError(wxT("No space to add new D-Plus reflector, ignoring"));
+		wxLogError(("No space to add new D-Plus reflector, ignoring"));
 		delete dplus;
 	}
 }
 
-void CDPlusHandler::relink(IReflectorCallback* handler, const wxString &gateway)
+void CDPlusHandler::relink(IReflectorCallback* handler, const std::string &gateway)
 {
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		if (m_reflectors[i] != NULL && m_reflectors[i]->m_direction == DIR_OUTGOING) {
@@ -397,7 +400,7 @@ void CDPlusHandler::relink(IReflectorCallback* handler, const wxString &gateway)
 	}	
 }
 
-void CDPlusHandler::unlink(IReflectorCallback* handler, const wxString& callsign, bool exclude)
+void CDPlusHandler::unlink(IReflectorCallback* handler, const std::string& callsign, bool exclude)
 {
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
@@ -406,8 +409,8 @@ void CDPlusHandler::unlink(IReflectorCallback* handler, const wxString& callsign
 			bool found = false;
 
 			if (exclude) {
-				if (reflector->m_direction == DIR_OUTGOING && reflector->m_destination == handler && !reflector->m_reflector.IsSameAs(callsign)) {
-					wxLogMessage(wxT("Removing outgoing D-Plus link %s, %s"), reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
+				if (reflector->m_direction == DIR_OUTGOING && reflector->m_destination == handler && reflector->m_reflector != callsign) {
+					wxLogMessage("Removing outgoing D-Plus link %s, %s", reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
 					if (reflector->m_linkState == DPLUS_LINKING || reflector->m_linkState == DPLUS_LINKED) {
 						CConnectData connect(CT_UNLINK, reflector->m_yourAddress, DPLUS_PORT);
@@ -424,8 +427,8 @@ void CDPlusHandler::unlink(IReflectorCallback* handler, const wxString& callsign
 					found = true;
 				}
 			} else {
-				if (reflector->m_destination == handler && reflector->m_reflector.IsSameAs(callsign)) {
-					wxLogMessage(wxT("Removing D-Plus link %s, %s"), reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
+				if (reflector->m_destination == handler && reflector->m_reflector == callsign) {
+					wxLogMessage(("Removing D-Plus link %s, %s"), reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
 					if (reflector->m_linkState == DPLUS_LINKING || reflector->m_linkState == DPLUS_LINKED) {
 						CConnectData connect(CT_UNLINK, reflector->m_yourAddress, DPLUS_PORT);
@@ -470,8 +473,8 @@ void CDPlusHandler::unlink()
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
 		if (reflector != NULL) {
-			if (!reflector->m_reflector.IsEmpty())
-				wxLogMessage(wxT("Unlinking from D-Plus reflector or dongle %s"), reflector->m_reflector.c_str());
+			if (!reflector->m_reflector.empty())
+				wxLogMessage(("Unlinking from D-Plus reflector or dongle %s"), reflector->m_reflector.c_str());
 
 			CConnectData connect(CT_UNLINK, reflector->m_yourAddress, reflector->m_yourPort);
 			reflector->m_handler->writeConnect(connect);
@@ -500,21 +503,21 @@ void CDPlusHandler::writeAMBE(IReflectorCallback* handler, CAMBEData& data, DIRE
 	}	
 }
 
-void CDPlusHandler::gatewayUpdate(const wxString& gateway, const wxString& address)
+void CDPlusHandler::gatewayUpdate(const std::string& gateway, const std::string& address)
 {
-	wxString gatewayBase = gateway;
-	gatewayBase.Truncate(LONG_CALLSIGN_LENGTH - 1U);
+	std::string gatewayBase = gateway;
+	gatewayBase.resize(LONG_CALLSIGN_LENGTH - 1U);
 
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
 		if (reflector != NULL) {
-			if (!reflector->m_reflector.IsEmpty() && reflector->m_reflector.Left(LONG_CALLSIGN_LENGTH - 1U).IsSameAs(gatewayBase)) {
-				if (!address.IsEmpty()) {
+			if (!reflector->m_reflector.empty() && reflector->m_reflector.substr(0, LONG_CALLSIGN_LENGTH - 1U) == gatewayBase) {
+				if (!address.empty()) {
 					// A new address, change the value
-					wxLogMessage(wxT("Changing IP address of D-Plus gateway or reflector %s to %s"), gatewayBase.c_str(), address.c_str());
-					reflector->m_yourAddress.s_addr = ::inet_addr(address.mb_str());
+					wxLogMessage("Changing IP address of D-Plus gateway or reflector %s to %s", gatewayBase.c_str(), address.c_str());
+					reflector->m_yourAddress.s_addr = ::inet_addr(address.c_str());
 				} else {
-					wxLogMessage(wxT("IP address for D-Plus gateway or reflector %s has been removed"), gatewayBase.c_str());
+					wxLogMessage("IP address for D-Plus gateway or reflector %s has been removed", gatewayBase.c_str());
 
 					// No address, this probably shouldn't happen....
 					if (reflector->m_direction == DIR_OUTGOING && reflector->m_destination != NULL)
@@ -556,15 +559,15 @@ void CDPlusHandler::finalise()
 
 void CDPlusHandler::processInt(CHeaderData& header)
 {
-	wxString     my = header.getMyCall1();
-	wxString   rpt1 = header.getRptCall1();
-	wxString   rpt2 = header.getRptCall2();
+	std::string     my = header.getMyCall1();
+	std::string   rpt1 = header.getRptCall1();
+	std::string   rpt2 = header.getRptCall2();
 	unsigned int id = header.getId();
 
 	if (m_whiteList != NULL) {
 		bool res = m_whiteList->isInList(my);
 		if (!res) {
-			wxLogMessage(wxT("%s rejected from D-Plus as not found in the white list"), my.c_str());
+			wxLogMessage(("%s rejected from D-Plus as not found in the white list"), my.c_str());
 			m_dPlusId = 0x00U;
 			return;
 		}
@@ -573,7 +576,7 @@ void CDPlusHandler::processInt(CHeaderData& header)
 	if (m_blackList != NULL) {
 		bool res = m_blackList->isInList(my);
 		if (res) {
-			wxLogMessage(wxT("%s rejected from D-Plus as found in the black list"), my.c_str());
+			wxLogMessage(("%s rejected from D-Plus as found in the black list"), my.c_str());
 			m_dPlusId = 0x00U;
 			return;
 		}
@@ -584,14 +587,14 @@ void CDPlusHandler::processInt(CHeaderData& header)
 
 	switch (m_direction) {
 		case DIR_OUTGOING:
-			if (m_reflector.IsSameAs(rpt1) || m_reflector.IsSameAs(rpt2)) {
+			if (m_reflector == rpt1 || m_reflector == rpt2) {
 				// If we're already processing, ignore the new header
 				if (m_dPlusId != 0x00U)
 					return;
 
 				// Write to Header.log if it's enabled
 				if (m_headerLogger != NULL)
-					m_headerLogger->write(wxT("DPlus"), header);
+					m_headerLogger->write("DPlus", header);
 
 				m_dPlusId  = id;
 				m_dPlusSeq = 0x00U;
@@ -621,7 +624,7 @@ void CDPlusHandler::processInt(CHeaderData& header)
 
 				// Write to Header.log if it's enabled
 				if (m_headerLogger != NULL)
-					m_headerLogger->write(wxT("DPlus"), header);
+					m_headerLogger->write(("DPlus"), header);
 
 				m_dPlusId  = id;
 				m_dPlusSeq = 0x00U;
@@ -676,7 +679,7 @@ bool CDPlusHandler::processInt(CConnectData& connect, CD_TYPE type)
 			switch (type) {
 				case CT_ACK:
 					if (m_linkState == DPLUS_LINKING) {
-						wxLogMessage(wxT("D-Plus ACK message received from %s"), m_reflector.c_str());
+						wxLogMessage(("D-Plus ACK message received from %s"), m_reflector.c_str());
 						m_destination->linkUp(DP_DPLUS, m_reflector);
 						m_stateChange = true;
 						m_linkState   = DPLUS_LINKED;
@@ -688,7 +691,7 @@ bool CDPlusHandler::processInt(CConnectData& connect, CD_TYPE type)
 
 				case CT_NAK:
 					if (m_linkState == DPLUS_LINKING) {
-						wxLogMessage(wxT("D-Plus NAK message received from %s"), m_reflector.c_str());
+						wxLogMessage(("D-Plus NAK message received from %s"), m_reflector.c_str());
 						m_destination->linkRefused(DP_DPLUS, m_reflector);
 						CConnectData reply(CT_UNLINK, connect.getYourAddress(), connect.getYourPort());
 						m_handler->writeConnect(reply);
@@ -698,7 +701,7 @@ bool CDPlusHandler::processInt(CConnectData& connect, CD_TYPE type)
 
 				case CT_UNLINK:
 					if (m_linkState == DPLUS_UNLINKING) {
-						wxLogMessage(wxT("D-Plus disconnect acknowledgement received from %s"), m_reflector.c_str());
+						wxLogMessage(("D-Plus disconnect acknowledgement received from %s"), m_reflector.c_str());
 						m_destination->linkFailed(DP_DPLUS, m_reflector, false);
 						m_stateChange = true;
 						m_tryTimer.stop();
@@ -721,7 +724,7 @@ bool CDPlusHandler::processInt(CConnectData& connect, CD_TYPE type)
 			switch (type) {
 				case CT_LINK2: {
 						m_reflector = connect.getRepeater();
-						wxLogMessage(wxT("D-Plus dongle link to %s has started"), m_reflector.c_str());
+						wxLogMessage(("D-Plus dongle link to %s has started"), m_reflector.c_str());
 						CConnectData reply(CT_ACK, m_yourAddress, m_yourPort);
 						m_handler->writeConnect(reply);
 						m_linkState   = DPLUS_LINKED;
@@ -731,7 +734,7 @@ bool CDPlusHandler::processInt(CConnectData& connect, CD_TYPE type)
 
 				case CT_UNLINK:
 					if (m_linkState == DPLUS_LINKED) {
-						wxLogMessage(wxT("D-Plus dongle link to %s has ended (unlinked)"), m_reflector.c_str());
+						wxLogMessage(("D-Plus dongle link to %s has ended (unlinked)"), m_reflector.c_str());
 						m_stateChange = true;
 						m_handler->writeConnect(connect);
 					}
@@ -763,16 +766,16 @@ bool CDPlusHandler::clockInt(unsigned int ms)
 		m_dPlusId     = 0x00U;
 		m_dPlusSeq    = 0x00U;
 
-		if (!m_reflector.IsEmpty()) {
+		if (!m_reflector.empty()) {
 			switch (m_linkState) {
 				case DPLUS_LINKING:
-					wxLogMessage(wxT("D-Plus link to %s has failed to connect"), m_reflector.c_str());
+					wxLogMessage(("D-Plus link to %s has failed to connect"), m_reflector.c_str());
 					break;
 				case DPLUS_LINKED:
-					wxLogMessage(wxT("D-Plus link to %s has failed (poll inactivity)"), m_reflector.c_str());
+					wxLogMessage(("D-Plus link to %s has failed (poll inactivity)"), m_reflector.c_str());
 					break;
 				case DPLUS_UNLINKING:
-					wxLogMessage(wxT("D-Plus link to %s has failed to disconnect cleanly"), m_reflector.c_str());
+					wxLogMessage(("D-Plus link to %s has failed to disconnect cleanly"), m_reflector.c_str());
 					break;
 				default:
 					break;
@@ -839,7 +842,7 @@ bool CDPlusHandler::clockInt(unsigned int ms)
 
 void CDPlusHandler::writeHeaderInt(IReflectorCallback* handler, CHeaderData& header, DIRECTION direction)
 {
-	wxASSERT(handler != NULL);
+	assert(handler != NULL);
 
 	if (m_linkState != DPLUS_LINKED)
 		return;
@@ -903,31 +906,31 @@ bool CDPlusHandler::stateChange()
 	return stateChange;
 }
 
-void CDPlusHandler::writeStatus(wxFFile& file)
+void CDPlusHandler::writeStatus(ofstream& file)
 {
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];
 		if (reflector != NULL) {
-			wxString text;
+			std::string text;
 
 			struct tm* tm = ::gmtime(&reflector->m_time);
 
 			if (reflector->m_linkState == DPLUS_LINKED) {
 				switch (reflector->m_direction) {
 					case DIR_OUTGOING:
-						text.Printf(wxT("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle Rptr: %s Refl: %s Dir: Outgoing\n"),
+						text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle Rptr: %s Refl: %s Dir: Outgoing\n",
 							tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 							reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 						break;
 
 					case DIR_INCOMING:
-						text.Printf(wxT("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle User: %s Dir: Incoming\n"),
+						text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle User: %s Dir: Incoming\n",
 							tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 							reflector->m_reflector.c_str());
 						break;
 				}
 
-				file.Write(text);
+				file << text;
 			}
 		}
 	}

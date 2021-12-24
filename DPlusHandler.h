@@ -20,6 +20,10 @@
 #ifndef	DPlusHandler_H
 #define	DPlusHandler_H
 
+#include <netinet/in.h>
+#include <iostream>
+#include <fstream>
+
 #include "DPlusProtocolHandlerPool.h"
 #include "DPlusAuthenticator.h"
 #include "ReflectorCallback.h"
@@ -34,14 +38,6 @@
 #include "Timer.h"
 #include "Defs.h"
 
-#if defined(__WINDOWS__)
-#include "Inaddr.h"
-#else
-#include <netinet/in.h>
-#endif
-
-#include <wx/wx.h>
-#include <wx/ffile.h>
 
 enum DPLUS_STATE {
 	DPLUS_LINKING,
@@ -53,18 +49,18 @@ class CDPlusHandler {
 public:
 	static void initialise(unsigned int maxReflectors);
 
-	static void setCallsign(const wxString& callsign);
+	static void setCallsign(const std::string& callsign);
 	static void setDPlusProtocolHandlerPool(CDPlusProtocolHandlerPool* pool);
 	static void setDPlusProtocolIncoming(CDPlusProtocolHandler* handler);
-	static void setDPlusLogin(const wxString& dplusLogin);
+	static void setDPlusLogin(const std::string& dplusLogin);
 	static void setHeaderLogger(CHeaderLogger* logger);
 	static void setMaxDongles(unsigned int maxDongles);
 
-	static void startAuthenticator(const wxString& address, CCacheManager* cache);
+	static void startAuthenticator(const std::string& address, CCacheManager* cache);
 
-	static void link(IReflectorCallback* handler, const wxString& repeater, const wxString& reflector, const in_addr& address);
-	static void relink(IReflectorCallback* handler, const wxString& reflector);
-	static void unlink(IReflectorCallback* handler, const wxString& reflector = wxEmptyString, bool exclude = true);
+	static void link(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, const in_addr& address);
+	static void relink(IReflectorCallback* handler, const std::string& reflector);
+	static void unlink(IReflectorCallback* handler, const std::string& reflector = "", bool exclude = true);
 	static void unlink();
 
 	static void writeHeader(IReflectorCallback* handler, CHeaderData& header, DIRECTION direction);
@@ -75,11 +71,11 @@ public:
 	static void process(const CPollData& header);
 	static void process(CConnectData& process);
 
-	static void gatewayUpdate(const wxString& gateway, const wxString& address);
+	static void gatewayUpdate(const std::string& gateway, const std::string& address);
 	static void clock(unsigned int ms);
 
 	static bool stateChange();
-	static void writeStatus(wxFFile& file);
+	static void writeStatus(ofstream& file);
 
 	static void setWhiteList(CCallsignList* list);
 	static void setBlackList(CCallsignList* list);
@@ -88,10 +84,10 @@ public:
 
 	static void getInfo(IReflectorCallback* handler, CRemoteRepeaterData& data);
 
-	static wxString getDongles();
+	static std::string getDongles();
 
 protected:
-	CDPlusHandler(IReflectorCallback* handler, const wxString& repeater, const wxString& reflector, CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port);
+	CDPlusHandler(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port);
 	CDPlusHandler(CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port);
 	~CDPlusHandler();
 
@@ -109,8 +105,8 @@ private:
 	static unsigned int               m_maxDongles;
 	static CDPlusHandler**            m_reflectors;
 
-	static wxString                   m_gatewayCallsign;
-	static wxString                   m_dplusLogin;
+	static std::string                   m_gatewayCallsign;
+	static std::string                   m_dplusLogin;
 	static CDPlusProtocolHandlerPool* m_pool;
 	static CDPlusProtocolHandler*     m_incoming;
 
@@ -122,9 +118,9 @@ private:
 	static CCallsignList*             m_whiteList;
 	static CCallsignList*             m_blackList;
 
-	wxString               m_repeater;
-	wxString               m_callsign;
-	wxString               m_reflector;
+	std::string               m_repeater;
+	std::string               m_callsign;
+	std::string               m_reflector;
 	CDPlusProtocolHandler* m_handler;
 	in_addr                m_yourAddress;
 	unsigned int           m_yourPort;
