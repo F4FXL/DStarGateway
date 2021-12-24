@@ -21,6 +21,7 @@
 #define RingBuffer_H
 
 #include <cassert>
+#include <cstring>
 
 #include "MutexLocker.h"
 
