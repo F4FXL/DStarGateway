@@ -1,6 +1,5 @@
 /*
  *   Copyright (C) 2010-2013,2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017-2018 by Thomas A. Early
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,16 +16,18 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#ifndef	DExtraHander_H
+#define	DExtraHander_H
 
 #include <netinet/in.h>
 #include <string>
-#include <list>
+#include <fstream>
+#include <iostream>
 
 #include "DExtraProtocolHandlerPool.h"
-#include "RemoteRepeaterData.h"
 #include "ReflectorCallback.h"
 #include "DStarDefines.h"
+#include "HeaderLogger.h"
 #include "CallsignList.h"
 #include "ConnectData.h"
 #include "HeaderData.h"
@@ -43,70 +44,80 @@ enum DEXTRA_STATE {
 
 class CDExtraHandler {
 public:
-	static void setCallsign(const std::string &callsign);
-	static void setDExtraProtocolHandlerPool(CDExtraProtocolHandlerPool *pool);
+	static void initialise(unsigned int maxReflectors);
 
-	static void link(IReflectorCallback *handler, const std::string &repeater, const std::string &reflector, const in_addr &address);
-	static void unlink(IReflectorCallback *handler, const std::string &reflector = std::string(""), bool exclude = true);
-	static void unlink(CDExtraHandler *reflector);
+	static void setCallsign(const std::string& callsign);
+	static void setDExtraProtocolHandlerPool(CDExtraProtocolHandlerPool* pool);
+	static void setDExtraProtocolIncoming(CDExtraProtocolHandler* handler);
+	static void setHeaderLogger(CHeaderLogger* logger);
+	static void setMaxDongles(unsigned int maxDongles);
+
+	static void link(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, const in_addr& address);
+	static void unlink(IReflectorCallback* handler, const std::string& reflector = "", bool exclude = true);
 	static void unlink();
 
-	static void writeHeader(IReflectorCallback *handler, CHeaderData &header, DIRECTION direction);
-	static void writeAMBE(IReflectorCallback *handler, CAMBEData &data, DIRECTION direction);
+	static void writeHeader(IReflectorCallback* handler, CHeaderData& header, DIRECTION direction);
+	static void writeAMBE(IReflectorCallback* handler, CAMBEData& data, DIRECTION direction);
 
-	static void process(CHeaderData &header);
-	static void process(CAMBEData &data);
-	static void process(const CPollData &poll);
-	static void process(CConnectData &connect);
+	static void process(CHeaderData& header);
+	static void process(CAMBEData& data);
+	static void process(const CPollData& poll);
+	static void process(CConnectData& connect);
 
-	static void gatewayUpdate(const std::string &reflector, const std::string &address);
+	static void gatewayUpdate(const std::string& reflector, const std::string& address);
 	static void clock(unsigned int ms);
 
 	static bool stateChange();
-	static void writeStatus(FILE *file);
+	static void writeStatus(std::ofstream& file);
 
-	static void setWhiteList(CCallsignList *list);
-	static void setBlackList(CCallsignList *list);
+	static void setWhiteList(CCallsignList* list);
+	static void setBlackList(CCallsignList* list);
 
 	static void finalise();
 
-	static void getInfo(IReflectorCallback *handler, CRemoteRepeaterData &data);
+	static void getInfo(IReflectorCallback* handler, CRemoteRepeaterData& data);
 
-	static std::string getIncoming(const std::string &callsign);
+	static std::string getIncoming(const std::string& callsign);
 	static std::string getDongles();
 
 protected:
-	CDExtraHandler(IReflectorCallback *handler, const std::string &reflector, const std::string &repeater, CDExtraProtocolHandler *protoHandler, const in_addr &address, unsigned int port, DIRECTION direction);
+	CDExtraHandler(IReflectorCallback* handler, const std::string& reflector, const std::string& repeater, CDExtraProtocolHandler* protoHandler, const in_addr& address, unsigned int port, DIRECTION direction);
+	CDExtraHandler(CDExtraProtocolHandler* protoHandler, const std::string& reflector, const in_addr& address, unsigned int port, DIRECTION direction);
 	~CDExtraHandler();
 
-	void processInt(CHeaderData &header);
-	void processInt(CAMBEData &data);
-	bool processInt(CConnectData &connect, CD_TYPE type);
+	void processInt(CHeaderData& header);
+	void processInt(CAMBEData& data);
+	bool processInt(CConnectData& connect, CD_TYPE type);
 
-	void writeHeaderInt(IReflectorCallback *handler, CHeaderData &header, DIRECTION direction);
-	void writeAMBEInt(IReflectorCallback *handler, CAMBEData &data, DIRECTION direction);
+	void writeHeaderInt(IReflectorCallback* handler, CHeaderData& header, DIRECTION direction);
+	void writeAMBEInt(IReflectorCallback* handler, CAMBEData& data, DIRECTION direction);
 
 	bool clockInt(unsigned int ms);
 
 private:
-	static std::list<CDExtraHandler *> m_DExtraHandlers;
+	static unsigned int                m_maxReflectors;
+	static unsigned int                m_maxDongles;
+	static CDExtraHandler**            m_reflectors;
 
-	static std::string                 m_callsign;
-	static CDExtraProtocolHandlerPool *m_pool;
+	static std::string                    m_callsign;
+	static CDExtraProtocolHandlerPool* m_pool;
+	static CDExtraProtocolHandler*     m_incoming;
 
 	static bool                        m_stateChange;
 
-	static CCallsignList              *m_whiteList;
-	static CCallsignList              *m_blackList;
+	static CHeaderLogger*              m_headerLogger;
 
-	std::string             m_reflector;
-	std::string             m_repeater;
-	CDExtraProtocolHandler *m_handler;
+	static CCallsignList*              m_whiteList;
+	static CCallsignList*              m_blackList;
+
+	std::string                m_reflector;
+	std::string                m_repeater;
+	CDExtraProtocolHandler* m_handler;
 	in_addr                 m_yourAddress;
 	unsigned int            m_yourPort;
 	DIRECTION               m_direction;
 	DEXTRA_STATE            m_linkState;
-	IReflectorCallback     *m_destination;
+	IReflectorCallback*     m_destination;
 	time_t                  m_time;
 	CTimer                  m_pollTimer;
 	CTimer                  m_pollInactivityTimer;
@@ -115,7 +126,9 @@ private:
 	unsigned int            m_dExtraId;
 	unsigned int            m_dExtraSeq;
 	CTimer                  m_inactivityTimer;
-	CHeaderData            *m_header;
+	CHeaderData*            m_header;
 
 	unsigned int calcBackoff();
 };
+
+#endif
