@@ -59,7 +59,7 @@ bool CDPlusProtocolHandler::writeHeader(const CHeaderData& header)
 	unsigned int length = header.getDPlusData(buffer, 60U, true);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Header"), buffer, length);
+	CUtils::dump("Sending Header", buffer, length);
 #endif
 
 	for (unsigned int i = 0U; i < 5U; i++) {
@@ -77,7 +77,7 @@ bool CDPlusProtocolHandler::writeAMBE(const CAMBEData& data)
 	unsigned int length = data.getDPlusData(buffer, 40U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Data"), buffer, length);
+	CUtils::dump("Sending Data", buffer, length);
 #endif
 
 	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
