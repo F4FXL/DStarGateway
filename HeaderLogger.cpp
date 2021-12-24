@@ -69,8 +69,7 @@ void CHeaderLogger::write(const std::string& type, const CHeaderData& header)
 	char* t = ::inet_ntoa(header.getYourAddress());
 	std::string address(t);
 
-	std::string text;
-	string_format("%04d-%02d-%02d %02d:%02d:%02d: %s header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X (%s:%u)\n",
+	std::string text = string_format("%04d-%02d-%02d %02d:%02d:%02d: %s header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X (%s:%u)\n",
 		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, type,
 		header.getMyCall1().c_str(), header.getMyCall2().c_str(), header.getYourCall().c_str(),
 		header.getRptCall1().c_str(), header.getRptCall2().c_str(), header.getFlag1(), header.getFlag2(),
