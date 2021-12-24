@@ -24,12 +24,9 @@
 #include "Log.h"
 #include "StringUtils.h"
 
-#if !defined(__WXMSW__)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#endif
-
 
 CHeaderLogger::CHeaderLogger(const std::string& dir, const std::string& name) :
 m_dir(dir),
