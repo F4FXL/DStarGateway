@@ -33,11 +33,14 @@
 #include "GroupHandler.h"
 #include "DExtraHandler.h"			// DEXTRA LINK
 #include "DCSHandler.h"				// DCS LINK
-// #include "DPlusHandler.h"
+#include "DPlusHandler.h"
 #include "HeaderData.h"
 #include "G2Handler.h"
 #include "AMBEData.h"
 #include "Utils.h"
+#include "DStarGatewayDefs.h"
+#include "AudioUnit.h"
+#include "RepeaterHandler.h"
 
 const unsigned int REMOTE_DUMMY_PORT = 65015U;
 
@@ -65,8 +68,12 @@ m_remote(NULL)
 	// CDPlusHandler::initialise(MAX_DPLUS_LINKS);
 	CDCSHandler::initialise(MAX_DCS_LINKS);
 	CRepeaterHandler::initialise(MAX_REPEATERS);
+#ifdef USE_STARNET
 	CStarNetHandler::initialise(MAX_STARNETS, m_name);
+#endif
+#ifdef USE_CCS
 	CCCSHandler::initialise(MAX_REPEATERS);
+#endif
 	CAudioUnit::initialise();
 	printf("DStarGatewayThread created. DExtra channels: %d, DCS Channels: %d\n", countDExtra, countDCS);
 }
