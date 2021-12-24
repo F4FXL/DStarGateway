@@ -75,7 +75,7 @@ public:
 	static void clock(unsigned int ms);
 
 	static bool stateChange();
-	static void writeStatus(ofstream& file);
+	static void writeStatus(std::ofstream& file);
 
 	static void setWhiteList(CCallsignList* list);
 	static void setBlackList(CCallsignList* list);
