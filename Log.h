@@ -22,5 +22,6 @@
 
 #pragma once
 
-#define wxLogMessage(...) printf(__VA_ARGS__)
-#define wxLogError(...) printf(__VA_ARGS__)
+#define wxLogMessage(...) ::printf(__VA_ARGS__)
+#define wxLogError(...) ::printf(__VA_ARGS__)
+#define wxLogWarning(...) ::printf(__VA_ARGS__)

@@ -25,6 +25,7 @@
 #include <stdexcept>
 
 #define wxT(x) std::string(x)
+#define string_right(s,l) (s.substr(s.length() - 1, l))
 
 template<typename ... Args>
 std::string string_format( const std::string& format, Args ... args );
