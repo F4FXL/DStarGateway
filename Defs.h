@@ -26,6 +26,8 @@ const std::string DEXTRA_HOSTS_FILE_NAME("DExtra_Hosts.txt");
 const std::string DCS_HOSTS_FILE_NAME("DCS_Hosts.txt");
 const std::string DPLUS_HOSTS_FILE_NAME("DPlus_Hosts.txt");
 
+const std::string HEADERS_BASE_NAME("Headers");
+
 enum RECONNECT {
 	RECONNECT_NEVER,
 	RECONNECT_FIXED,
