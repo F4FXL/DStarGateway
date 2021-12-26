@@ -44,4 +44,5 @@ public:
 	static std::string				getCurrentTime(void);
 	static void						ReplaceChar(std::string &str, char from, char to);
 	static time_t					parseTime(const std::string str);
+	static void						truncateFile(const std::string& fileName);
 };

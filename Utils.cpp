@@ -14,7 +14,6 @@
  
 #include <sys/types.h>
 #include <netdb.h>
-
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -26,6 +25,9 @@
 #include <iterator>
 #include <cstring>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+
 #include "Utils.h"
 
 void CUtils::dump(const char* title, const bool* data, unsigned int length)
@@ -414,5 +416,13 @@ time_t CUtils::parseTime(const std::string str)
 	struct tm stm;
 	strptime(str.c_str(), "%Y-%m-%d %H:%M:%S", &stm);
 	return mktime(&stm);
+}
+
+void CUtils::truncateFile(const std::string& fileName)
+{
+	std::fstream file;
+	file.open(fileName, std::fstream::trunc);
+	if(file.is_open())
+		file.close();
 }
 
