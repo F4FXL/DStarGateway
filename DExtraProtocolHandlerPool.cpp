@@ -40,11 +40,21 @@ CDExtraProtocolHandlerPool::~CDExtraProtocolHandlerPool()
 	}
 }
 
+CDExtraProtocolHandler* CDExtraProtocolHandlerPool::getIncomingHandler()
+{
+	return getHandler(m_basePort);
+}
+
 CDExtraProtocolHandler* CDExtraProtocolHandlerPool::getHandler()
 {
-	unsigned int port = m_basePort;
+	return getHandler(m_basePort + 1U);
+}
+
+CDExtraProtocolHandler* CDExtraProtocolHandlerPool::getHandler(unsigned int port)
+{
 	while (m_pool.end() != m_pool.find(port))
 		port++;	// find an unused port
+
 	CDExtraProtocolHandler *proto = new CDExtraProtocolHandler(port, m_address);
 	if (proto) {
 		if (proto->open()) {

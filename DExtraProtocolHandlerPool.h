@@ -30,6 +30,7 @@ public:
 	~CDExtraProtocolHandlerPool();
 
 	CDExtraProtocolHandler *getHandler();
+	CDExtraProtocolHandler *getIncomingHandler();
 	void release(CDExtraProtocolHandler *handler);
 
 	DEXTRA_TYPE   read();
@@ -41,6 +42,8 @@ public:
 	void close();
 
 private:
+	CDExtraProtocolHandler *getHandler(unsigned int port);
+
 	std::map<unsigned int, CDExtraProtocolHandler *> m_pool;
 	std::map<unsigned int, CDExtraProtocolHandler *>::iterator m_index;
 	unsigned int m_basePort;
