@@ -918,13 +918,13 @@ void CDPlusHandler::writeStatus(ofstream& file)
 			if (reflector->m_linkState == DPLUS_LINKED) {
 				switch (reflector->m_direction) {
 					case DIR_OUTGOING:
-						text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle Rptr: %s Refl: %s Dir: Outgoing\n",
+						text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle Rptr: %s Refl: %s Dir: Outgoing\n",
 							tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 							reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 						break;
 
 					case DIR_INCOMING:
-						text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle User: %s Dir: Incoming\n",
+						text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: DPlus link - Type: Dongle User: %s Dir: Incoming\n",
 							tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 							reflector->m_reflector.c_str());
 						break;

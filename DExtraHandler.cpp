@@ -957,7 +957,7 @@ void CDExtraHandler::writeStatus(ofstream& file)
 			switch (reflector->m_direction) {
 				case DIR_OUTGOING:
 					if (reflector->m_linkState == DEXTRA_LINKED) {
-						text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Repeater Rptr: %s Refl: %s Dir: Outgoing\n",
+						text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Repeater Rptr: %s Refl: %s Dir: Outgoing\n",
 							tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 							reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
@@ -968,11 +968,11 @@ void CDExtraHandler::writeStatus(ofstream& file)
 				case DIR_INCOMING:
 					if (reflector->m_linkState == DEXTRA_LINKED) {
 						if (reflector->m_repeater.empty())
-							text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Dongle User: %s Dir: Incoming\n",
+							text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Dongle User: %s Dir: Incoming\n",
 								tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 								reflector->m_reflector.c_str());
 						else
-							text = string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Repeater Rptr: %s Refl: %s Dir: Incoming\n",
+							text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: DExtra link - Type: Repeater Rptr: %s Refl: %s Dir: Incoming\n",
 								tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, 
 								reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
