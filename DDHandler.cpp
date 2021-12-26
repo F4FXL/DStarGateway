@@ -387,7 +387,7 @@ void CDDHandler::writeStatus(const CEthernet& ethernet)
 	time_t timeNow = ::time(NULL);
 	struct tm* tm = ::gmtime(&timeNow);
 
-	std::string text = string_format("%04d-%02d-%02d %02d:%02d:%02d: %02X:%02X:%02X:%02X:%02X:%02X %s\n",
+	std::string text = CStringUtils::string_format("%04d-%02d-%02d %02d:%02d:%02d: %02X:%02X:%02X:%02X:%02X:%02X %s\n",
 		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec,
 		address[0], address[1], address[2], address[3], address[4], address[5],	callsign.c_str());
 
