@@ -25,3 +25,4 @@
 #define wxLogMessage(...) ::printf(__VA_ARGS__)
 #define wxLogError(...) ::printf(__VA_ARGS__)
 #define wxLogWarning(...) ::printf(__VA_ARGS__)
+#define wxLogInfo(...) ::printf(__VA_ARGS__)
