@@ -1,19 +1,20 @@
 # Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
 
 # if you change these locations, make sure the dstargateway.service file is updated!
-BINDIR=/usr/local/bin
-CFGDIR=/usr/local/etc/dstargateway.d/
+BIN_DIR=/usr/local/bin
+CFG_DIR=/usr/local/etc/dstargateway.d/
+DATA_DIR=/usr/local/share/dstargateway.d/
 
 # choose this if you want debugging help
-CPPFLAGS=-g -ggdb -W -Wall -std=c++11 -DCFG_DIR=\"$(CFGDIR)\"
+CPPFLAGS=-g -ggdb -W -Wall -std=c++14 -DCFG_DIR=\"$(CFG_DIR)\" -DDATA_DIR=\"$(DATA_DIR)\"
 # or, you can choose this for a much smaller executable without debugging help
-#CPPFLAGS=-W -Wall -std=c++11 -DCFG_DIR=\"$(CFGDIR)\"
+#CPPFLAGS=-W -Wall -std=c++14 -DCFG_DIR=\"$(CFGDIR)\" -DDATA_DIR=\"$(DATA_DIR)"
 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
-dstargateway :  GitVersion.h $(OBJS)
+dstargateway : GitVersion.h $(OBJS) 
 	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lconfig++ -pthread
 
 %.o : %.cpp
@@ -51,12 +52,11 @@ removehostfiles :
 	/bin/rm -f $(CFGDIR)/DExtra_Hosts.txt
 	/bin/rm -f $(CFGDIR)/DCS_Hosts.txt
 
-GitVersion.h : force
+GitVersion.h : FORCE
 ifneq ("$(wildcard .git/index)","")
 	echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > $@
 else
 	echo "const char *gitversion = \"0000000000000000000000000000000000000000\";" > $@
 endif
 
-force:
-	@true
+FORCE:
