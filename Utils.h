@@ -17,6 +17,8 @@
 #include <sys/socket.h>
 #include <string>
 #include <vector>
+#include <climits>
+#include <memory>
 
 enum TRISTATE {
 	STATE_FALSE,
@@ -45,4 +47,23 @@ public:
 	static void						ReplaceChar(std::string &str, char from, char to);
 	static time_t					parseTime(const std::string str);
 	static void						truncateFile(const std::string& fileName);
+
+	template <typename T>
+	static T swap_endian(T u)
+	{
+		static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
+
+		union
+		{
+			T u;
+			unsigned char u8[sizeof(T)];
+		} source, dest;
+
+		source.u = u;
+
+		for (size_t k = 0; k < sizeof(T); k++)
+			dest.u8[k] = source.u8[sizeof(T) - k - 1];
+
+		return dest.u;
+	}
 };

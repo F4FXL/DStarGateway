@@ -425,4 +425,3 @@ void CUtils::truncateFile(const std::string& fileName)
 	if(file.is_open())
 		file.close();
 }
-
