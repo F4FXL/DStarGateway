@@ -41,7 +41,7 @@ m_locks()
 	if (logging)
 		wxLogMessage("Reading %s", fileName.c_str());
 
-	while(!file.eof()) {// To get you all the lines.
+	while(!file.eof()) {
 		std::string line;
 		std::getline(file, line);
 
