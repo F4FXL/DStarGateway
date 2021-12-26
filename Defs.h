@@ -25,7 +25,12 @@
 const std::string DEXTRA_HOSTS_FILE_NAME("DExtra_Hosts.txt");
 const std::string DCS_HOSTS_FILE_NAME("DCS_Hosts.txt");
 const std::string DPLUS_HOSTS_FILE_NAME("DPlus_Hosts.txt");
+const std::string GATEWAY_HOSTS_FILE_NAME("Gateway_Hosts.txt");
 
+const std::string LINKS_BASE_NAME("Links");
+const std::string TEXT_BASE_NAME("Text");
+const std::string USERS_BASE_NAME("Users");
+const std::string STARNET_BASE_NAME("STARnet");
 const std::string HEADERS_BASE_NAME("Headers");
 const std::string DDMODE_BASE_NAME("DDMode");
 
