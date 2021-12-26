@@ -2523,38 +2523,38 @@ void CRepeaterHandler::writeLinkingTo(const std::string &callsign)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = string_format(wxT("Verbinde mit %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Verbinde mit %s"), callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = string_format(wxT("Linker til %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linker til %s"), callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = string_format(wxT("Connexion a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Connexion a %s"), callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = string_format(wxT("In conn con %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("In conn con %s"), callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = string_format(wxT("Linkuje do %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linkuje do %s"), callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = string_format(wxT("Enlazando %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Enlazando %s"), callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = string_format(wxT("Lankar till %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Lankar till %s"), callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = string_format(wxT("Linken naar %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linken naar %s"), callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = string_format(wxT("Kobler til %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Kobler til %s"), callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = string_format(wxT("Conectando, %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Conectando, %s"), callsign.c_str());
 			break;
 		default:
-			text = string_format(wxT("Linking to %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linking to %s"), callsign.c_str());
 			break;
 	}
 
@@ -2575,38 +2575,38 @@ void CRepeaterHandler::writeLinkedTo(const std::string &callsign)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = string_format(wxT("Verlinkt zu %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Verlinkt zu %s"), callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = string_format(wxT("Linket til %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linket til %s"), callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = string_format(wxT("Connecte a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Connecte a %s"), callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = string_format(wxT("Connesso a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Connesso a %s"), callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = string_format(wxT("Polaczony z %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Polaczony z %s"), callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = string_format(wxT("Enlazado %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Enlazado %s"), callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = string_format(wxT("Lankad till %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Lankad till %s"), callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = string_format(wxT("Gelinkt met %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Gelinkt met %s"), callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = string_format(wxT("Tilkoblet %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Tilkoblet %s"), callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = string_format(wxT("Conectado a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Conectado a %s"), callsign.c_str());
 			break;
 		default:
-			text = string_format(wxT("Linked to %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linked to %s"), callsign.c_str());
 			break;
 	}
 
@@ -2681,48 +2681,48 @@ void CRepeaterHandler::writeIsBusy(const std::string& callsign)
 	switch (m_language) {
 		case TL_DEUTSCH:
 			text = wxT("Nicht verbunden");
-			tempText = string_format(wxT("%s ist belegt"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s ist belegt"), callsign.c_str());
 			break;
 		case TL_DANSK:
 			text = wxT("Ikke forbundet");
-			tempText = string_format(wxT("Optaget fra %s"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("Optaget fra %s"), callsign.c_str());
 			break;
 		case TL_FRANCAIS:
 			text = wxT("Non connecte");
-			tempText = string_format(wxT("Occupe par %s"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("Occupe par %s"), callsign.c_str());
 			break;
 		case TL_ITALIANO:
 			text = wxT("Non connesso");
-			tempText = string_format(wxT("Occupado da%s"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("Occupado da%s"), callsign.c_str());
 			break;
 		case TL_POLSKI:
 			text = wxT("Nie polaczony");
-			tempText = string_format(wxT("%s jest zajety"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s jest zajety"), callsign.c_str());
 			break;
 		case TL_ESPANOL:
 			text = wxT("No enlazado");
-			tempText = string_format(wxT("%s ocupado"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s ocupado"), callsign.c_str());
 			break;
 		case TL_SVENSKA:
 			text = wxT("Ej lankad");
-			tempText = string_format(wxT("%s ar upptagen"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s ar upptagen"), callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
 			text = wxT("Niet gelinkt");
-			tempText = string_format(wxT("%s is bezet"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s is bezet"), callsign.c_str());
 			break;
 		case TL_NORSK:
 			text = wxT("Ikke linket");
-			tempText = string_format(wxT("%s er opptatt"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s er opptatt"), callsign.c_str());
 			break;
 		case TL_PORTUGUES:
 			text = wxT("Desconectado");
-			tempText = string_format(wxT("%s, ocupado"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s, ocupado"), callsign.c_str());
 			break;
 		default:
 			text = wxT("Not linked");
-			tempText = string_format(wxT("%s is busy"), callsign.c_str());
+			tempText = CStringUtils::string_format(wxT("%s is busy"), callsign.c_str());
 			break;
 	}
 
@@ -2747,38 +2747,38 @@ void CRepeaterHandler::ccsLinkMade(const std::string& callsign, DIRECTION direct
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = string_format(wxT("Verlinkt zu %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Verlinkt zu %s"), callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = string_format(wxT("Linket til %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linket til %s"), callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = string_format(wxT("Connecte a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Connecte a %s"), callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = string_format(wxT("Connesso a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Connesso a %s"), callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = string_format(wxT("Polaczony z %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Polaczony z %s"), callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = string_format(wxT("Enlazado %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Enlazado %s"), callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = string_format(wxT("Lankad till %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Lankad till %s"), callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = string_format(wxT("Gelinkt met %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Gelinkt met %s"), callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = string_format(wxT("Tilkoblet %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Tilkoblet %s"), callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = string_format(wxT("Conectado a %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Conectado a %s"), callsign.c_str());
 			break;
 		default:
-			text = string_format(wxT("Linked to %s"), callsign.c_str());
+			text = CStringUtils::string_format(wxT("Linked to %s"), callsign.c_str());
 			break;
 	}
 
@@ -2890,48 +2890,48 @@ void CRepeaterHandler::ccsLinkFailed(const std::string& dtmf, DIRECTION directio
 	switch (m_language) {
 		case TL_DEUTSCH:
 			text = wxT("Nicht verbunden");
-			tempText = string_format(wxT("%s unbekannt"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s unbekannt"), dtmf.c_str());
 			break;
 		case TL_DANSK:
 			text = wxT("Ikke forbundet");
-			tempText = string_format(wxT("%s unknown"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s unknown"), dtmf.c_str());
 			break;
 		case TL_FRANCAIS:
 			text = wxT("Non connecte");
-			tempText = string_format(wxT("%s inconnu"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s inconnu"), dtmf.c_str());
 			break;
 		case TL_ITALIANO:
 			text = wxT("Non connesso");
-			tempText = string_format(wxT("Sconosciuto %s"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("Sconosciuto %s"), dtmf.c_str());
 			break;
 		case TL_POLSKI:
 			text = wxT("Nie polaczony");
-			tempText = string_format(wxT("%s nieznany"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s nieznany"), dtmf.c_str());
 			break;
 		case TL_ESPANOL:
 			text = wxT("No enlazado");
-			tempText = string_format(wxT("Desconocido %s"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("Desconocido %s"), dtmf.c_str());
 			break;
 		case TL_SVENSKA:
 			text = wxT("Ej lankad");
-			tempText = string_format(wxT("%s okand"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s okand"), dtmf.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
 			text = wxT("Niet gelinkt");
-			tempText = string_format(wxT("%s bekend"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s bekend"), dtmf.c_str());
 			break;
 		case TL_NORSK:
 			text = wxT("Ikke linket");
-			tempText = string_format(wxT("%s ukjent"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s ukjent"), dtmf.c_str());
 			break;
 		case TL_PORTUGUES:
 			text = wxT("Desconectado");
-			tempText = string_format(wxT("%s desconhecido"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s desconhecido"), dtmf.c_str());
 			break;
 		default:
 			text = wxT("Not linked");
-			tempText = string_format(wxT("%s unknown"), dtmf.c_str());
+			tempText = CStringUtils::string_format(wxT("%s unknown"), dtmf.c_str());
 			break;
 	}
 
