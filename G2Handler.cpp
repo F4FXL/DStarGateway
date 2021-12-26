@@ -61,6 +61,11 @@ void CG2Handler::setG2ProtocolHandler(CG2ProtocolHandler* handler)
 	m_handler = handler;
 }
 
+void CG2Handler::setHeaderLogger(CHeaderLogger* logger)
+{
+	m_headerLogger = logger;
+}
+
 void CG2Handler::process(CHeaderData& header)
 {
 	// Is this a busy reply?

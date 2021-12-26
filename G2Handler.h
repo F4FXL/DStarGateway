@@ -33,6 +33,7 @@ public:
 	static void initialise(unsigned int maxRoutes);
 
 	static void setG2ProtocolHandler(CG2ProtocolHandler* handler);
+	static void setHeaderLogger(CHeaderLogger* logger);
 
 	static void process(CHeaderData& header);
 	static void process(CAMBEData& header);
@@ -52,6 +53,8 @@ private:
 	static CG2Handler**        m_routes;
 
 	static CG2ProtocolHandler* m_handler;
+
+	static CHeaderLogger*      m_headerLogger;
 
 	in_addr           m_address;
 	unsigned int      m_id;
