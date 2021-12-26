@@ -31,6 +31,7 @@
 const unsigned int APRS_TIMEOUT = 10U;
 
 CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
+CThread(),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),
@@ -57,6 +58,7 @@ m_clientName("ircDDBGateway")
 }
 
 CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CThread(),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),

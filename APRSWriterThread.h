@@ -32,15 +32,15 @@ public:
 	CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName);
 	virtual ~CAPRSWriterThread();
 
-	virtual bool start();
+	bool start();
 
-	virtual bool isConnected() const;
+	bool isConnected() const;
 
-	virtual void write(const char* data);
+	void write(const char* data);
 
-	virtual void* Entry();
+	void* Entry();
 
-	virtual void stop();
+	void stop();
 
 	void clock(unsigned int ms);
 
