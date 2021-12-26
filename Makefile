@@ -3,10 +3,9 @@
 # if you change these locations, make sure the dstargateway.service file is updated!
 BIN_DIR=/usr/local/bin
 CFG_DIR=/usr/local/etc/dstargateway.d/
-DATA_DIR=/usr/local/share/dstargateway.d/
 
 # choose this if you want debugging help
-CPPFLAGS=-g -ggdb -W -Wall -std=c++14 -DCFG_DIR=\"$(CFG_DIR)\" -DDATA_DIR=\"$(DATA_DIR)\"
+CPPFLAGS=-g -ggdb -W -Wall -std=c++14 -DCFG_DIR=\"$(CFG_DIR)\"
 # or, you can choose this for a much smaller executable without debugging help
 #CPPFLAGS=-W -Wall -std=c++14 -DCFG_DIR=\"$(CFGDIR)\" -DDATA_DIR=\"$(DATA_DIR)"
 

@@ -142,7 +142,15 @@ const unsigned int TIME_PER_TIC_MS = 5U;
 typedef struct {
 	std::string callsign;
 	std::string address;
-	unsigned int port;
+	std::string hbAddress;
+	unsigned int hbPort;
+	std::string icomAddress;
+	unsigned int icomPort;
+	double latitude;
+	double longitude;
+	std::string description1;
+	std::string description2;
+	std::string url; 
 } TGateway;
 
 typedef struct {
@@ -151,6 +159,24 @@ typedef struct {
 	std::string reflector;
 	std::string address;
 	unsigned int port;
+	HW_TYPE hwType;
+	bool reflectorAtStartup;
+	RECONNECT reflectorReconnect;
+#ifdef USE_DRATS
+	bool dRatsEnabled;
+#endif
+	double frequency;
+	double offset;
+	double range;
+	double latitude;
+	double longitude;
+	double agl;
+	std::string description1;
+	std::string description2;
+	std::string url;
+	char band1;
+	char band2;
+	char band3;
 } TRepeater;
 
 typedef struct {
@@ -159,3 +185,8 @@ typedef struct {
 	std::string password;
 	bool isQuadNet;
 } TircDDB;
+
+typedef struct {
+	std::string logDir;
+	std::string dataDir;
+} Tpaths;

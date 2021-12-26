@@ -1,6 +1,6 @@
 /*
  *   Copyright (C) 2010,2011 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017,2018 by Thomas A. Early N7TAE
+ *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include "DStarGatewayDefs.h"
 #include "DStarGatewayConfig.h"
@@ -31,6 +32,7 @@
 #include "IRCDDBClient.h"
 #include "Utils.h"
 #include "GitVersion.h"
+#include "RepeaterProtocolHandlerFactory.h"
 
 int main(int argc, char *argv[])
 {
@@ -92,34 +94,63 @@ bool CDStarGatewayApp::createThread()
 		printf("FATAL: Invalid configuration");
 		return false;
 	}
-	// m_thread = new CDStarGatewayThread(config.getLinkCount("XRF"), config.getLinkCount("DCS"));
 
-	// std::string CallSign, address;
-	// config.getGateway(CallSign, address);
+	Tpaths paths;
+	config.getPaths(paths);
+	m_thread = new CDStarGatewayThread(paths.logDir, paths.dataDir, "");
 
-	// CallSign.resize(7, ' ');
-	// CallSign.push_back('G');
+	TGateway gatewayConfig;
+	config.getGateway(gatewayConfig);
 
 	// printf("Gateway callsign set to %s, local address set to %s\n", CallSign.c_str(), address.c_str());
 
-	// CIRCDDB_Array clients;
-	// for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
-	// 	std::string hostname, username, password;
-	// 	bool isQuadNet;
-	// 	config.getIrcDDB(i, hostname, username, password, isQuadNet);
-	// 	std::cout << "ircDDB " << i + 1 << " set to " << hostname << " username set to " << username << " QuadNet " << isQuadNet << std::endl;
-	// 	CIRCDDB *ircDDB = new CIRCDDBClient(hostname, 9007U, username, password, std::string("linux_SmartGroupServer") + std::string("-") + VERSION, address, isQuadNet);
-	// 	clients.push_back(ircDDB);
-	// }
-	
-	// CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
-	// bool res = multiClient->open();
-	// if (!res) {
-	// 	printf("Cannot initialise the ircDDB protocol handler\n");
-	// 	return false;
-	// }
+	std::vector<CIRCDDB *> clients;
+	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
+		TircDDB ircDDBConfig;
+		config.getIrcDDB(i, ircDDBConfig);
+		std::cout << "ircDDB " << i + 1 << " set to " << ircDDBConfig.hostname << " username set to " << ircDDBConfig.username << " QuadNet " << ircDDBConfig.isQuadNet << std::endl;
 
-	// m_thread->setIRC(multiClient);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		clients.push_back(ircDDB);
+	}
+	
+	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
+	bool res = multiClient->open();
+	if (!res) {
+		printf("Cannot initialise the ircDDB protocol handler\n");
+		return false;
+	}
+
+	m_thread->setIRC(multiClient);
+
+	CRepeaterHandlerFactory repeaterProtocolFactory;
+
+	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
+		TRepeater rptrConfig;
+		config.getRepeater(i, rptrConfig);
+
+		m_thread->addRepeater(rptrConfig.callsign,
+								rptrConfig.band,
+								rptrConfig.address,
+								rptrConfig.port,
+								rptrConfig.hwType,
+								rptrConfig.reflector,
+								rptrConfig.reflectorAtStartup,
+								rptrConfig.reflectorReconnect,
+								rptrConfig.frequency,
+								rptrConfig.offset,
+								rptrConfig.range,
+								rptrConfig.latitude,
+								rptrConfig.longitude,
+								rptrConfig.agl,
+								rptrConfig.description1,
+								rptrConfig.description2,
+								rptrConfig.url,
+								repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port),
+								rptrConfig.band1,
+								rptrConfig.band2,
+								rptrConfig.band3);
+	}
 
 	// for (unsigned int i=0; i<config.getModCount(); i++) {
 	// 	std::string band, callsign, logoff, info, permanent, reflector;

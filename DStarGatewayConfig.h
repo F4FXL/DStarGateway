@@ -33,22 +33,27 @@ public:
 	void getGateway(TGateway & gateway) const;
 	void getIrcDDB(unsigned int ircddbIndex, TircDDB & ircddb) const;
 	void getRepeater(unsigned int repeaterIndex, TRepeater & repeater) const;
-	unsigned int getRepeaterCount();
-	unsigned int getIrcDDBCount();
+	void getPaths(Tpaths & paths) const;
+	unsigned int getRepeaterCount() const;
+	unsigned int getIrcDDBCount() const;
 
 private:
 	bool open(Config & cfg);
-	bool loadGateway(Config & cfg);
-	bool loadIrcDDB(Config & cfg);
-	bool loadRepeaters(Config & cfg);
+	bool loadGateway(const Config & cfg);
+	bool loadIrcDDB(const Config & cfg);
+	bool loadRepeaters(const Config & cfg);
+	bool loadPaths(const Config & cfg);
 	bool get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value);
 	bool get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value);
+	bool get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value);
 	bool get_value(const Config &cfg, const std::string &path, bool &value, bool default_value);
 	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value);
 	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault);
+	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault, const std::vector<std::string>& allowedValues);
 
 	std::string m_fileName;
 	TGateway m_gateway;
+	Tpaths m_paths;
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };

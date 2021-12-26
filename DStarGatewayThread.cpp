@@ -59,9 +59,10 @@ const std::string LOOPBACK_ADDRESS("127.0.0.1");
 
 const unsigned int REMOTE_DUMMY_PORT = 65016U;
 
-CDStarGatewayThread::CDStarGatewayThread(const std::string& logDir, const std::string& name) :
+CDStarGatewayThread::CDStarGatewayThread(const std::string& logDir, const std::string& dataDir, const std::string& name) :
 CThread(),
 m_logDir(logDir),
+m_dataDir(dataDir),
 m_name(name),
 m_killed(false),
 m_stopped(true),
@@ -508,11 +509,13 @@ void CDStarGatewayThread::setGateway(GATEWAY_TYPE gatewayType, const std::string
 	m_gatewayAddress  = gatewayAddress;
 }
 
+#ifdef USE_DRATS
 void CDStarGatewayThread::addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
 {
-#ifdef USE_DRATS
 	CRepeaterHandler::add(callsign, band, address, port, hwType, reflector, atStartup, reconnect, dratsEnabled, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
 #else
+void CDStarGatewayThread::addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
+{
 	CRepeaterHandler::add(callsign, band, address, port, hwType, reflector, atStartup, reconnect, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
 #endif
 
@@ -616,7 +619,7 @@ void CDStarGatewayThread::setCCS(bool enabled, const std::string& host)
 #if defined(__WINDOWS__)
 		fileName.Assign(::wxGetCwd(), CCS_HOSTS_FILE_NAME);
 #else
-		fileName.Assign(wxT(DATA_DIR), CCS_HOSTS_FILE_NAME);
+		fileName.Assign(wxT(m_dataDir), CCS_HOSTS_FILE_NAME);
 #endif
 		if (!fileName.IsFileReadable()) {
 			wxLogMessage(wxT("File %s not readable"), fileName.GetFullPath().c_str());
@@ -1101,7 +1104,7 @@ void CDStarGatewayThread::processDD()
 
 void CDStarGatewayThread::loadGateways()
 {
-	std::string fileName = std::string(DATA_DIR) + "/" + GATEWAY_HOSTS_FILE_NAME;
+	std::string fileName = m_dataDir + "/" + GATEWAY_HOSTS_FILE_NAME;
 	loadReflectors(fileName, DP_DEXTRA);
 }
 
@@ -1112,17 +1115,17 @@ void CDStarGatewayThread::loadAllReflectors()
 	}
 	
 	if (m_dplusEnabled) {
-		std::string fileName = std::string(DATA_DIR) + "/" + DPLUS_HOSTS_FILE_NAME;
+		std::string fileName = m_dataDir + "/" + DPLUS_HOSTS_FILE_NAME;
 		loadReflectors(fileName, DP_DPLUS);
 	}
 
 	if (m_dextraEnabled) {
-		std::string fileName = std::string(DATA_DIR) + "/" + DCS_HOSTS_FILE_NAME;
+		std::string fileName = m_dataDir + "/" + DCS_HOSTS_FILE_NAME;
 		loadReflectors(fileName, DP_DEXTRA);
 	}
 
 	if (m_dcsEnabled) {
-		std::string fileName = std::string(DATA_DIR) + "/" + DCS_HOSTS_FILE_NAME;
+		std::string fileName = m_dataDir + "/" + DCS_HOSTS_FILE_NAME;
 		loadReflectors(fileName, DP_DCS);
 	}
 }

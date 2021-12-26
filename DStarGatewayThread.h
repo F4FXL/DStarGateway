@@ -43,11 +43,15 @@
 
 class CDStarGatewayThread : public CThread{
 public:
-	CDStarGatewayThread(const std::string& logDir, const std::string& name);
+	CDStarGatewayThread(const std::string& logDir, const std::string& dataDir, const std::string& name);
 	virtual ~CDStarGatewayThread();
 
 	virtual void setGateway(GATEWAY_TYPE type, const std::string& callsign, const std::string& address);
-	virtual void addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1 = 0x00U, unsigned char band2 = 0x00U, unsigned char band3 = 0x00U);
+#ifdef USE_DRATS
+virtual void addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1 = 0x00U, unsigned char band2 = 0x00U, unsigned char band3 = 0x00U);
+#else
+	virtual void addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1 = 0x00U, unsigned char band2 = 0x00U, unsigned char band3 = 0x00U);
+#endif
 #ifdef USE_STARNET
 #if defined(DEXTRA_LINK) || defined(DCS_LINK)
 	virtual void addStarNet(const std::string& callsign, const std::string& logoff, const std::string& repeater, const std::string& infoText, const std::string& permanent, unsigned int userTimeout, unsigned int groupTimeout, STARNET_CALLSIGN_SWITCH callsignSwitch, bool txMsgSwitch, const std::string& reflector);
@@ -82,13 +86,13 @@ public:
 	virtual CIRCDDBGatewayStatusData* getStatus() const;
 
 	virtual void kill();
-
-
-	void* Entry();
+	
 protected:
+	void* Entry();
 	
 private:
 	std::string                  m_logDir;
+	std::string					 m_dataDir;
 	std::string                  m_name;
 	bool                      m_killed;
 	bool                      m_stopped;
