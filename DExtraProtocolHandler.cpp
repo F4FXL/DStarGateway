@@ -158,7 +158,7 @@ bool CDExtraProtocolHandler::readPackets()
 	}
 }
 
-CHeaderData* CDExtraProtocolHandler::newHeader()
+CHeaderData* CDExtraProtocolHandler::readHeader()
 {
 	if (m_type != DE_HEADER)
 		return NULL;
@@ -175,7 +175,7 @@ CHeaderData* CDExtraProtocolHandler::newHeader()
 	return header;
 }
 
-CAMBEData* CDExtraProtocolHandler::newAMBE()
+CAMBEData* CDExtraProtocolHandler::readAMBE()
 {
 	if (m_type != DE_AMBE)
 		return NULL;
@@ -191,7 +191,7 @@ CAMBEData* CDExtraProtocolHandler::newAMBE()
 	return data;
 }
 
-CPollData* CDExtraProtocolHandler::newPoll()
+CPollData* CDExtraProtocolHandler::readPoll()
 {
 	if (m_type != DE_POLL)
 		return NULL;
@@ -207,7 +207,7 @@ CPollData* CDExtraProtocolHandler::newPoll()
 	return poll;
 }
 
-CConnectData* CDExtraProtocolHandler::newConnect()
+CConnectData* CDExtraProtocolHandler::readConnect()
 {
 	if (m_type != DE_CONNECT)
 		return NULL;

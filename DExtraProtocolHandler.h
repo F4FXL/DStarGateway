@@ -53,10 +53,10 @@ public:
 	bool writePoll(const CPollData& poll);
 
 	DEXTRA_TYPE   read();
-	CHeaderData*  newHeader();
-	CAMBEData*    newAMBE();
-	CPollData*    newPoll();
-	CConnectData* newConnect();
+	CHeaderData*  readHeader();
+	CAMBEData*    readAMBE();
+	CPollData*    readPoll();
+	CConnectData* readConnect();
 
 	void close();
 
