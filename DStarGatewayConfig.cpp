@@ -24,7 +24,7 @@
 
 #include "Utils.h"
 #include "DStarGatewayConfig.h"
-
+#include "DStarDefines.h"
 
 CDStarGatewayConfig::CDStarGatewayConfig(const std::string &pathname)
 : m_fileName(pathname)
@@ -156,6 +156,10 @@ bool CDStarGatewayConfig::loadGateway(Config & cfg)
 	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true);
 	get_value(cfg, "gateway.port", m_gateway.port, 1U, 65535U, 20010U);
 	std::cout << "GATEWAY: callsign='" << m_gateway.callsign << "' listen address='" << m_gateway.address << ":" << m_gateway.port << std::endl;
+
+	//properly size values
+	m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
+	m_gateway.callsign.push_back('G');
 
 	return true;
 }
