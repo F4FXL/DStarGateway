@@ -31,6 +31,7 @@ public:
 	~CDCSProtocolHandlerPool();
 
 	CDCSProtocolHandler *getHandler();
+	CDCSProtocolHandler *getIncomingHandler();
 	void release(CDCSProtocolHandler *handler);
 
 	DCS_TYPE      read();
@@ -41,6 +42,7 @@ public:
 	void close();
 
 private:
+	CDCSProtocolHandler *getHandler(unsigned int port);
 	std::map<int,CDCSProtocolHandler *> m_pool;
 	std::map<int,CDCSProtocolHandler *>::iterator m_index;
 	unsigned int m_basePort;

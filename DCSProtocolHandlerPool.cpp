@@ -41,9 +41,18 @@ CDCSProtocolHandlerPool::~CDCSProtocolHandlerPool()
 	}
 }
 
+CDCSProtocolHandler *CDCSProtocolHandlerPool::getIncomingHandler()
+{
+	return getHandler(m_basePort);
+}
+
 CDCSProtocolHandler *CDCSProtocolHandlerPool::getHandler()
 {
-	unsigned int port = m_basePort;
+	return getHandler(m_basePort + 1U);
+}
+
+CDCSProtocolHandler *CDCSProtocolHandlerPool::getHandler(unsigned int port)
+{ 
 	while (m_pool.end() != m_pool.find(port))
 		port++;	// find an unused port
 	CDCSProtocolHandler *proto = new CDCSProtocolHandler(port, m_address);
