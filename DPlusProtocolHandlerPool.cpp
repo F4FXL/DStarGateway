@@ -1,5 +1,6 @@
 /*
- *   Copyright (C) 2012,2013,2015 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013 by Jonathan Naylor G4KLX
+ *   Copyright (c) 2017-2018 by Thomas A. Early
  *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -20,122 +21,107 @@
 #include <cassert>
 
 #include "DPlusProtocolHandlerPool.h"
-#include "Log.h"
+#include "Utils.h"
 
-CDPlusProtocolHandlerPool::CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const std::string& addr) :
-m_pool(NULL),
-m_n(n),
-m_index(0U)
+CDPlusProtocolHandlerPool::CDPlusProtocolHandlerPool(const unsigned int port, const std::string &addr) :
+m_basePort(port),
+m_address(addr)
 {
 	assert(port > 0U);
-	assert(n > 0U);
-
-	m_pool = new CDPlusProtocolHandlerEntry[n];
-
-	for (unsigned int i = 0U; i < n; i++) {
-		m_pool[i].m_handler = new CDPlusProtocolHandler(port + i, addr);
-		m_pool[i].m_port    = port + i;
-		m_pool[i].m_inUse   = false;
-	}
-
-	wxLogMessage("Allocated UDP ports %u-%u to D-Plus", port, port + n - 1U);
+	m_index = m_pool.end();
+	printf("DExtra UDP port base = %u\n", port);
 }
 
 CDPlusProtocolHandlerPool::~CDPlusProtocolHandlerPool()
 {
-	for (unsigned int i = 0U; i < m_n; i++)
-		delete m_pool[i].m_handler;
-
-	delete[] m_pool;
+	while (m_pool.end() != m_pool.begin()) {
+		auto it = m_pool.begin();
+		delete it->second;
+		m_pool.erase(it);
+	}
 }
 
-bool CDPlusProtocolHandlerPool::open()
+CDPlusProtocolHandler* CDPlusProtocolHandlerPool::getIncomingHandler()
 {
-	for (unsigned int i = 0U; i < m_n; i++) {
-		bool ret = m_pool[i].m_handler->open();
-		if (!ret)
-			return false;
-	}
+	return getHandler(m_basePort);
+}
 
-	return true;
+CDPlusProtocolHandler* CDPlusProtocolHandlerPool::getHandler()
+{
+	return getHandler(m_basePort + 1U);
 }
 
 CDPlusProtocolHandler* CDPlusProtocolHandlerPool::getHandler(unsigned int port)
 {
-	if (port == 0U) {
-		for (unsigned int i = 0U; i < m_n; i++) {
-			if (!m_pool[i].m_inUse) {
-				m_pool[i].m_inUse = true;
-				return m_pool[i].m_handler;
-			}
-		}
-	} else {
-		for (unsigned int i = 0U; i < m_n; i++) {
-			if (m_pool[i].m_port == port) {
-				m_pool[i].m_inUse = true;
-				return m_pool[i].m_handler;
-			}
-		}
-	}
+	while (m_pool.end() != m_pool.find(port))
+		port++;	// find an unused port
 
-	wxLogError("Cannot find a free D-Plus port in the pool");
-
-	return NULL;
+	CDPlusProtocolHandler *proto = new CDPlusProtocolHandler(port, m_address);
+	if (proto) {
+		if (proto->open()) {
+			m_pool[port] = proto;
+			printf("New CDPlusProtocolHandler now on UDP port %u.\n", port);
+		} else {
+			delete proto;
+			proto = NULL;
+			printf("ERROR: Can't open new DPlus UDP port %u!\n", port);
+		}
+	} else
+		printf("ERROR: Can't allocate new CDPlusProtocolHandler at port %u\n", port);
+	return proto;
 }
 
-void CDPlusProtocolHandlerPool::release(CDPlusProtocolHandler* handler)
+void CDPlusProtocolHandlerPool::release(CDPlusProtocolHandler *handler)
 {
 	assert(handler != NULL);
-
-	for (unsigned int i = 0U; i < m_n; i++) {
-		if (m_pool[i].m_handler == handler && m_pool[i].m_inUse) {
-			m_pool[i].m_inUse = false;
+	for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+		if (it->second == handler) {
+			it->second->close();
+			delete it->second;
+			printf("Releasing CDPlusProtocolHandler on port %u.\n", it->first);
+			m_pool.erase(it);
 			return;
 		}
 	}
-
-	wxLogError("Trying to release an unused D-Plus port");
+	// we should never get here!
+	printf("ERROR: could not find CDPlusProtocolHander (port=%u) to release!\n", handler->getPort());
 }
 
 DPLUS_TYPE CDPlusProtocolHandlerPool::read()
 {
-	while (m_index < m_n) {
-		if (m_pool[m_index].m_inUse) {
-			DPLUS_TYPE type = m_pool[m_index].m_handler->read();
-			if (type != DP_NONE)
-				return type;
-		}
-
+	if (m_index == m_pool.end())
+		m_index = m_pool.begin();
+	while (m_index != m_pool.end()) {
+		DPLUS_TYPE type = m_index->second->read();
+		if (type != DP_NONE)
+			return type;
 		m_index++;
 	}
-
-	m_index = 0U;
-
 	return DP_NONE;
 }
 
-CHeaderData* CDPlusProtocolHandlerPool::readHeader()
+CHeaderData *CDPlusProtocolHandlerPool::readHeader()
 {
-	return m_pool[m_index].m_handler->readHeader();
+	return m_index->second->readHeader();
 }
 
-CAMBEData* CDPlusProtocolHandlerPool::readAMBE()
+CAMBEData *CDPlusProtocolHandlerPool::readAMBE()
 {
-	return m_pool[m_index].m_handler->readAMBE();
+	return m_index->second->readAMBE();
 }
 
-CPollData* CDPlusProtocolHandlerPool::readPoll()
+CPollData *CDPlusProtocolHandlerPool::readPoll()
 {
-	return m_pool[m_index].m_handler->readPoll();
+	return m_index->second->readPoll();
 }
 
-CConnectData* CDPlusProtocolHandlerPool::readConnect()
+CConnectData *CDPlusProtocolHandlerPool::readConnect()
 {
-	return m_pool[m_index].m_handler->readConnect();
+	return m_index->second->readConnect();
 }
 
 void CDPlusProtocolHandlerPool::close()
 {
-	for (unsigned int i = 0U; i < m_n; i++)
-		m_pool[i].m_handler->close();
+	for (auto it=m_pool.begin(); it!=m_pool.end(); it++)
+		it->second->close();
 }

@@ -1,6 +1,6 @@
 /*
- *   Copyright (C) 2012,2013,2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2012,2013 by Jonathan Naylor G4KLX
+ *   Copyright (c) 2017-2018 by Thomas A. Early
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,29 +17,23 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef DPlusProtocolHandlerPool_H
-#define	DPlusProtocolHandlerPool_H
+#pragma once
+
+#include <string>
+#include <map>
 
 #include "DPlusProtocolHandler.h"
 
-class CDPlusProtocolHandlerEntry {
-public:
-	CDPlusProtocolHandler* m_handler;
-	unsigned int         m_port;
-	bool                 m_inUse;
-};
-
 class CDPlusProtocolHandlerPool {
 public:
-	CDPlusProtocolHandlerPool(unsigned int n, unsigned int port, const std::string& addr = "");
+	CDPlusProtocolHandlerPool(const unsigned int port, const std::string &addr = std::string(""));
 	~CDPlusProtocolHandlerPool();
 
-	bool open();
+	CDPlusProtocolHandler *getHandler();
+	CDPlusProtocolHandler *getIncomingHandler();
+	void release(CDPlusProtocolHandler *handler);
 
-	CDPlusProtocolHandler* getHandler(unsigned int port = 0U);
-	void release(CDPlusProtocolHandler* handler);
-
-	DPLUS_TYPE    read();
+	DPLUS_TYPE   read();
 	CHeaderData*  readHeader();
 	CAMBEData*    readAMBE();
 	CPollData*    readPoll();
@@ -48,9 +42,10 @@ public:
 	void close();
 
 private:
-	CDPlusProtocolHandlerEntry* m_pool;
-	unsigned int                m_n;
-	unsigned int                m_index;
-};
+	CDPlusProtocolHandler *getHandler(unsigned int port);
 
-#endif
+	std::map<unsigned int, CDPlusProtocolHandler *> m_pool;
+	std::map<unsigned int, CDPlusProtocolHandler *>::iterator m_index;
+	unsigned int m_basePort;
+	std::string m_address;
+};
