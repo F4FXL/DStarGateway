@@ -21,6 +21,7 @@
 #define	APRSWriter_H
 
 #include <unordered_map>
+#include <string>
 
 #include "APRSWriterThread.h"
 #include "UDPReaderWriter.h"

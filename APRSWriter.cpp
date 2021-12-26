@@ -274,7 +274,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	if (n != std::string::npos)
 		body = body.substr(0, n);
 
-	std::string output = string_format(wxT("%s,qAR,%s-%s:%s"), header.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(), body.c_str());
+	std::string output = CStringUtils::string_format(wxT("%s,qAR,%s-%s:%s"), header.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(), body.c_str());
 
 	char ascii[500U];
 	::memset(ascii, 0x00, 500U);
@@ -353,12 +353,12 @@ void CAPRSWriter::sendIdFramesFixed()
 		std::string desc;
 		if (entry->getBand().length() > 1U) {
 			if (entry->getFrequency() != 0.0)
-				desc = string_format("Data %.5lfMHz", entry->getFrequency());
+				desc = CStringUtils::string_format("Data %.5lfMHz", entry->getFrequency());
 			else
 				desc = "Data";
 		} else {
 			if (entry->getFrequency() != 0.0)
-				desc = string_format(wxT("Voice %.5lfMHz %c%.4lfMHz"),
+				desc = CStringUtils::string_format(wxT("Voice %.5lfMHz %c%.4lfMHz"),
 						entry->getFrequency(),
 						entry->getOffset() < 0.0 ? '-' : '+',
 						::fabs(entry->getOffset()));
@@ -389,32 +389,32 @@ void CAPRSWriter::sendIdFramesFixed()
 
 		std::string lat;
 		if (latitude >= 1000.0F)
-			lat = string_format(wxT("%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("%.2lf"), latitude);
 		else if (latitude >= 100.0F)
-			lat = string_format(wxT("0%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("0%.2lf"), latitude);
 		else if (latitude >= 10.0F)
-			lat = string_format(wxT("00%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("00%.2lf"), latitude);
 		else
-			lat = string_format(wxT("000%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("000%.2lf"), latitude);
 
 		std::string lon;
 		if (longitude >= 10000.0F)
-			lon = string_format(wxT("%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("%.2lf"), longitude);
 		else if (longitude >= 1000.0F)
-			lon = string_format(wxT("0%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("0%.2lf"), longitude);
 		else if (longitude >= 100.0F)
-			lon = string_format(wxT("00%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("00%.2lf"), longitude);
 		else if (longitude >= 10.0F)
-			lon = string_format(wxT("000%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("000%.2lf"), longitude);
 		else
-			lon = string_format(wxT("0000%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("0000%.2lf"), longitude);
 
 		// Convert commas to periods in the latitude and longitude
 		boost::replace_all(lat, wxT(","), wxT("."));
 		boost::replace_all(lon, ",", wxT("."));
 
 		std::string output;
-		output = string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s"),
+		output = CStringUtils::string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s"),
 			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 			tm->tm_mday, tm->tm_hour, tm->tm_min,
 			lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
@@ -429,7 +429,7 @@ void CAPRSWriter::sendIdFramesFixed()
 		m_thread->write(ascii);
 
 		if (entry->getBand().length() == 1U) {
-			output = string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s"),
+			output = CStringUtils::string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s"),
 				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 				lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
 				lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
@@ -485,12 +485,12 @@ void CAPRSWriter::sendIdFramesMobile()
 		std::string desc;
 		if (entry->getBand().length() > 1U) {
 			if (entry->getFrequency() != 0.0)
-				desc = string_format(wxT("Data %.5lfMHz"), entry->getFrequency());
+				desc = CStringUtils::string_format(wxT("Data %.5lfMHz"), entry->getFrequency());
 			else
 				desc = wxT("Data");
 		} else {
 			if (entry->getFrequency() != 0.0)
-				desc = string_format(wxT("Voice %.5lfMHz %c%.4lfMHz"),
+				desc = CStringUtils::string_format(wxT("Voice %.5lfMHz %c%.4lfMHz"),
 						entry->getFrequency(),
 						entry->getOffset() < 0.0 ? '-' : '+',
 						::fabs(entry->getOffset()));
@@ -521,32 +521,32 @@ void CAPRSWriter::sendIdFramesMobile()
 
 		std::string lat;
 		if (latitude >= 1000.0F)
-			lat = string_format(wxT("%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("%.2lf"), latitude);
 		else if (latitude >= 100.0F)
-			lat = string_format(wxT("0%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("0%.2lf"), latitude);
 		else if (latitude >= 10.0F)
-			lat = string_format(wxT("00%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("00%.2lf"), latitude);
 		else
-			lat = string_format(wxT("000%.2lf"), latitude);
+			lat = CStringUtils::string_format(wxT("000%.2lf"), latitude);
 
 		std::string lon;
 		if (longitude >= 10000.0F)
-			lon = string_format(wxT("%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("%.2lf"), longitude);
 		else if (longitude >= 1000.0F)
-			lon = string_format(wxT("0%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("0%.2lf"), longitude);
 		else if (longitude >= 100.0F)
-			lon = string_format(wxT("00%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("00%.2lf"), longitude);
 		else if (longitude >= 10.0F)
-			lon = string_format(wxT("000%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("000%.2lf"), longitude);
 		else
-			lon = string_format(wxT("0000%.2lf"), longitude);
+			lon = CStringUtils::string_format(wxT("0000%.2lf"), longitude);
 
 		// Convert commas to periods in the latitude and longitude
 		boost::replace_all(lat, ",", ".");
 		boost::replace_all(lon, ",", ".");
 
 		std::string output1;
-		output1 = string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf"),
+		output1 = CStringUtils::string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf"),
 			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 			tm->tm_mday, tm->tm_hour, tm->tm_min,
 			lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
@@ -558,11 +558,11 @@ void CAPRSWriter::sendIdFramesMobile()
 			double rawBearing   = ::atof(pBearing);
 			double rawVelocity  = ::atof(pVelocity);
 
-			output2 = string_format(wxT("%03.0lf/%03.0lf"), rawBearing, rawVelocity * 0.539957F);
+			output2 = CStringUtils::string_format(wxT("%03.0lf/%03.0lf"), rawBearing, rawVelocity * 0.539957F);
 		}
 
 		std::string output3;
-		output3 = string_format(wxT("RNG%04.0lf %s %s"), entry->getRange() * 0.6214, band.c_str(), desc.c_str());
+		output3 = CStringUtils::string_format(wxT("RNG%04.0lf %s %s"), entry->getRange() * 0.6214, band.c_str(), desc.c_str());
 
 		char ascii[300U];
 		::memset(ascii, 0x00, 300U);
@@ -577,7 +577,7 @@ void CAPRSWriter::sendIdFramesMobile()
 		m_thread->write(ascii);
 
 		if (entry->getBand().length() == 1U) {
-			output1 = string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf"),
+			output1 = CStringUtils::string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf"),
 				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 				lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
 				lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
