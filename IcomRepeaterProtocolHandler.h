@@ -150,7 +150,7 @@ private:
 	in_addr                  m_icomAddress;
 	unsigned int             m_icomPort;
 	bool                     m_over1;
-	wxUint16                 m_seqNo;
+	uint16_t                 m_seqNo;
 	unsigned int             m_tries;
 	CDataQueue*              m_ackQueue;
 	bool                     m_killed;
