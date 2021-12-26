@@ -1,7 +1,6 @@
 /*
  *   Copyright (C) 2010,2012 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,12 +17,15 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#ifndef	G2Handler_H
+#define	G2Handler_H
 
 #include <netinet/in.h>
 
 #include "G2ProtocolHandler.h"
+#include "RepeaterHandler.h"
 #include "DStarDefines.h"
+#include "HeaderLogger.h"
 #include "HeaderData.h"
 #include "AMBEData.h"
 #include "Timer.h"
@@ -43,7 +45,7 @@ public:
 	static void finalise();
 
 protected:
-	CG2Handler(const in_addr& address, unsigned int id);
+	CG2Handler(CRepeaterHandler* repeater, const in_addr& address, unsigned int id);
 	~CG2Handler();
 
 	bool clockInt(unsigned int ms);
@@ -56,7 +58,10 @@ private:
 
 	static CHeaderLogger*      m_headerLogger;
 
+	CRepeaterHandler* m_repeater;
 	in_addr           m_address;
 	unsigned int      m_id;
 	CTimer            m_inactivityTimer;
 };
+
+#endif

@@ -1,7 +1,6 @@
 /*
- *   Copyright (C) 2010-2014 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2010,2012 by Jonathan Naylor G4KLX
+ *   copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,17 +19,24 @@
 
 #include <cassert>
 
-#include "GroupHandler.h"
+#if USE_STARNET
+#include "StarNetHandler.h"
+#endif
+#include "DStarDefines.h"
 #include "G2Handler.h"
 #include "Utils.h"
 #include "Defs.h"
+#include "Log.h"
 
 unsigned int        CG2Handler::m_maxRoutes = 0U;
 CG2Handler**        CG2Handler::m_routes = NULL;
 
 CG2ProtocolHandler* CG2Handler::m_handler = NULL;
 
-CG2Handler::CG2Handler(const in_addr& address, unsigned int id) :
+CHeaderLogger*      CG2Handler::m_headerLogger = NULL;
+
+CG2Handler::CG2Handler(CRepeaterHandler* repeater, const in_addr& address, unsigned int id) :
+m_repeater(repeater),
 m_address(address),
 m_id(id),
 m_inactivityTimer(1000U, NETWORK_TIMEOUT)
@@ -72,26 +78,99 @@ void CG2Handler::process(CHeaderData& header)
 	unsigned char flag1 = header.getFlag1();
 	if (flag1 == 0x01) {
 		// Don't check the incoming stream
-		// printf("G2 busy message received\n"));
+		// wxLogMessage(wxT("G2 busy message received"));
 		return;
 	}
 
-	// Check to see if this is for Smart Group
-	CGroupHandler* handler = CGroupHandler::findGroup(header);
+#ifdef USE_STARNET
+	// Check to see if this is for StarNet
+	CStarNetHandler* handler = CStarNetHandler::findStarNet(header);
 	if (handler != NULL) {
+		// Write to Header.log if it's enabled
+		if (m_headerLogger != NULL)
+			m_headerLogger->write(wxT("StarNet"), header);
+
 		handler->process(header);
 		return;
 	}
+#endif
+
+	// No need to go any further
+	if (m_maxRoutes == 0U)
+		return;
+
+	in_addr address = header.getYourAddress();
+	unsigned int id = header.getId();
+
+	for (unsigned int i = 0U; i < m_maxRoutes; i++) {
+		CG2Handler* route = m_routes[i];
+		if (route != NULL) {
+			// Is this a duplicate header, ignore it
+			if (route->m_id == id)
+				return;
+		}
+	}	
+
+	// Find the destination repeater
+	CRepeaterHandler* repeater = CRepeaterHandler::findDVRepeater(header.getRptCall2());
+	if (repeater == NULL) {
+		wxLogMessage("Incoming G2 header from %s to unknown repeater - %s", header.getMyCall1().c_str(), header.getRptCall2().c_str());
+		return;		// Not found, ignore
+	}
+
+	CG2Handler* route = new CG2Handler(repeater, address, id);
+
+	for (unsigned int i = 0U; i < m_maxRoutes; i++) {
+		if (m_routes[i] == NULL) {
+			m_routes[i] = route;
+
+			// Write to Header.log if it's enabled
+			if (m_headerLogger != NULL)
+				m_headerLogger->write("G2", header);
+
+			repeater->process(header, DIR_INCOMING, AS_G2);
+			return;
+		}
+	}
+
+	wxLogMessage("No space to add new G2 route, ignoring");
+
+	delete route;
 }
 
 void CG2Handler::process(CAMBEData& data)
 {
-	// Check to see if this is for Smart Group
-	CGroupHandler* handler = CGroupHandler::findGroup(data);
+#ifdef USE_STARNET
+	// Check to see if this is for StarNet
+	CStarNetHandler* handler = CStarNetHandler::findStarNet(data);
 	if (handler != NULL) {
 		handler->process(data);
 		return;
 	}
+#endif
+
+	// No need to go any further
+	if (m_maxRoutes == 0U)
+		return;
+
+	unsigned int id = data.getId();
+
+	for (unsigned int i = 0U; i < m_maxRoutes; i++) {
+		CG2Handler* route = m_routes[i];
+		if (route != NULL) {
+			if (route->m_id == id) {
+				route->m_inactivityTimer.start();
+				route->m_repeater->process(data, DIR_INCOMING, AS_G2);
+
+				if (data.isEnd()) {
+					delete route;
+					m_routes[i] = NULL;
+				}
+
+				return;
+			}
+		}
+	}	
 }
 
 void CG2Handler::clock(unsigned int ms)
@@ -121,7 +200,7 @@ bool CG2Handler::clockInt(unsigned int ms)
 	m_inactivityTimer.clock(ms);
 
 	if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {
-		printf("Inactivity timeout for a G2 route has expired\n");
+		wxLogMessage("Inactivity timeout for a G2 route has expired");
 		return true;
 	}
 
