@@ -26,6 +26,11 @@ CThread::CThread()
 
 }
 
+CThread::~CThread()
+{
+
+}
+
 void CThread::Create()
 {
     //Actually does nothing, might be removed in the future

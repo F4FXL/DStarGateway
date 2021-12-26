@@ -27,13 +27,14 @@
 class CThread {
 public:
     CThread();
+    virtual ~CThread();
     void Create();
     void Run();
     void Wait();
     void Sleep(unsigned long milli);
 
 protected:
-    virtual void* Entry();
+    virtual void* Entry() = 0;
 
 private:
     static void EntryRunner(CThread * thread);
