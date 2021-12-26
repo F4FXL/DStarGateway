@@ -76,8 +76,8 @@ bool CDStarGatewayApp::init()
 
 void CDStarGatewayApp::run()
 {
-	m_thread->run();
-
+	m_thread->Run();
+	m_thread->Wait();
 	printf("exiting\n");
 }
 
