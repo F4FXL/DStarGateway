@@ -26,6 +26,7 @@
 using namespace libconfig;
 
 typedef struct {
+	GATEWAY_TYPE type;
 	std::string callsign;
 	std::string address;
 	std::string hbAddress;
@@ -37,6 +38,7 @@ typedef struct {
 	std::string description1;
 	std::string description2;
 	std::string url; 
+	TEXT_LANG language;
 } TGateway;
 
 typedef struct {
@@ -77,6 +79,13 @@ typedef struct {
 	std::string dataDir;
 } Tpaths;
 
+typedef struct {
+	bool enabled;
+	std::string hostname;
+	unsigned int port;
+	std::string password;
+} TAPRS;
+
 class CDStarGatewayConfig {
 public:
 	CDStarGatewayConfig(const std::string &pathname);
@@ -85,10 +94,11 @@ public:
 	bool load();
 	void getGateway(TGateway & gateway) const;
 	void getIrcDDB(unsigned int ircddbIndex, TircDDB & ircddb) const;
-	void getRepeater(unsigned int repeaterIndex, TRepeater & repeater) const;
-	void getPaths(Tpaths & paths) const;
-	unsigned int getRepeaterCount() const;
 	unsigned int getIrcDDBCount() const;
+	void getRepeater(unsigned int repeaterIndex, TRepeater & repeater) const;
+	unsigned int getRepeaterCount() const;
+	void getPaths(Tpaths & paths) const;
+	void getAPRS(TAPRS & aprs) const;
 
 private:
 	bool open(Config & cfg);
@@ -96,6 +106,7 @@ private:
 	bool loadIrcDDB(const Config & cfg);
 	bool loadRepeaters(const Config & cfg);
 	bool loadPaths(const Config & cfg);
+	bool loadAPRS(const Config & cfg);
 	bool get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value);
 	bool get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value);
 	bool get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value);
@@ -107,6 +118,7 @@ private:
 	std::string m_fileName;
 	TGateway m_gateway;
 	Tpaths m_paths;
+	TAPRS m_aprs;
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };

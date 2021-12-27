@@ -38,11 +38,28 @@ bool CDStarGatewayConfig::load()
 	if(open(cfg)
 	&& loadGateway(cfg)
 	&& loadIrcDDB(cfg)
-	&& loadRepeaters(cfg)) {
+	&& loadRepeaters(cfg)
+	&& loadPaths(cfg)
+	&& loadAPRS(cfg)) {
+
+		//properly size values
+		m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
+		m_gateway.callsign.push_back('G');
+		
 		return true;
 	}
 
 	return false;
+}
+
+bool CDStarGatewayConfig::loadAPRS(const Config & cfg)
+{
+	bool ret = get_value(cfg, "aprs.enabled", m_aprs.enabled, false);
+	ret = get_value(cfg, "aprs.port", m_aprs.port, 1U, 65535U, 14580U) && ret;
+	ret = get_value(cfg, "aprs.hostname", m_aprs.hostname, 0, 1024, "rotate.aprs2.net", true) && ret;
+	ret = get_value(cfg, "aprs.password", m_aprs.password, 0U, 30U, "", true) && ret;
+
+	return ret;
 }
 
 bool CDStarGatewayConfig::loadPaths(const Config & cfg)
@@ -104,7 +121,7 @@ bool CDStarGatewayConfig::loadRepeaters(const Config & cfg)
 		}
 
 		std::string reconnect;
-		if (get_value(cfg, key.str() + ".reflectorReconnect", reconnect, 1, 5, "never", true,
+		if (get_value(cfg, key.str() + ".reflectorReconnect", reconnect, 0, 5, "never", true,
 						{"never", "fixed", "5", "10", "15", "20", "25", "30", "60", "90", "120", "180"})) {
 			if(reconnect == "never") repeater->reflectorReconnect = RECONNECT_NEVER;
 			else if(reconnect == "5") repeater->reflectorReconnect = RECONNECT_5MINS;
@@ -242,33 +259,45 @@ bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
 
 bool CDStarGatewayConfig::loadGateway(const Config & cfg)
 {
-	if (! get_value(cfg, "gateway.callsign", m_gateway.callsign, 3, 8, "")
-	|| 0 == m_gateway.callsign.size())
-	{
-		printf("CONFIG: No gateway callsign specified");
-		return false;
-	}
-	CUtils::ToUpper(m_gateway.callsign);
-	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true);
-	get_value(cfg, "gateway.hbaddress", m_gateway.hbAddress, 0, 20, "127.0.0.1", true);
-	get_value(cfg, "gateway.hbport", m_gateway.hbPort, 1U, 65535U, 20010U);
-	get_value(cfg, "gateway.icomAddress", m_gateway.icomAddress, 0, 20, "127.0.0.1", true);
-	get_value(cfg, "gateway.icomPort", m_gateway.icomPort, 1U, 65535U, 20000U);
-	get_value(cfg, "gateway.latitude", m_gateway.latitude, -90.0, 90.0, 0.0);
-	get_value(cfg, "gateway.longitude", m_gateway.longitude, -180.0, 180.0, 0.0);
-	get_value(cfg, "gateway.description1", m_gateway.description1, 0, 1024, "");
-	get_value(cfg, "gateway.description2", m_gateway.description2, 0, 1024, "");
-	get_value(cfg, "gateway.url", m_gateway.url, 0, 1024, "");
+	bool ret = get_value(cfg, "gateway.callsign", m_gateway.callsign, 3, 8, "");
+	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true) && ret;
+	get_value(cfg, "gateway.hbaddress", m_gateway.hbAddress, 0, 20, "127.0.0.1", true) && ret;
+	get_value(cfg, "gateway.hbport", m_gateway.hbPort, 1U, 65535U, 20010U) && ret;
+	get_value(cfg, "gateway.icomAddress", m_gateway.icomAddress, 0, 20, "127.0.0.1", true) && ret;
+	get_value(cfg, "gateway.icomPort", m_gateway.icomPort, 1U, 65535U, 20000U) && ret;
+	get_value(cfg, "gateway.latitude", m_gateway.latitude, -90.0, 90.0, 0.0) && ret;
+	get_value(cfg, "gateway.longitude", m_gateway.longitude, -180.0, 180.0, 0.0) && ret;
+	get_value(cfg, "gateway.description1", m_gateway.description1, 0, 1024, "") && ret;
+	get_value(cfg, "gateway.description2", m_gateway.description2, 0, 1024, "") && ret;
+	get_value(cfg, "gateway.url", m_gateway.url, 0, 1024, "") && ret;
+	
+	std::string type;
+	get_value(cfg, "gateway.type", type, 0, 8, "repeater", true, {"repeater", "hotspot"}) && ret;
+	if(type == "repeater") m_gateway.type = GT_REPEATER;
+	if(type == "hotspot") m_gateway.type = GT_HOTSPOT;
+
+	std::string lang;
+	get_value(cfg, "gateway.language", lang, 0, 30, "english_uk", true, {"english_uk", "deutsch", "dansk", "francais", "italiano", "polski", "english_us", "espanol", "svenska", "nederlands_nl", "nederlands_be", "norsk", "portugues"});
+	if(lang == "english_uk") m_gateway.language = TL_ENGLISH_UK;
+	else if(lang == "deutsch") m_gateway.language = TL_DEUTSCH;
+	else if(lang == "dansk") m_gateway.language = TL_DANSK;
+	else if(lang == "francais") m_gateway.language = TL_FRANCAIS;
+	else if(lang == "italiano") m_gateway.language = TL_ITALIANO;
+	else if(lang == "polski") m_gateway.language = TL_POLSKI;
+	else if(lang == "english_us") m_gateway.language = TL_ENGLISH_US;
+	else if(lang == "espanol") m_gateway.language = TL_ESPANOL;
+	else if(lang == "svenska") m_gateway.language = TL_SVENSKA;
+	else if(lang == "nederlands_nl") m_gateway.language = TL_NEDERLANDS_NL;
+	else if(lang == "nederlands_be") m_gateway.language = TL_NEDERLANDS_BE;
+	else if(lang == "norsk") m_gateway.language = TL_NORSK;
+	else if(lang == "portugues") m_gateway.language = TL_PORTUGUES;
 
 	std::cout << "GATEWAY: callsign='" << m_gateway.callsign << "' listen address='" << m_gateway.address << std::endl;
 
+	CUtils::ToUpper(m_gateway.callsign);
 	CUtils::clean(m_gateway.description1, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 	CUtils::clean(m_gateway.description2, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 	CUtils::clean(m_gateway.url, 		  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
-
-	//properly size values
-	m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
-	m_gateway.callsign.push_back('G');
 
 	return true;
 }
@@ -424,4 +453,9 @@ void CDStarGatewayConfig::getRepeater(unsigned int index, TRepeater & repeater) 
 void CDStarGatewayConfig::getPaths(Tpaths & paths) const
 {
 	paths = m_paths;
+}
+
+void CDStarGatewayConfig::getAPRS(TAPRS & aprs) const
+{
+	aprs = m_aprs;
 }
