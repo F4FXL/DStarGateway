@@ -82,7 +82,7 @@ public:
 
 	static void initialise();
 
-	static void setLanguage(TEXT_LANG language);
+	static void setLanguage(const std::string & dir, TEXT_LANG language);
 
 	static void finalise();
 

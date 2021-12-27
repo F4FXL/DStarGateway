@@ -44,7 +44,7 @@ void CAudioUnit::initialise()
 {
 }
 
-void CAudioUnit::setLanguage(TEXT_LANG language)
+void CAudioUnit::setLanguage(const std::string & dir, TEXT_LANG language)
 {
 	m_language = language;
 
@@ -94,14 +94,14 @@ void CAudioUnit::setLanguage(TEXT_LANG language)
 			break;
 	}
 
-	bool ret = readAMBE(ambeFileName);
+	bool ret = readAMBE(dir, ambeFileName);
 	if (!ret) {
 		delete[] m_ambe;
 		m_ambe = NULL;
 		return;
 	}
 
-	ret = readIndex(indxFileName);
+	ret = readIndex(dir, indxFileName);
 	if (!ret) {
 		delete[] m_ambe;
 		m_ambe = NULL;

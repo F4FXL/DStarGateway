@@ -290,7 +290,7 @@ void* CDStarGatewayThread::Entry()
 	if (m_restrictList != NULL)
 		CRepeaterHandler::setRestrictList(m_restrictList);
 
-	CAudioUnit::setLanguage(m_language);
+	CAudioUnit::setLanguage(m_dataDir, m_language);
 
 #ifdef USE_STARNET
 	CStarNetHandler::setCache(&m_cache);
