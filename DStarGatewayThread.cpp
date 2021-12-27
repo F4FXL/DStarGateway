@@ -180,7 +180,6 @@ void* CDStarGatewayThread::Entry()
 	else {
 		CLog::logError("Failed to allocate incoming DExtra handler\n");
 	}
-	
 
 	std::string dplusAddress = m_dplusEnabled ? m_gatewayAddress : LOOPBACK_ADDRESS;
 	m_dplusPool = new CDPlusProtocolHandlerPool(DPLUS_PORT, dplusAddress);
