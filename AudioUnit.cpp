@@ -329,15 +329,13 @@ void CAudioUnit::spellReflector(unsigned int id, const std::string &reflector)
 	}
 }
 
-bool CAudioUnit::readAMBE(const std::string& name)
+bool CAudioUnit::readAMBE(const std::string& dir, const std::string& name)
 {
-	std::string dir = std::getenv("HOME");
 	std::string fileName = dir + "/" + name;
 	struct stat sbuf;
 	
 	if (stat(fileName.c_str(), &sbuf)) {
 		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.assign(CFG_DIR);
 		fileName.append("/data/");
 		fileName += name;
 		if (stat(fileName.c_str(), &sbuf)) {
@@ -396,15 +394,13 @@ bool CAudioUnit::readAMBE(const std::string& name)
 	return true;
 }
 
-bool CAudioUnit::readIndex(const std::string& name)
+bool CAudioUnit::readIndex(const std::string& dir, const std::string& name)
 {
-	std::string dir = std::getenv("HOME");
 	std::string fileName = dir + "/" + name;
 	struct stat sbuf;
 	
 	if (stat(fileName.c_str(), &sbuf)) {
 		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.assign(CFG_DIR);
 		fileName.append("/data/");
 		fileName += name;
 		if (stat(fileName.c_str(), &sbuf)) {

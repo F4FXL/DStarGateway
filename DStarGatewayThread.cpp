@@ -1259,7 +1259,7 @@ void CDStarGatewayThread::readStatusFiles()
 
 void CDStarGatewayThread::readStatusFile(const std::string& filename, unsigned int n, std::string& var)
 {
-	std::string fullFileName = std::string(CFG_DIR) + "/" + filename;
+	std::string fullFileName = m_dataDir + "/" + filename;
 	std::string text;
 	std::ifstream file;
 

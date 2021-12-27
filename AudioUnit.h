@@ -114,7 +114,7 @@ private:
 	void spellReflector(unsigned int id, const std::string& reflector);
 	void sendStatus(LINK_STATUS status, const std::string& reflector, const std::string& text);
 
-	static bool readAMBE(const std::string& name);
-	static bool readIndex(const std::string& name);
+	static bool readAMBE(const std::string& dir, const std::string& name);
+	static bool readIndex(const std::string& dir, const std::string& name);
 };
 
