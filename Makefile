@@ -5,9 +5,9 @@ BIN_DIR=/usr/local/bin
 CFG_DIR=/usr/local/etc/dstargateway.d/
 
 # choose this if you want debugging help
-CPPFLAGS=-g -ggdb -W -Wall -std=c++14 -DCFG_DIR=\"$(CFG_DIR)\"
+CPPFLAGS=-g -ggdb -W -Wall -std=c++17 -DCFG_DIR=\"$(CFG_DIR)\"
 # or, you can choose this for a much smaller executable without debugging help
-#CPPFLAGS=-W -Wall -std=c++14 -DCFG_DIR=\"$(CFGDIR)\" -DDATA_DIR=\"$(DATA_DIR)"
+#CPPFLAGS=-W -Wall -std=c++17 -DCFG_DIR=\"$(CFGDIR)\" -DDATA_DIR=\"$(DATA_DIR)"
 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
@@ -53,9 +53,9 @@ removehostfiles :
 
 GitVersion.h : FORCE
 ifneq ("$(wildcard .git/index)","")
-	echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > $@
+	echo "#pragma once\nconst char *gitversion = \"$(shell git rev-parse HEAD)\";" > $@
 else
-	echo "const char *gitversion = \"0000000000000000000000000000000000000000\";" > $@
+	echo "#pragma once\nconst char *gitversion = \"0000000000000000000000000000000000000000\";" > $@
 endif
 
 FORCE:
