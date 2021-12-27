@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/dstargateway",
-            "args": ["${workspaceFolder}/example-test.cfg"],
+            "args": ["${workspaceFolder}/___test.cfg"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

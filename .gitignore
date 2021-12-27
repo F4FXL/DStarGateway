@@ -29,11 +29,14 @@
 # removed source
 removed/*
 
-#log files
+# log files
 *.log
 
-#dynamically generated files
+# dynamically generated files
 GitVersion.h
+
+# test files
+___test.cfg
 
 # Executables
 *.exe
