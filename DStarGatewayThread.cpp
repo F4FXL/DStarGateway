@@ -157,7 +157,7 @@ void* CDStarGatewayThread::Entry()
 		fullName += fullName + m_name;
 	}
 	CUtils::truncateFile(fullName);
-	wxLogMessage("Truncating %s", fullName.c_str());
+	CLog::logInfo("Truncating %s", fullName.c_str());
 
 #ifdef USE_STARNET
 	// Truncate the old StarNet.log file
@@ -166,7 +166,7 @@ void* CDStarGatewayThread::Entry()
 		fullName += fullName + m_name;
 	}
 	CUtils::truncateFile(fullName);
-	wxLogMessage("Truncating %s", fullName.c_str());
+	CLog::logInfo("Truncating %s", fullName.c_str());
 #endif
 
 	std::string dextraAddress = m_dextraEnabled ? m_gatewayAddress : LOOPBACK_ADDRESS;
@@ -178,7 +178,7 @@ void* CDStarGatewayThread::Entry()
 		CDExtraHandler::setDExtraProtocolHandlerPool(m_dextraPool);
 	}
 	else {
-		wxLogError("Failed to allocate incoming DExtra handler\n");
+		CLog::logError("Failed to allocate incoming DExtra handler\n");
 	}
 	
 
@@ -189,7 +189,7 @@ void* CDStarGatewayThread::Entry()
 		CDPlusHandler::setDPlusProtocolIncoming(dplusHandler);
 		CDPlusHandler::setDPlusProtocolHandlerPool(m_dplusPool);
 	} else {
-		wxLogError("Failed to allocate incoming DPlus handler\n");
+		CLog::logError("Failed to allocate incoming DPlus handler\n");
 	}
 
 	std::string dcsAddress = m_dcsEnabled ? m_gatewayAddress : LOOPBACK_ADDRESS;
@@ -199,13 +199,13 @@ void* CDStarGatewayThread::Entry()
 		CDCSHandler::setDCSProtocolIncoming(dcsHandler);
 		CDCSHandler::setDCSProtocolHandlerPool(m_dcsPool);
 	} else {
-		wxLogError("Failed to allocate incoming DCS handler\n");
+		CLog::logError("Failed to allocate incoming DCS handler\n");
 	}
 
 	m_g2Handler = new CG2ProtocolHandler(G2_DV_PORT, m_gatewayAddress);
 	bool ret = m_g2Handler->open();
 	if (!ret) {
-		wxLogError("Could not open the G2 protocol handler");
+		CLog::logError("Could not open the G2 protocol handler");
 		delete m_g2Handler;
 		m_g2Handler = NULL;
 	}
@@ -226,7 +226,7 @@ void* CDStarGatewayThread::Entry()
 
 	m_stopped = false;
 
-	wxLogMessage("Starting the ircDDB Gateway thread");
+	CLog::logInfo("Starting the ircDDB Gateway thread");
 
 	CHeaderLogger* headerLogger = NULL;
 	if (m_logEnabled) {
@@ -427,13 +427,13 @@ void* CDStarGatewayThread::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		wxLogError("Exception raised in the main thread - \"%s\"", message.c_str());
+		CLog::logError("Exception raised in the main thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		wxLogError("Unknown exception raised in the main thread");
+		CLog::logError("Unknown exception raised in the main thread");
 	}
 
-	wxLogMessage("Stopping the ircDDB Gateway thread");
+	CLog::logInfo("Stopping the ircDDB Gateway thread");
 
 	// Unlink from all reflectors
 	CDExtraHandler::unlink();
@@ -526,7 +526,7 @@ void CDStarGatewayThread::addRepeater(const std::string& callsign, const std::st
 	// Add a fixed address and protocol for the local repeaters
 	m_cache.updateRepeater(repeater, m_gatewayCallsign, "127.0.0.1", DP_LOOPBACK, true, true);
 
-	wxLogMessage("Adding %s to the cache as a local repeater", repeater.c_str());
+	CLog::logInfo("Adding %s to the cache as a local repeater", repeater.c_str());
 }
 
 #ifdef USE_STARNET
@@ -615,14 +615,14 @@ void CDStarGatewayThread::setCCS(bool enabled, const std::string& host)
 	wxFileName fileName(wxFileName::GetHomeDir(), CCS_HOSTS_FILE_NAME);
 
 	if (!fileName.IsFileReadable()) {
-		wxLogMessage(wxT("File %s not readable"), fileName.GetFullPath().c_str());
+		CLog::logInfo(wxT("File %s not readable"), fileName.GetFullPath().c_str());
 #if defined(__WINDOWS__)
 		fileName.Assign(::wxGetCwd(), CCS_HOSTS_FILE_NAME);
 #else
 		fileName.Assign(wxT(m_dataDir), CCS_HOSTS_FILE_NAME);
 #endif
 		if (!fileName.IsFileReadable()) {
-			wxLogMessage(wxT("File %s not readable"), fileName.GetFullPath().c_str());
+			CLog::logInfo(wxT("File %s not readable"), fileName.GetFullPath().c_str());
 			m_ccsEnabled = false;
 			return;
 		}
@@ -713,19 +713,19 @@ void CDStarGatewayThread::processIrcDDB()
 			case 0:
 			case 10:
 				if (m_lastStatus != IS_DISCONNECTED) {
-					wxLogInfo("Disconnected from ircDDB");
+					CLog::logInfo("Disconnected from ircDDB");
 					m_lastStatus = IS_DISCONNECTED;
 				}
 				break;
 			case 7:
 				if (m_lastStatus != IS_CONNECTED) {
-					wxLogInfo("Connected to ircDDB");
+					CLog::logInfo("Connected to ircDDB");
 					m_lastStatus = IS_CONNECTED;
 				}
 				break;
 			default:
 				if (m_lastStatus != IS_CONNECTING) {
-					wxLogInfo("Connecting to ircDDB");
+					CLog::logInfo("Connecting to ircDDB");
 					m_lastStatus = IS_CONNECTING;
 				}
 				break;
@@ -746,13 +746,13 @@ void CDStarGatewayThread::processIrcDDB()
 						break;
 
 					if (!address.empty()) {
-						wxLogMessage("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
+						CLog::logInfo("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateUser(user, repeater, gateway, address, timestamp, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						wxLogMessage("USER: %s NOT FOUND", user.c_str());
+						CLog::logInfo("USER: %s NOT FOUND", user.c_str());
 					}
 				}
 				break;
@@ -765,13 +765,13 @@ void CDStarGatewayThread::processIrcDDB()
 
 					CRepeaterHandler::resolveRepeater(repeater, gateway, address, DP_DEXTRA);
 					if (!address.empty()) {
-						wxLogMessage("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
+						CLog::logInfo("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateRepeater(repeater, gateway, address, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						wxLogMessage("REPEATER: %s NOT FOUND", repeater.c_str());
+						CLog::logInfo("REPEATER: %s NOT FOUND", repeater.c_str());
 					}
 				}
 				break;
@@ -785,13 +785,13 @@ void CDStarGatewayThread::processIrcDDB()
 					CDExtraHandler::gatewayUpdate(gateway, address);
 					CDPlusHandler::gatewayUpdate(gateway, address);
 					if (!address.empty()) {
-						wxLogMessage("GATEWAY: %s %s", gateway.c_str(), address.c_str());
+						CLog::logInfo("GATEWAY: %s %s", gateway.c_str(), address.c_str());
 						m_cache.updateGateway(gateway, address, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)						
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						wxLogMessage("GATEWAY: %s NOT FOUND", gateway.c_str());
+						CLog::logInfo("GATEWAY: %s NOT FOUND", gateway.c_str());
 					}
 				}
 				break;
@@ -832,7 +832,7 @@ void CDStarGatewayThread::processRepeater(IRepeaterProtocolHandler* handler)
 						if (repeater != user) {
 							CRepeaterHandler* handler = CRepeaterHandler::findDVRepeater(repeater);
 							if (handler == NULL)
-								wxLogMessage("Heard received from unknown repeater, %s", repeater.c_str());
+								CLog::logInfo("Heard received from unknown repeater, %s", repeater.c_str());
 							else
 								handler->processRepeater(*heard);
 
@@ -845,11 +845,11 @@ void CDStarGatewayThread::processRepeater(IRepeaterProtocolHandler* handler)
 			case RT_HEADER: {
 					CHeaderData* header = handler->readHeader();
 					if (header != NULL) {
-						// wxLogMessage(wxT("Repeater header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
+						// CLog::logInfo(wxT("Repeater header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
 
 						CRepeaterHandler* repeater = CRepeaterHandler::findDVRepeater(*header);
 						if (repeater == NULL)
-							wxLogMessage("Header received from unknown repeater, %s", header->getRptCall1().c_str());
+							CLog::logInfo("Header received from unknown repeater, %s", header->getRptCall1().c_str());
 						else
 							repeater->processRepeater(*header);
 
@@ -873,11 +873,11 @@ void CDStarGatewayThread::processRepeater(IRepeaterProtocolHandler* handler)
 			case RT_BUSY_HEADER: {
 					CHeaderData* header = handler->readBusyHeader();
 					if (header != NULL) {
-						// wxLogMessage(wxT("Repeater busy header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
+						// CLog::logInfo(wxT("Repeater busy header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
 
 						CRepeaterHandler* repeater = CRepeaterHandler::findDVRepeater(*header);
 						if (repeater == NULL)
-							wxLogMessage("Busy header received from unknown repeater, %s", header->getRptCall1().c_str());
+							CLog::logInfo("Busy header received from unknown repeater, %s", header->getRptCall1().c_str());
 						else
 							repeater->processBusy(*header);
 
@@ -901,11 +901,11 @@ void CDStarGatewayThread::processRepeater(IRepeaterProtocolHandler* handler)
 			case RT_DD: {
 					CDDData* data = handler->readDD();
 					if (data != NULL) {
-						// wxLogMessage(wxT("DD header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), data->getMyCall1().c_str(), data->getMyCall2().c_str(), data->getYourCall().c_str(), data->getRptCall1().c_str(), data->getRptCall2().c_str(), data->getFlag1(), data->getFlag2(), data->getFlag3());
+						// CLog::logInfo(wxT("DD header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), data->getMyCall1().c_str(), data->getMyCall2().c_str(), data->getYourCall().c_str(), data->getRptCall1().c_str(), data->getRptCall2().c_str(), data->getFlag1(), data->getFlag2(), data->getFlag3());
 
 						CRepeaterHandler* repeater = CRepeaterHandler::findDDRepeater();
 						if (repeater == NULL)
-							wxLogMessage("DD data received from unknown DD repeater, %s", data->getRptCall1().c_str());
+							CLog::logInfo("DD data received from unknown DD repeater, %s", data->getRptCall1().c_str());
 						else
 							repeater->processRepeater(*data);
 
@@ -947,7 +947,7 @@ void CDStarGatewayThread::processDExtra()
 			case DE_HEADER: {
 					CHeaderData* header = m_dextraPool->readHeader();
 					if (header != NULL) {
-						// wxLogMessage(wxT("DExtra header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
+						// CLog::logInfo(wxT("DExtra header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
 						CDExtraHandler::process(*header);
 						delete header;
 					}
@@ -996,7 +996,7 @@ void CDStarGatewayThread::processDPlus()
 			case DP_HEADER: {
 					CHeaderData* header = m_dplusPool->readHeader();
 					if (header != NULL) {
-						// wxLogMessage(wxT("D-Plus header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
+						// CLog::logInfo(wxT("D-Plus header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
 						CDPlusHandler::process(*header);
 						delete header;
 					}
@@ -1045,7 +1045,7 @@ void CDStarGatewayThread::processDCS()
 			case DC_DATA: {
 					CAMBEData* data = m_dcsPool->readData();
 					if (data != NULL) {
-						// wxLogMessage(wxT("DCS header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
+						// CLog::logInfo(wxT("DCS header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str());
 						CDCSHandler::process(*data);
 						delete data;
 					}
@@ -1067,7 +1067,7 @@ void CDStarGatewayThread::processG2()
 			case GT_HEADER: {
 					CHeaderData* header = m_g2Handler->readHeader();
 					if (header != NULL) {
-						// wxLogMessage(wxT("G2 header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
+						// CLog::logInfo(wxT("G2 header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
 						CG2Handler::process(*header);
 						delete header;
 					}
@@ -1096,7 +1096,7 @@ void CDStarGatewayThread::processDD()
 		if (data == NULL)
 			return;
 
-		// wxLogMessage(wxT("DD header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), data->getMyCall1().c_str(), data->getMyCall2().c_str(), data->getYourCall().c_str(), data->getRptCall1().c_str(), data->getRptCall2().c_str(), data->getFlag1(), data->getFlag2(), data->getFlag3());
+		// CLog::logInfo(wxT("DD header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X"), data->getMyCall1().c_str(), data->getMyCall2().c_str(), data->getYourCall().c_str(), data->getRptCall1().c_str(), data->getRptCall2().c_str(), data->getFlag1(), data->getFlag2(), data->getFlag3());
 
 		delete data;
 	}
@@ -1147,7 +1147,7 @@ void CDStarGatewayThread::loadReflectors(std::string hostFileName, DSTAR_PROTOCO
 			addrText = CStringUtils::string_format("%u.%u.%u.%u", ucp[0U] & 0xFFU, ucp[1U] & 0xFFU, ucp[2U] & 0xFFU, ucp[3U] & 0xFFU);
 
 			if (lock)
-				wxLogMessage("Locking %s to %s", reflector.c_str(), addrText.c_str());
+				CLog::logInfo("Locking %s to %s", reflector.c_str(), addrText.c_str());
 
 			reflector.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
 			reflector += "G";
@@ -1174,7 +1174,7 @@ void CDStarGatewayThread::loadReflectors(std::string hostFileName, DSTAR_PROTOCO
 		break;
 	}
 
-	wxLogMessage("Loaded %u of %u %s hosts from %s", count, hostFile.getCount(), protoString.c_str() , hostFileName.c_str());
+	CLog::logInfo("Loaded %u of %u %s hosts from %s", count, hostFile.getCount(), protoString.c_str() , hostFileName.c_str());
 }
 
 void CDStarGatewayThread::writeStatus()
@@ -1190,7 +1190,7 @@ void CDStarGatewayThread::writeStatus()
 	std::ofstream file;
 	file.open(fullName, std::fstream::trunc);
 	if (!file.is_open()) {
-		wxLogError("Unable to open %s for writing", fullName.c_str());
+		CLog::logError("Unable to open %s for writing", fullName.c_str());
 		return;
 	}
 
@@ -1270,7 +1270,7 @@ void CDStarGatewayThread::readStatusFile(const std::string& filename, unsigned i
 	}
 
 	if(var != text) {
-		wxLogMessage("Status %u message set to \"%s\"", n + 1U, text.c_str());
+		CLog::logInfo("Status %u message set to \"%s\"", n + 1U, text.c_str());
 		CStatusData statusData(text, n);
 		CRepeaterHandler::writeStatus(statusData);
 		var = text;

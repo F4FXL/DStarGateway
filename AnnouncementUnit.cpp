@@ -25,6 +25,7 @@
 #include "HeaderData.h"
 #include "AnnouncementUnit.h"
 #include "Utils.h"
+#include "Log.h"
 
 CAnnouncementUnit::CAnnouncementUnit(IRepeaterCallback* handler, const std::string& callsign, const std::string& fileName, const std::string& name) :
 m_handler(handler),
@@ -41,7 +42,7 @@ m_id(0U)
 
 	m_name.resize(SHORT_CALLSIGN_LENGTH, ' ');
 
-	printf("Connected '%s' to %s using file - %s\n", name.c_str(), callsign.c_str(), fileName.c_str());
+	CLog::logInfo("Connected '%s' to %s using file - %s\n", name.c_str(), callsign.c_str(), fileName.c_str());
 }
 
 CAnnouncementUnit::~CAnnouncementUnit()

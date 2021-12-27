@@ -52,7 +52,7 @@ bool CHeaderLogger::open()
 
 	m_file.open(fullName, std::ios::app);
 	if (!m_file.is_open()) {
-		wxLogError("Cannot open %s file for appending", fullName.c_str());
+		CLog::logError("Cannot open %s file for appending", fullName.c_str());
 		return false;
 	}
 

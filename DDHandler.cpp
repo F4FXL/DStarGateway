@@ -110,7 +110,7 @@ void CDDHandler::initialise(unsigned int maxRoutes, const std::string& name)
 #if defined(__linux__)
 	m_fd = ::open("/dev/net/tun", O_RDWR);
 	if (m_fd < 0) {
-		wxLogError("Cannot open /dev/net/tun");
+		CLog::logError("Cannot open /dev/net/tun");
 		return;
 	}
 
@@ -121,18 +121,18 @@ void CDDHandler::initialise(unsigned int maxRoutes, const std::string& name)
 	::strcpy(ifr1.ifr_name, "tap%d");
 
 	if (::ioctl(m_fd, TUNSETIFF, (void *)&ifr1) < 0) {
-		wxLogError("TUNSETIFF ioctl failed, closing the tap device");
+		CLog::logError("TUNSETIFF ioctl failed, closing the tap device");
 		::close(m_fd);
 		m_fd = -1;
 		return;
 	}
 
 	std::string device = std::string(ifr1.ifr_name);
-	wxLogMessage("DD mode Tap interface created on %s", device.c_str());
+	CLog::logInfo("DD mode Tap interface created on %s", device.c_str());
 
 	int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd < 0) {
-		wxLogError("Unable to open the config socket, closing the tap device");
+		CLog::logError("Unable to open the config socket, closing the tap device");
 		::close(m_fd);
 		m_fd = -1;
 		return;
@@ -144,7 +144,7 @@ void CDDHandler::initialise(unsigned int maxRoutes, const std::string& name)
 
 	ifr2.ifr_flags = IFF_UP | IFF_BROADCAST | IFF_MULTICAST;
 	if (::ioctl(fd, SIOCSIFFLAGS, (void *)&ifr2) < 0) {
-		wxLogError("SIOCSIFFLAGS ioctl failed, closing the tap device");
+		CLog::logError("SIOCSIFFLAGS ioctl failed, closing the tap device");
 		::close(m_fd);
 		m_fd = -1;
 		return;
@@ -219,7 +219,7 @@ void CDDHandler::process(CDDData& data)
 	}
 
 	if (!found) {
-		wxLogMessage("Adding DD user %s with ethernet address %02X:%02X:%02X:%02X:%02X:%02X", myCall1.c_str(),
+		CLog::logInfo("Adding DD user %s with ethernet address %02X:%02X:%02X:%02X:%02X:%02X", myCall1.c_str(),
 			address[0], address[1], address[2], address[3], address[4], address[5]);
 
 		CEthernet* ethernet = new CEthernet(address, myCall1);
@@ -236,7 +236,7 @@ void CDDHandler::process(CDDData& data)
 		}
 
 		if (!found) {
-			wxLogError("No space to add new DD ethernet address");
+			CLog::logError("No space to add new DD ethernet address");
 			delete ethernet;
 			return;
 		}
@@ -247,7 +247,7 @@ void CDDHandler::process(CDDData& data)
 
 	ssize_t len = ::write(m_fd, (char*)m_buffer, length);
 	if (len != ssize_t(length))
-		wxLogError("Error returned from write()");
+		CLog::logError("Error returned from write()");
 #endif
 }
 
@@ -276,7 +276,7 @@ CDDData* CDDHandler::read()
 
 	int ret = ::select(m_fd + 1, &readFds, NULL, NULL, &tv);
 	if (ret < 0) {
-		wxLogError("Error returned from select()");
+		CLog::logError("Error returned from select()");
 		return NULL;
 	}
 
@@ -293,7 +293,7 @@ CDDData* CDDHandler::read()
 
 	ssize_t len = ::read(m_fd, (char*)m_buffer, BUFFER_LENGTH);
 	if (len <= 0) {
-		wxLogError("Error returned from read()");
+		CLog::logError("Error returned from read()");
 		return NULL;
 	}
 
@@ -318,17 +318,17 @@ CDDData* CDDHandler::read()
 	}
 
 	if (ethernet == NULL) {
-		wxLogWarning("Cannot find the ethernet address of %02X:%02X:%02X:%02X:%02X:%02X in the ethernet list", address[0], address[1], address[2], address[3], address[4], address[5]);
+		CLog::logWarning("Cannot find the ethernet address of %02X:%02X:%02X:%02X:%02X:%02X in the ethernet list", address[0], address[1], address[2], address[3], address[4], address[5]);
 		return NULL;
 	}
 
 	CRepeaterHandler* handler = CRepeaterHandler::findDDRepeater();
 	if (handler == NULL) {
-		wxLogWarning("Incoming DD data to unknown repeater");
+		CLog::logWarning("Incoming DD data to unknown repeater");
 		return NULL;
 	}
 
-	// wxLogMessage("Mapping ethernet address %02X:%02X:%02X:%02X:%02X:%02X to user %s",
+	// CLog::logInfo("Mapping ethernet address %02X:%02X:%02X:%02X:%02X:%02X to user %s",
 	//				address[0], address[1], address[2], address[3], address[4], address[5],
 	//				ethernet->getCallsign().c_str());
 
@@ -377,7 +377,7 @@ void CDDHandler::writeStatus(const CEthernet& ethernet)
 	std::ofstream file;
 	file.open(fullName, std::ios::app);
 	if (!file.is_open()) {
-		wxLogError("Unable to open %s for writing", fullName.c_str());
+		CLog::logError("Unable to open %s for writing", fullName.c_str());
 		return;
 	}
 

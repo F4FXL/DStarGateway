@@ -26,6 +26,7 @@
 #include "DStarDefines.h"
 #include "Utils.h"
 #include "Defs.h"
+#include "Log.h"
 
 const std::string OPENDSTAR_HOSTNAME = "auth.dstargateway.org";
 const unsigned int OPENDSTAR_PORT = 20001U;
@@ -65,7 +66,7 @@ void CDPlusAuthenticator::start()
 
 void* CDPlusAuthenticator::Entry()
 {
-	printf("Starting the D-Plus Authenticator thread");
+	CLog::logInfo("Starting the D-Plus Authenticator thread");
 
 	authenticate(m_loginCallsign, OPENDSTAR_HOSTNAME, OPENDSTAR_PORT, '2', true);
 
@@ -85,13 +86,13 @@ void* CDPlusAuthenticator::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		printf("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
+		CLog::logInfo("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		printf("Unknown exception raised in the D-Plus Authenticator thread");
+		CLog::logInfo("Unknown exception raised in the D-Plus Authenticator thread");
 	}
 
-	printf("Stopping the D-Plus Authenticator thread");
+	CLog::logInfo("Stopping the D-Plus Authenticator thread");
 
 	return NULL;
 }
@@ -160,12 +161,12 @@ bool CDPlusAuthenticator::authenticate(const std::string& callsign, const std::s
 		// Ensure that we get exactly len - 2U bytes from the TCP stream
 		ret = read(socket, buffer + 2U, len - 2U);
 		if (!ret) {
-			printf("Short read from %s:%u", hostname.c_str(), port);
+			CLog::logInfo("Short read from %s:%u", hostname.c_str(), port);
 			break;
 		}
 
 		if ((buffer[1U] & 0xC0U) != 0xC0U || buffer[2U] != 0x01U) {
-			printf("Invalid packet received from %s:%u", hostname.c_str(), port);
+			CLog::logInfo("Invalid packet received from %s:%u", hostname.c_str(), port);
 			CUtils::dump("Details:", buffer, len);
 			break;
 		}
@@ -183,7 +184,7 @@ bool CDPlusAuthenticator::authenticate(const std::string& callsign, const std::s
 			// An empty name or IP address or an inactive gateway/reflector is not written out
 			if (address.length() > 0U && name.length() > 0U && !name.compare(0, 3, "XRF") == 0 && active && writeToCache){
 				if (name.compare(0, 3, "REF") == 0)
-					printf("D-Plus: %s\t%s", name.c_str(), address.c_str());
+					CLog::logInfo("D-Plus: %s\t%s", name.c_str(), address.c_str());
 
 				name += "        ";
 				name = name.substr(LONG_CALLSIGN_LENGTH - 1U);
@@ -195,7 +196,7 @@ bool CDPlusAuthenticator::authenticate(const std::string& callsign, const std::s
 		ret = read(socket, buffer + 0U, 2U);
 	}
 
-	printf("Registered with %s using callsign %s", hostname.c_str(), callsign.c_str());
+	CLog::logInfo("Registered with %s using callsign %s", hostname.c_str(), callsign.c_str());
 
 	socket.close();
 

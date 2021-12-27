@@ -20,8 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "IRCDDBMultiClient.h"
+
 #include <stdio.h>
+
+#include "IRCDDBMultiClient.h"
+#include "Log.h"
 
 CIRCDDBMultiClient::CIRCDDBMultiClient(const CIRCDDB_Array& clients) :
 m_clients(),
@@ -284,11 +287,11 @@ bool CIRCDDBMultiClient::receiveUser(std::string & userCallsign, std::string & r
 {
 	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_USER, "CIRCDDBMultiClient::receiveUser: unexpected response type");
 	if (item == NULL) {
-		//wxLogMessage(wxT("CIRCDDBMultiClient::receiveUser NO USER IN QUEUE"));
+		//CLog::logInfo(wxT("CIRCDDBMultiClient::receiveUser NO USER IN QUEUE"));
 		return false;
 	}
 
-	//wxLogMessage(wxT("CIRCDDBMultiClient::receiveUser : %s"), item->toString());
+	//CLog::logInfo(wxT("CIRCDDBMultiClient::receiveUser : %s"), item->toString());
 
 	userCallsign = item->getUser();
 	repeaterCallsign = item->getRepeater();
@@ -312,7 +315,7 @@ CIRCDDBMultiClientQuery * CIRCDDBMultiClient::checkAndGetNextResponse(IRCDDB_RES
 	m_responseQueueLock.lock();
 
 	if (m_responseQueue.size() == 0 || m_responseQueue[0]->getType() != expectedType) {
-		printf(errorMessage.c_str());
+		CLog::logInfo(errorMessage.c_str());
 	}
 	else {
 		item = m_responseQueue[0];

@@ -112,7 +112,7 @@ bool CIcomRepeaterProtocolHandler::open()
 
 		if (length == 10 && m_buffer[0U] == 'I' && m_buffer[1U] == 'N' && m_buffer[2U] == 'I' && m_buffer[3U] == 'T' && m_buffer[6U] == 0x72 && m_buffer[7U] == 0x00) {
 			m_seqNo = m_buffer[4U] * 256U + m_buffer[5U] + 1U;
-			wxLogMessage("Initial sequence number from the RP2C is %u", m_seqNo);
+			CLog::logInfo("Initial sequence number from the RP2C is %u", m_seqNo);
 
 			// Start the thread
 			Create();
@@ -126,14 +126,14 @@ bool CIcomRepeaterProtocolHandler::open()
 
 	m_socket.close();
 
-	wxLogError("No reply from the RP2C for 10 seconds, aborting");
+	CLog::logError("No reply from the RP2C for 10 seconds, aborting");
 
 	return false;
 }
 
 void* CIcomRepeaterProtocolHandler::Entry()
 {
-	wxLogMessage("Starting the Icom Controller thread");
+	CLog::logInfo("Starting the Icom Controller thread");
 
 	try {
 		while (!m_killed) {
@@ -148,13 +148,13 @@ void* CIcomRepeaterProtocolHandler::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		wxLogError("Exception raised in the Icom Controller thread - \"%s\"", message.c_str());
+		CLog::logError("Exception raised in the Icom Controller thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		wxLogError("Unknown exception raised in the Icom Controller thread");
+		CLog::logError("Unknown exception raised in the Icom Controller thread");
 	}
 
-	wxLogMessage("Stopping the Icom Controller thread");
+	CLog::logInfo("Stopping the Icom Controller thread");
 
 	m_socket.close();
 
@@ -209,7 +209,7 @@ void CIcomRepeaterProtocolHandler::readIcomPackets()
 			return;
 
 		if (address.s_addr != m_icomAddress.s_addr || port != m_icomPort) {
-			wxLogError("Incoming Icom data from an unknown source");
+			CLog::logError("Incoming Icom data from an unknown source");
 			continue;
 		}
 
@@ -247,7 +247,7 @@ void CIcomRepeaterProtocolHandler::readIcomPackets()
 			CHeardData* heard = new CHeardData;
 			bool ret = heard->setIcomRepeaterData(m_buffer, length, m_icomAddress, m_icomPort);
 			if (!ret) {
-				wxLogError("Invalid heard data from the RP2C");
+				CLog::logError("Invalid heard data from the RP2C");
 				delete heard;
 				continue;
 			}
@@ -267,7 +267,7 @@ void CIcomRepeaterProtocolHandler::readIcomPackets()
 			CDDData* data = new CDDData;
 			bool ret = data->setIcomRepeaterData(m_buffer, length, m_icomAddress, m_icomPort);
 			if (!ret) {
-				wxLogError("Invalid DD data from the RP2C");
+				CLog::logError("Invalid DD data from the RP2C");
 				delete data;
 				continue;
 			}
@@ -282,7 +282,7 @@ void CIcomRepeaterProtocolHandler::readIcomPackets()
 				CHeaderData* header = new CHeaderData;
 				bool ret = header->setIcomRepeaterData(m_buffer, length, true, m_icomAddress, m_icomPort);
 				if (!ret) {
-					wxLogError("Invalid header data or checksum from the RP2C");
+					CLog::logError("Invalid header data or checksum from the RP2C");
 					delete header;
 					continue;
 				}
@@ -298,7 +298,7 @@ void CIcomRepeaterProtocolHandler::readIcomPackets()
 				CAMBEData* data = new CAMBEData;
 				bool ret = data->setIcomRepeaterData(m_buffer, length, m_icomAddress, m_icomPort);
 				if (!ret) {
-					wxLogError("Invalid AMBE data from the RP2C");
+					CLog::logError("Invalid AMBE data from the RP2C");
 					delete data;
 					continue;
 				}
@@ -325,7 +325,7 @@ void CIcomRepeaterProtocolHandler::sendGwyPackets()
 	if (m_ackQueue == NULL) {
 		m_ackQueue = m_gwyQueue.getData();
 		if (m_ackQueue == NULL) {
-			wxLogError("getData of a non-empty gateway queue is NULL");
+			CLog::logError("getData of a non-empty gateway queue is NULL");
 			return;
 		}
 	}
@@ -355,7 +355,7 @@ void CIcomRepeaterProtocolHandler::sendGwyPackets()
 			break;
 
 		default:
-			wxLogError("Invalid type in the gateway queue");
+			CLog::logError("Invalid type in the gateway queue");
 			break;
 	}
 
@@ -366,7 +366,7 @@ void CIcomRepeaterProtocolHandler::sendGwyPackets()
 		m_retryTimer.start();
 
 		if (m_tries > 0U && (m_tries % 100U) == 0U)
-			wxLogMessage("No reply from the RP2C after %u retries", m_tries);
+			CLog::logInfo("No reply from the RP2C after %u retries", m_tries);
 	}
 }
 
@@ -377,7 +377,7 @@ REPEATER_TYPE CIcomRepeaterProtocolHandler::read()
 	} else {
 		CDataQueue* dq = m_rptrQueue.peek();
 		if (dq == NULL) {
-			wxLogError("Peek of a non-empty repeater queue is NULL");
+			CLog::logError("Peek of a non-empty repeater queue is NULL");
 			m_type = RT_NONE;
 		} else {
 			m_type = dq->getType();
@@ -394,12 +394,12 @@ CPollData* CIcomRepeaterProtocolHandler::readPoll()
 
 	CDataQueue* dq = m_rptrQueue.getData();
 	if (dq == NULL) {
-		wxLogError("Missing DataQueue in readPoll");
+		CLog::logError("Missing DataQueue in readPoll");
 		return NULL;
 	}
 
 	if (dq->getType() != RT_POLL) {
-		wxLogError("Wrong DataQueue type in readPoll");
+		CLog::logError("Wrong DataQueue type in readPoll");
 		delete dq;
 		return NULL;
 	}
@@ -419,12 +419,12 @@ CHeaderData* CIcomRepeaterProtocolHandler::readHeader()
 
 	CDataQueue* dq = m_rptrQueue.getData();
 	if (dq == NULL) {
-		wxLogError("Missing DataQueue in readHeader");
+		CLog::logError("Missing DataQueue in readHeader");
 		return NULL;
 	}
 
 	if (dq->getType() != RT_HEADER) {
-		wxLogError("Wrong DataQueue type in readHeader");
+		CLog::logError("Wrong DataQueue type in readHeader");
 		delete dq;
 		return NULL;
 	}
@@ -443,12 +443,12 @@ CAMBEData* CIcomRepeaterProtocolHandler::readAMBE()
 
 	CDataQueue* dq = m_rptrQueue.getData();
 	if (dq == NULL) {
-		wxLogError("Missing DataQueue in readData");
+		CLog::logError("Missing DataQueue in readData");
 		return NULL;
 	}
 
 	if (dq->getType() != RT_AMBE) {
-		wxLogError("Wrong DataQueue type in readData");
+		CLog::logError("Wrong DataQueue type in readData");
 		delete dq;
 		return NULL;
 	}
@@ -467,12 +467,12 @@ CHeardData* CIcomRepeaterProtocolHandler::readHeard()
 
 	CDataQueue* dq = m_rptrQueue.getData();
 	if (dq == NULL) {
-		wxLogError("Missing DataQueue in readHeard");
+		CLog::logError("Missing DataQueue in readHeard");
 		return NULL;
 	}
 
 	if (dq->getType() != RT_HEARD) {
-		wxLogError("Wrong DataQueue type in readHeard");
+		CLog::logError("Wrong DataQueue type in readHeard");
 		delete dq;
 		return NULL;
 	}
@@ -491,12 +491,12 @@ CDDData* CIcomRepeaterProtocolHandler::readDD()
 
 	CDataQueue* dq = m_rptrQueue.getData();
 	if (dq == NULL) {
-		wxLogError("Missing DataQueue in readData");
+		CLog::logError("Missing DataQueue in readData");
 		return NULL;
 	}
 
 	if (dq->getType() != RT_DD) {
-		wxLogError("Wrong DataQueue type in readData");
+		CLog::logError("Wrong DataQueue type in readData");
 		delete dq;
 		return NULL;
 	}

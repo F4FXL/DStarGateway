@@ -28,6 +28,7 @@
 #include "HeaderData.h"
 #include "AudioUnit.h"
 #include "Utils.h"
+#include "Log.h"
 
 unsigned char* CAudioUnit::m_ambe = NULL;
 unsigned int   CAudioUnit::m_ambeLength = 0U;
@@ -247,7 +248,7 @@ bool CAudioUnit::lookup(unsigned int id, const std::string &name)
 {
 	CIndexRecord* info = m_index[name];
 	if (info == NULL) {
-		// wxLogError(wxT("Cannot find the AMBE index for *%s*"), name.c_str());
+		// CLog::logError(wxT("Cannot find the AMBE index for *%s*"), name.c_str());
 		return false;
 	}
 
@@ -335,12 +336,12 @@ bool CAudioUnit::readAMBE(const std::string& name)
 	struct stat sbuf;
 	
 	if (stat(fileName.c_str(), &sbuf)) {
-		printf("File %s not readable\n", fileName.c_str());
+		CLog::logInfo("File %s not readable\n", fileName.c_str());
 		fileName.assign(CFG_DIR);
 		fileName.append("/data/");
 		fileName += name;
 		if (stat(fileName.c_str(), &sbuf)) {
-			printf("File %s not readable\n", fileName.c_str());
+			CLog::logInfo("File %s not readable\n", fileName.c_str());
 			return false;
 		}
 	}
@@ -348,23 +349,23 @@ bool CAudioUnit::readAMBE(const std::string& name)
 
 	FILE *file = fopen(fileName.c_str(), "rb");
 	if (NULL == file) {
-		printf("Cannot open %s for reading\n", fileName.c_str());
+		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
 		return false;
 	}
 
-	printf("Reading %s\n", fileName.c_str());
+	CLog::logInfo("Reading %s\n", fileName.c_str());
 
 	unsigned char buffer[VOICE_FRAME_LENGTH_BYTES];
 
 	size_t n = fread(buffer, 4, 1, file);
 	if (n != 4) {
-		printf("Unable to read the header from %s\n", fileName.c_str());
+		CLog::logInfo("Unable to read the header from %s\n", fileName.c_str());
 		fclose(file);
 		return false;
 	}
 
 	if (memcmp(buffer, "AMBE", 4)) {
-		printf("Invalid header from %s\n", fileName.c_str());
+		CLog::logInfo("Invalid header from %s\n", fileName.c_str());
 		fclose(file);
 		return false;
 	}
@@ -383,7 +384,7 @@ bool CAudioUnit::readAMBE(const std::string& name)
 
 	n = fread(p, length, 1, file);
 	if (n != length) {
-		printf("Unable to read the AMBE data from %s\n", fileName.c_str());
+		CLog::logInfo("Unable to read the AMBE data from %s\n", fileName.c_str());
 		fclose(file);
 		delete[] m_ambe;
 		m_ambe = NULL;
@@ -402,26 +403,26 @@ bool CAudioUnit::readIndex(const std::string& name)
 	struct stat sbuf;
 	
 	if (stat(fileName.c_str(), &sbuf)) {
-		printf("File %s not readable\n", fileName.c_str());
+		CLog::logInfo("File %s not readable\n", fileName.c_str());
 		fileName.assign(CFG_DIR);
 		fileName.append("/data/");
 		fileName += name;
 		if (stat(fileName.c_str(), &sbuf)) {
-			printf("File %s not readable\n", fileName.c_str());
+			CLog::logInfo("File %s not readable\n", fileName.c_str());
 			return false;
 		}
 	}
 
 	FILE *file = fopen(fileName.c_str(), "r");
 	if (NULL == file) {
-		printf("Cannot open %s for reading\n", fileName.c_str());
+		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
 		return false;
 	}
 
 	// Add a silence entry at the beginning
 	m_index[" "] = new CIndexRecord(" ", 0, SILENCE_LENGTH);
 
-	printf("Reading %s\n", fileName.c_str());
+	CLog::logInfo("Reading %s\n", fileName.c_str());
 
 	char line[128];
 	while (fgets(line, 128, file)) {
@@ -437,7 +438,7 @@ bool CAudioUnit::readIndex(const std::string& name)
 				unsigned long length = std::stoul(leng);
 
 				if (start >= m_ambeLength || (start + length) >= m_ambeLength)
-					printf("The start or end for *%s* is out of range, start: %lu, end: %lu\n", name.c_str(), start, start + length);
+					CLog::logInfo("The start or end for *%s* is out of range, start: %lu, end: %lu\n", name.c_str(), start, start + length);
 				else
 					m_index[name] = new CIndexRecord(name, start + SILENCE_LENGTH, length);
 			}

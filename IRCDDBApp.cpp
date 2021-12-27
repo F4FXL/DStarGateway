@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IRCDDBApp.h"
 #include "Utils.h"
+#include "Log.h"
 
 class IRCDDBAppUserObject
 {
@@ -180,7 +181,7 @@ void IRCDDBApp::rptrQTH(const std::string& callsign, double latitude, double lon
 
 	d->moduleQTH[cs] = cs + std::string(" ") + pos + std::string(" ") + d1 + std::string(" ") + d2;
 
-	printf("QTH: %s\n", d->moduleQTH[cs].c_str());
+	CLog::logInfo("QTH: %s\n", d->moduleQTH[cs].c_str());
 
 	std::string url = infoURL;
 
@@ -190,7 +191,7 @@ void IRCDDBApp::rptrQTH(const std::string& callsign, double latitude, double lon
 
 	if (url.size()) {
 		d->moduleURL[cs] = cs + std::string(" ") + url;
-		printf("URL: %s\n", d->moduleURL[cs].c_str());
+		CLog::logInfo("URL: %s\n", d->moduleURL[cs].c_str());
 	}
 
 	d->moduleQTHURLMutex.unlock();
@@ -209,7 +210,7 @@ void IRCDDBApp::rptrQRG(const std::string& callsign, double txFrequency, double 
 
 	d->moduleQRGMutex.lock();
 	d->moduleQRG[cs] = cs + std::string(" ") + f;
-	printf("QRG: %s\n", d->moduleQRG[cs].c_str());
+	CLog::logInfo("QRG: %s\n", d->moduleQRG[cs].c_str());
 	d->moduleQRGMutex.unlock();
 
 	d->infoTimer = 5; // send info in 5 seconds
@@ -257,7 +258,7 @@ IRCDDB_RESPONSE_TYPE IRCDDBApp::getReplyMessageType()
 	if (0 == msgType.compare("IDRT_GATEWAY"))
 		return IDRT_GATEWAY;
 
-	printf("IRCDDBApp::getMessageType: unknown msg type: %s\n", msgType.c_str());
+	CLog::logInfo("IRCDDBApp::getMessageType: unknown msg type: %s\n", msgType.c_str());
 
 	return IDRT_NONE;
 }
@@ -337,7 +338,7 @@ void IRCDDBApp::userLeave(const std::string& nick)
 
 	if (d->currentServer.size()) {
 		if (d->user.count(d->myNick) != 1) {
-			printf("IRCDDBApp::userLeave: could not find own nick\n");
+			CLog::logInfo("IRCDDBApp::userLeave: could not find own nick\n");
 			d->userMapMutex.unlock();
 			return;
 		}
@@ -368,13 +369,13 @@ void IRCDDBApp::userListReset()
 void IRCDDBApp::setCurrentNick(const std::string& nick)
 {
 	d->myNick = nick;
-	printf("IRCDDBApp::setCurrentNick %s\n", nick.c_str());
+	CLog::logInfo("IRCDDBApp::setCurrentNick %s\n", nick.c_str());
 }
 
 void IRCDDBApp::setBestServer(const std::string& ircUser)
 {
 	d->bestServer = ircUser;
-	printf("IRCDDBApp::setBestServer %s\n", ircUser.c_str());
+	CLog::logInfo("IRCDDBApp::setBestServer %s\n", ircUser.c_str());
 }
 
 void IRCDDBApp::setTopic(const std::string& topic)
@@ -667,7 +668,7 @@ void IRCDDBApp::doNotFound(std::string& msg, std::string& retval)
 		tableID = std::stoi(tk);
 
 		if (tableID<0 || tableID>=numberOfTables) {
-			printf("invalid table ID %d\n", tableID);
+			CLog::logInfo("invalid table ID %d\n", tableID);
 			return;
 		}
 
@@ -698,7 +699,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 	if (std::regex_match(tk, d->tablePattern)) {
 		tableID = std::stoi(tk);
 		if ((tableID < 0) || (tableID >= numberOfTables)) {
-			printf("invalid table ID %d\n", tableID);
+			CLog::logInfo("invalid table ID %d\n", tableID);
 			return;
 		}
 
@@ -899,7 +900,7 @@ void IRCDDBApp::Entry()
 				break;
 
 			case 2:	// choose server
-				printf("IRCDDBApp: state=2 choose new 's-'-user\n");
+				CLog::logInfo("IRCDDBApp: state=2 choose new 's-'-user\n");
 				if (NULL == getSendQ())
 					d->state = 10;
 				else {
@@ -925,7 +926,7 @@ void IRCDDBApp::Entry()
 					if (sendlistTableID < 0)
 						d->state = 6; // end of sendlist
 					else {
-						printf("IRCDDBApp: state=3 tableID=%d\n", sendlistTableID);
+						CLog::logInfo("IRCDDBApp: state=3 tableID=%d\n", sendlistTableID);
 						d->state = 4; // send "SENDLIST"
 						d->timer = 900; // 15 minutes max for update
 					}
@@ -964,7 +965,7 @@ void IRCDDBApp::Entry()
 				if (NULL == getSendQ())
 					d->state = 10; // disconnect DB
 				else {
-					printf( "IRCDDBApp: state=6 initialization completed\n");
+					CLog::logInfo( "IRCDDBApp: state=6 initialization completed\n");
 					d->infoTimer = 2;
 					d->initReady = true;
 					d->state = 7;

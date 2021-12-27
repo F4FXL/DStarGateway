@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IRCProtocol.h"
 #include "Utils.h"
+#include "IRCDDBMultiClient.h"
+#include "Log.h"
 
 #define CIRCDDB_VERSION	  "2.0.0"
 
@@ -74,7 +76,7 @@ void IRCProtocol::setNetworkReady(bool b)
 {
 	if (b == true) {
 		if (0 != m_state)
-			printf("IRCProtocol::setNetworkReady: unexpected state\n");
+			CLog::logInfo("IRCProtocol::setNetworkReady: unexpected state\n");
 		m_state = 1;
 		chooseNewNick();
 	} else

@@ -31,6 +31,7 @@
 #include "IRCDDBMultiClient.h"
 #include "IRCDDBClient.h"
 #include "Utils.h"
+#include "Version.h"
 #include "GitVersion.h"
 #include "RepeaterProtocolHandlerFactory.h"
 #include "Log.h"
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
 	std::string cfgFile(argv[1]);
 
 	CDStarGatewayApp gateway(cfgFile);
-
+	
 	if (!gateway.init()) {
 		return 1;
 	}
@@ -81,7 +82,7 @@ void CDStarGatewayApp::run()
 {
 	m_thread->Run();
 	m_thread->Wait();
-	printf("exiting\n");
+	CLog::logInfo("exiting\n");
 }
 
 bool CDStarGatewayApp::createThread()
@@ -92,12 +93,13 @@ bool CDStarGatewayApp::createThread()
 
 	CDStarGatewayConfig config(m_configFile);
 	if(!config.load()) {
-		wxLogError("FATAL: Invalid configuration");
+		CLog::logError("FATAL: Invalid configuration");
 		return false;
 	}
 
 	Tpaths paths;
 	config.getPaths(paths);
+	CLog::initialize(paths.logDir + "dstargateway.log", LS_INFO, true);
 	m_thread = new CDStarGatewayThread(paths.logDir, paths.dataDir, "");
 
 	// Setup the gateway
@@ -126,8 +128,7 @@ bool CDStarGatewayApp::createThread()
 	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
-		std::cout << "ircDDB " << i + 1 << " set to " << ircDDBConfig.hostname << " username set to " << ircDDBConfig.username << " QuadNet " << ircDDBConfig.isQuadNet << std::endl;
-
+		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
 		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
@@ -135,7 +136,7 @@ bool CDStarGatewayApp::createThread()
 	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
 	bool res = multiClient->open();
 	if (!res) {
-		wxLogMessage("Cannot initialise the ircDDB protocol handler\n");
+		CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
 		return false;
 	}
 
@@ -143,7 +144,7 @@ bool CDStarGatewayApp::createThread()
 
 	// Setup the repeaters
 	if(config.getRepeaterCount() == 0U) {
-		wxLogMessage("No repeater configured\n");
+		CLog::logInfo("No repeater configured\n");
 		return false;
 	}
 	CRepeaterHandlerFactory repeaterProtocolFactory;
@@ -189,7 +190,7 @@ bool CDStarGatewayApp::createThread()
 	// 		repeater.resize(7, ' ');
 	// 		repeater.push_back(band[0]);
 	// 		m_thread->addGroup(callsign, logoff, repeater, info, permanent, usertimeout, callsignswitch, txmsgswitch, reflector);
-	// 		printf("Group %d: %s/%s using %s, \"%s\", perm: %s, timeout: %u mins, c/s switch: %s, msg switch: %s, Linked: %s\n",
+	// 		CLog::logInfo("Group %d: %s/%s using %s, \"%s\", perm: %s, timeout: %u mins, c/s switch: %s, msg switch: %s, Linked: %s\n",
 	// 			i, callsign.c_str(), logoff.c_str(), repeater.c_str(), info.c_str(), permanent.c_str(), usertimeout,
 	// 			SCS_GROUP_CALLSIGN==callsignswitch ? "Group" : "User", txmsgswitch ? "true" : "false", reflector.c_str());
 	// 	}
@@ -199,7 +200,7 @@ bool CDStarGatewayApp::createThread()
 	// std::string remotePassword;
 	// unsigned int remotePort;
 	// config.getRemote(remoteEnabled, remotePassword, remotePort);
-	// printf("Remote enabled set to %d, port set to %u\n", int(remoteEnabled), remotePort);
+	// CLog::logInfo("Remote enabled set to %d, port set to %u\n", int(remoteEnabled), remotePort);
 	// m_thread->setRemote(remoteEnabled, remotePassword, remotePort);
 
 	// m_thread->setAddress(address);

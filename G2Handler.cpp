@@ -78,7 +78,7 @@ void CG2Handler::process(CHeaderData& header)
 	unsigned char flag1 = header.getFlag1();
 	if (flag1 == 0x01) {
 		// Don't check the incoming stream
-		// wxLogMessage(wxT("G2 busy message received"));
+		// CLog::logInfo(wxT("G2 busy message received"));
 		return;
 	}
 
@@ -114,7 +114,7 @@ void CG2Handler::process(CHeaderData& header)
 	// Find the destination repeater
 	CRepeaterHandler* repeater = CRepeaterHandler::findDVRepeater(header.getRptCall2());
 	if (repeater == NULL) {
-		wxLogMessage("Incoming G2 header from %s to unknown repeater - %s", header.getMyCall1().c_str(), header.getRptCall2().c_str());
+		CLog::logInfo("Incoming G2 header from %s to unknown repeater - %s", header.getMyCall1().c_str(), header.getRptCall2().c_str());
 		return;		// Not found, ignore
 	}
 
@@ -133,7 +133,7 @@ void CG2Handler::process(CHeaderData& header)
 		}
 	}
 
-	wxLogMessage("No space to add new G2 route, ignoring");
+	CLog::logInfo("No space to add new G2 route, ignoring");
 
 	delete route;
 }
@@ -200,7 +200,7 @@ bool CG2Handler::clockInt(unsigned int ms)
 	m_inactivityTimer.clock(ms);
 
 	if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {
-		wxLogMessage("Inactivity timeout for a G2 route has expired");
+		CLog::logInfo("Inactivity timeout for a G2 route has expired");
 		return true;
 	}
 

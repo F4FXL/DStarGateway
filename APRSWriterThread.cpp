@@ -25,6 +25,7 @@
 #include "DStarDefines.h"
 #include "Utils.h"
 #include "Defs.h"
+#include "Log.h"
 
 // #define	DUMP_TX
 
@@ -100,11 +101,11 @@ bool CAPRSWriterThread::start()
 
 void* CAPRSWriterThread::Entry()
 {
-	printf("Starting the APRS Writer thread");
+	CLog::logInfo("Starting the APRS Writer thread");
 
 	m_connected = connect();
 	if (!m_connected) {
-		printf("Connect attempt to the APRS server has failed");
+		CLog::logInfo("Connect attempt to the APRS server has failed");
 		startReconnectionTimer();
 	}
 
@@ -116,7 +117,7 @@ void* CAPRSWriterThread::Entry()
 
 					m_connected = connect();
 					if (!m_connected) {
-						printf("Reconnect attempt to the APRS server has failed");
+						CLog::logInfo("Reconnect attempt to the APRS server has failed");
 						startReconnectionTimer();
 					}
 				}
@@ -129,7 +130,7 @@ void* CAPRSWriterThread::Entry()
 					char* p = m_queue.getData();
 
 					std::string text(p);
-					printf("APRS ==> %s", text.c_str());
+					CLog::logInfo("APRS ==> %s", text.c_str());
 
 					::strcat(p, "\r\n");
 
@@ -137,7 +138,7 @@ void* CAPRSWriterThread::Entry()
 					if (!ret) {
 						m_connected = false;
 						m_socket.close();
-						printf("Connection to the APRS thread has failed");
+						CLog::logInfo("Connection to the APRS thread has failed");
 						startReconnectionTimer();
 					}
 
@@ -148,19 +149,19 @@ void* CAPRSWriterThread::Entry()
 					int length = m_socket.readLine(line, APRS_TIMEOUT);
 
 					/*if (length == 0)
-						wxLogWarning(wxT("No response from the APRS server after %u seconds"), APRS_TIMEOUT);*/
+						CLog::logWarning((wxT("No response from the APRS server after %u seconds"), APRS_TIMEOUT);*/
 
 					if (length < 0) {
 						m_connected = false;
 						m_socket.close();
-						printf("Error when reading from the APRS server");
+						CLog::logInfo("Error when reading from the APRS server");
 						startReconnectionTimer();
 					}
 
 					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
 					    && m_APRSReadCallback != NULL)//do we have someone wanting an APRS Frame?
 					{	
-						//printf("Received APRS Frame : ") + line);
+						//CLog::logInfo("Received APRS Frame : ") + line);
 						m_APRSReadCallback(std::string(line));
 					}
 				}
@@ -178,13 +179,13 @@ void* CAPRSWriterThread::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		printf("Exception raised in the APRS Writer thread - \"%s\"", message.c_str());
+		CLog::logInfo("Exception raised in the APRS Writer thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		printf("Unknown exception raised in the APRS Writer thread");
+		CLog::logInfo("Unknown exception raised in the APRS Writer thread");
 	}
 
-	printf("Stopping the APRS Writer thread");
+	CLog::logInfo("Stopping the APRS Writer thread");
 
 	return NULL;
 }
@@ -237,11 +238,11 @@ bool CAPRSWriterThread::connect()
 	std::string serverResponse("");
 	length = m_socket.readLine(serverResponse, APRS_TIMEOUT);
 	if (length == 0) {
-		printf("No reply from the APRS server after %u seconds", APRS_TIMEOUT);
+		CLog::logInfo("No reply from the APRS server after %u seconds", APRS_TIMEOUT);
 		m_socket.close();
 		return false;
 	}
-	printf("Received login banner : %s", serverResponse.c_str());
+	CLog::logInfo("Received login banner : %s", serverResponse.c_str());
 
 	std::string filter(m_filter);
 	if (filter.length() > 0) filter = " filter " + filter;
@@ -250,7 +251,7 @@ bool CAPRSWriterThread::connect()
 					<< " pass " << m_password
 					<< " vers " << (m_clientName.length() ? m_clientName : "ircDDBGateway")
 					<< filter;
-	//printf("Connect String : ") + connectString);
+	//CLog::logInfo("Connect String : ") + connectString);
 	ret = m_socket.writeLine(connectString.str());
 	if (!ret) {
 		m_socket.close();
@@ -259,19 +260,19 @@ bool CAPRSWriterThread::connect()
 	
 	length = m_socket.readLine(serverResponse, APRS_TIMEOUT);
 	if (length == 0) {
-		printf("No reply from the APRS server after %u seconds", APRS_TIMEOUT);
+		CLog::logInfo("No reply from the APRS server after %u seconds", APRS_TIMEOUT);
 		m_socket.close();
 		return false;
 	}
 	if (length < 0) {
-		printf("Error when reading from the APRS server");
+		CLog::logInfo("Error when reading from the APRS server");
 		m_socket.close();
 		return false;
 	}
 
-	printf("Response from APRS server: %s", serverResponse.c_str());
+	CLog::logInfo("Response from APRS server: %s", serverResponse.c_str());
 
-	printf("Connected to the APRS server");
+	CLog::logInfo("Connected to the APRS server");
 
 	return true;
 }

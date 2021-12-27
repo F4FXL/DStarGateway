@@ -26,6 +26,7 @@
 #include "APRSWriter.h"
 #include "DStarDefines.h"
 #include "Defs.h"
+#include "Log.h"
 
 CAPRSEntry::CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl) :
 m_callsign(callsign),
@@ -204,7 +205,7 @@ void CAPRSWriter::writeHeader(const std::string& callsign, const CHeaderData& he
 {
 	CAPRSEntry* entry = m_array[callsign];
 	if (entry == NULL) {
-		wxLogError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
+		CLog::logError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
 		return;
 	}
 
@@ -222,7 +223,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 
 	CAPRSEntry* entry = m_array[callsign];
 	if (entry == NULL) {
-		wxLogError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
+		CLog::logError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
 		return;
 	}
 

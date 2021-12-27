@@ -39,7 +39,7 @@ m_locks()
 		return;
 
 	if (logging)
-		wxLogMessage("Reading %s", fileName.c_str());
+		CLog::logInfo("Reading %s", fileName.c_str());
 
 	while(!file.eof()) {
 		std::string line;

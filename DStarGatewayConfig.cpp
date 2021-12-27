@@ -25,6 +25,7 @@
 #include "Utils.h"
 #include "DStarGatewayConfig.h"
 #include "DStarDefines.h"
+#include "Log.h"
 
 CDStarGatewayConfig::CDStarGatewayConfig(const std::string &pathname)
 : m_fileName(pathname)
@@ -34,6 +35,7 @@ CDStarGatewayConfig::CDStarGatewayConfig(const std::string &pathname)
 
 bool CDStarGatewayConfig::load()
 {
+	CLog::logInfo("Loading configuration from %s", m_fileName.c_str());
 	Config cfg;
 	if(open(cfg)
 	&& loadGateway(cfg)
@@ -48,6 +50,8 @@ bool CDStarGatewayConfig::load()
 		
 		return true;
 	}
+
+	CLog::logError("Loading configuration from %s failed", m_fileName.c_str());
 
 	return false;
 }
@@ -189,12 +193,12 @@ bool CDStarGatewayConfig::loadRepeaters(const Config & cfg)
 			isOk = true;
 		}
 		else {
-			std::cout << "Repeater " << i << " has an empty callsign" << std::endl ;
+			CLog::logError("Repeater %d has an empty callsign", i);
 		}
 		
 		if (isOk && !isalpha(repeater->band[0])) {
 			isOk = false;
-			std::cout << "Repeater " << i << " band is not a letter" << std::endl;
+			CLog::logError("Repeater %s band is not a letter", i);
 		}
 
 		if (isOk && repeater->address.length() == 0) {
@@ -204,7 +208,6 @@ bool CDStarGatewayConfig::loadRepeaters(const Config & cfg)
 		if(!isOk) {
 			delete repeater;
 		} else {
-			std::cout << "REPEATER: " << repeater->callsign << "-" << repeater->band << " " << repeater->address << ":" << repeater->port << std::endl;
 			m_repeaters.push_back(repeater);
 		}
 	}
@@ -241,7 +244,6 @@ bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
 
 		ircddb->isQuadNet = ircddb->hostname.find("openquad.net") != std::string::npos;
 		this->m_ircDDB.push_back(ircddb);
-		std::cout << "IRCDDB: host=" << ircddb->hostname << " user=" << ircddb->username << " password=" << ircddb->password << std::endl;
 	}
 
 	if(this->m_ircDDB.size() == 0) {//no ircddb network specified? Default to openquad!
@@ -251,7 +253,7 @@ bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
 		ircddb->username  = m_gateway.callsign;
 		ircddb->isQuadNet = true;
 		this->m_ircDDB.push_back(ircddb);
-		std::cout << "No ircDDB networks configured, defaulting to IRCDDB: host=" << ircddb->hostname << " user=" << ircddb->username << " password=" << ircddb->password << "\n";
+		CLog::logError("No ircDDB networks configured, defaulting to IRCDDB: host=%s user=%s", ircddb->hostname.c_str(), ircddb->username.c_str());
 	}
 
 	return true;
@@ -292,8 +294,6 @@ bool CDStarGatewayConfig::loadGateway(const Config & cfg)
 	else if(lang == "norsk") m_gateway.language = TL_NORSK;
 	else if(lang == "portugues") m_gateway.language = TL_PORTUGUES;
 
-	std::cout << "GATEWAY: callsign='" << m_gateway.callsign << "' listen address='" << m_gateway.address << std::endl;
-
 	CUtils::ToUpper(m_gateway.callsign);
 	CUtils::clean(m_gateway.description1, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 	CUtils::clean(m_gateway.description2, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
@@ -305,7 +305,7 @@ bool CDStarGatewayConfig::loadGateway(const Config & cfg)
 bool CDStarGatewayConfig::open(Config & cfg)
 {
 	if (m_fileName.size() < 1) {
-		printf("Configuration filename too short!\n");
+		CLog::logError("Configuration filename too short!\n");
 		return false;
 	}
 
@@ -313,11 +313,11 @@ bool CDStarGatewayConfig::open(Config & cfg)
 		cfg.readFile(m_fileName.c_str());
 	}
 	catch(const FileIOException &fioex) {
-		printf("Can't read %s\n", m_fileName.c_str());
+		CLog::logError("Can't read %s\n", m_fileName.c_str());
 		return false;
 	}
 	catch(const ParseException &pex) {
-		printf("Parse error at %s:%d - %s\n", pex.getFile(), pex.getLine(), pex.getError());
+		CLog::logError("Parse error at %s:%d - %s\n", pex.getFile(), pex.getLine(), pex.getError());
 		return false;
 	}
 
@@ -386,7 +386,7 @@ bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, 
 	if (cfg.lookupValue(path, value)) {
 		int l = value.length();
 		if (l<min || l>max) {
-			std::cout << path << "=" << value << " has an inalid length, must be between " << min << " and " <<  max << " actual " << l << "\n";
+			CLog::logWarning("%s has an invalid length, must be between %d and %d, actual %d", path.c_str(), min, max, l);
 			return false;
 		}
 	} else
@@ -418,8 +418,7 @@ bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, 
 		for(std::string s : allowedValues) {
 			message << s << ", ";
 		}
-		message << std::endl;
-		std::cout << message.str();
+		CLog::logWarning(message.str());
 	}
 
 	return ret;

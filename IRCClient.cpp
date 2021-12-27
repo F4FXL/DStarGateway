@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "IRCClient.h"
 #include "Utils.h"
+#include "Log.h"
 
 IRCClient::IRCClient(IRCApplication *app, const std::string& update_channel, const std::string& hostName, unsigned int port, const std::string& callsign,
 										const std::string& password, const std::string& versionInfo, const std::string& localAddr)
@@ -87,7 +88,7 @@ void IRCClient::Entry()
 	int result = CUtils::getAllIPV4Addresses(m_local_addr, 0, &numAddr, &myaddr, 1);
 
 	if (result || 1!=numAddr) {
-		printf("IRCClient::Entry: local address not parseable, using 0.0.0.0\n");
+		CLog::logInfo("IRCClient::Entry: local address not parseable, using 0.0.0.0\n");
 		memset(&myaddr, 0, sizeof(struct sockaddr_in));
 	}
 
@@ -98,7 +99,7 @@ void IRCClient::Entry()
 		switch (state) {
 			case 0:
 				if (m_terminateThread) {
-					printf("IRCClient::Entry: thread terminated at state=%d\n", state);
+					CLog::logInfo("IRCClient::Entry: thread terminated at state=%d\n", state);
 					return;
 				}
 
@@ -106,7 +107,7 @@ void IRCClient::Entry()
 					timer = 30;
 
 					if (0 == CUtils::getAllIPV4Addresses(m_host_name, m_port, &numAddr, addr, MAXIPV4ADDR)) {
-						printf("IRCClient::Entry: number of DNS entries %d\n", numAddr);
+						CLog::logInfo("IRCClient::Entry: number of DNS entries %d\n", numAddr);
 						if (numAddr > 0) {
 							currentAddr = 0;
 							state = 1;
@@ -118,7 +119,7 @@ void IRCClient::Entry()
 
 			case 1:
 				if (m_terminateThread) {
-					printf("IRCClient::Entry: thread terminated at state=%d\n", state);
+					CLog::logInfo("IRCClient::Entry: thread terminated at state=%d\n", state);
 					return;
 				}
 
@@ -126,12 +127,12 @@ void IRCClient::Entry()
 					sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 					if (sock < 0) {
-						printf("IRCClient::Entry: socket\n");
+						CLog::logInfo("IRCClient::Entry: socket\n");
 						timer = 30;
 						state = 0;
 					} else {
 						if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-							printf("IRCClient::Entry: fcntl\n");
+							CLog::logInfo("IRCClient::Entry: fcntl\n");
 							close(sock);
 							timer = 30;
 							state = 0;
@@ -139,12 +140,12 @@ void IRCClient::Entry()
 							unsigned char * h = (unsigned char *) &(myaddr.sin_addr);
 
 							if (h[0] || h[1] || h[2] || h[3])
-								printf("IRCClient::Entry: bind: local address %d.%d.%d.%d\n", h[0], h[1], h[2], h[3]);
+								CLog::logInfo("IRCClient::Entry: bind: local address %d.%d.%d.%d\n", h[0], h[1], h[2], h[3]);
 
 							int res = bind(sock, (struct sockaddr *)&myaddr, sizeof (struct sockaddr_in));
 
 							if (res) {
-								printf("IRCClient::Entry: bind\n");
+								CLog::logInfo("IRCClient::Entry: bind\n");
 								close(sock);
 								state = 0;
 								timer = 30;
@@ -152,20 +153,20 @@ void IRCClient::Entry()
 							}
 
 							h = (unsigned char *) &(addr[currentAddr].sin_addr);
-							printf("IRCClient::Entry: trying to connect to %d.%d.%d.%d\n", h[0], h[1], h[2], h[3]);
+							CLog::logInfo("IRCClient::Entry: trying to connect to %d.%d.%d.%d\n", h[0], h[1], h[2], h[3]);
 
 							res = connect(sock, (struct sockaddr *)(addr + currentAddr), sizeof (struct sockaddr_in));
 
 							if (res == 0) {
-								printf("IRCClient::Entry: connected\n");
+								CLog::logInfo("IRCClient::Entry: connected\n");
 								state = 4;
 							} else { 
 								if (errno == EINPROGRESS) {
-									printf("IRCClient::Entry: connect in progress\n");
+									CLog::logInfo("IRCClient::Entry: connect in progress\n");
 									state = 3;
 									timer = 10;  // 5 second timeout
 								} else {
-									printf("IRCClient::Entry: connect\n");
+									CLog::logInfo("IRCClient::Entry: connect\n");
 									close(sock);
 									currentAddr++;
 									if (currentAddr >= numAddr) {
@@ -194,7 +195,7 @@ void IRCClient::Entry()
 
 					int res = select(sock+1, NULL, &myset, NULL, &tv); 
 					if (res < 0) {
-						printf("IRCClient::Entry: select\n");
+						CLog::logInfo("IRCClient::Entry: select\n");
 						close(sock);
 						state = 0;
 						timer = 30;
@@ -207,13 +208,13 @@ void IRCClient::Entry()
 						val_len = sizeof value;
 
 						if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (char *) &value, &val_len) < 0) {
-							printf("IRCClient::Entry: getsockopt\n");
+							CLog::logInfo("IRCClient::Entry: getsockopt\n");
 							close(sock);
 							state = 0;
 							timer = 30;
 						} else {
 							if (value) {
-								printf("IRCClient::Entry: SO_ERROR=%d\n", value);
+								CLog::logInfo("IRCClient::Entry: SO_ERROR=%d\n", value);
 								close(sock);
 								currentAddr ++;
 								if (currentAddr >= numAddr) {
@@ -224,13 +225,13 @@ void IRCClient::Entry()
 									timer = 2;
 								}
 							} else {
-								printf("IRCClient::Entry: connected2\n");
+								CLog::logInfo("IRCClient::Entry: connected2\n");
 								state = 4;
 							}
 						}
 					}
 					else if (timer == 0) {  // select timeout and timer timeout
-						printf("IRCClient::Entry: connect timeout\n");
+						CLog::logInfo("IRCClient::Entry: connect timeout\n");
 						close(sock);
 						currentAddr ++;
 						if (currentAddr >= numAddr) {
@@ -283,12 +284,12 @@ void IRCClient::Entry()
 							int r = send(sock, buf, len, 0);
 
 							if (r != len) {
-								printf("IRCClient::Entry: short write %d < %d\n", r, len);
+								CLog::logInfo("IRCClient::Entry: short write %d < %d\n", r, len);
 								timer = 0;
 								state = 6;
 							}
 						} else {
-							printf("IRCClient::Entry: no NL at end, len=%d\n", len);
+							CLog::logInfo("IRCClient::Entry: no NL at end, len=%d\n", len);
 							timer = 0;
 							state = 6;
 						}
@@ -316,7 +317,7 @@ void IRCClient::Entry()
 					close(sock);
 
 					if (m_terminateThread) { // request to end the thread
-						printf("IRCClient::Entry: thread terminated at state=%d\n", state);
+						CLog::logInfo("IRCClient::Entry: thread terminated at state=%d\n", state);
 						return;
 					}
 					timer = 30;

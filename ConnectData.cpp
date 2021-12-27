@@ -27,6 +27,7 @@
 #include "DStarDefines.h"
 #include "Version.h"
 #include "Utils.h"
+#include "Log.h"
 
 const char *HTML = "<table border=\"0\" width=\"95%%\"><tr><td width=\"4%%\"><img border=\"0\" src=%s></td><td width=\"96%%\"><font size=\"2\"><b>%s</b> DStarGateway %s</font></td></tr></table>";
 
@@ -256,7 +257,7 @@ bool CConnectData::setDPlusData(const unsigned char* data, unsigned int length, 
 
 		case 8U: {
 				std::string reply((const char*)(data + 4U), 4U);
-				printf("D-Plus reply is %.4s\n", reply.c_str());
+				CLog::logInfo("D-Plus reply is %.4s\n", reply.c_str());
 
 				if (::memcmp(data + 4U, "OKRW", 4U) == 0)
 					m_type = CT_ACK;

@@ -240,7 +240,7 @@ void CDCSHandler::process(CPollData& poll)
 		}
 	}
 
-	wxLogMessage("Unknown incoming DCS poll from %s", reflector.c_str());
+	CLog::logInfo("Unknown incoming DCS poll from %s", reflector.c_str());
 }
 
 void CDCSHandler::process(CConnectData& connect)
@@ -285,14 +285,14 @@ void CDCSHandler::process(CConnectData& connect)
 	// Check the validity of our repeater callsign
 	IReflectorCallback* handler = CRepeaterHandler::findDVRepeater(reflectorCallsign);
 	if (handler == NULL) {
-		wxLogMessage("DCS connect to unknown reflector %s from %s", reflectorCallsign.c_str(), repeaterCallsign.c_str());
+		CLog::logInfo("DCS connect to unknown reflector %s from %s", reflectorCallsign.c_str(), repeaterCallsign.c_str());
 		CConnectData reply(repeaterCallsign, reflectorCallsign, CT_NAK, connect.getYourAddress(), connect.getYourPort());
 		m_incoming->writeConnect(reply);
 		return;
 	}
 
 	// A new connect packet indicates the need for a new entry
-	wxLogMessage("New incoming DCS link to %s from %s", reflectorCallsign.c_str(), repeaterCallsign.c_str());
+	CLog::logInfo("New incoming DCS link to %s from %s", reflectorCallsign.c_str(), repeaterCallsign.c_str());
 
 	CDCSHandler* dcs = new CDCSHandler(handler, repeaterCallsign, reflectorCallsign, m_incoming, yourAddress, yourPort, DIR_INCOMING);
 
@@ -312,7 +312,7 @@ void CDCSHandler::process(CConnectData& connect)
 		CConnectData reply(repeaterCallsign, reflectorCallsign, CT_NAK, yourAddress, yourPort);
 		m_incoming->writeConnect(reply);
 
-		wxLogError("No space to add new DCS link, ignoring");
+		CLog::logError("No space to add new DCS link, ignoring");
 		delete dcs;
 	}
 }
@@ -346,7 +346,7 @@ void CDCSHandler::link(IReflectorCallback* handler, const std::string& repeater,
 		CConnectData reply(m_gatewayType, repeater, gateway, CT_LINK1, address, DCS_PORT);
 		protoHandler->writeConnect(reply);
 	} else {
-		wxLogError("No space to add new DCS link, ignoring");
+		CLog::logError("No space to add new DCS link, ignoring");
 		delete dcs;
 	}
 }
@@ -361,7 +361,7 @@ void CDCSHandler::unlink(IReflectorCallback* handler, const std::string& callsig
 
 			if (exclude) {
 				if (reflector->m_direction == DIR_OUTGOING && reflector->m_destination == handler && reflector->m_reflector != callsign) {
-					wxLogMessage("Removing outgoing DCS link %s, %s", reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
+					CLog::logInfo("Removing outgoing DCS link %s, %s", reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
 					if (reflector->m_linkState == DCS_LINKING || reflector->m_linkState == DCS_LINKED) {
 						CConnectData connect(reflector->m_repeater, reflector->m_reflector, CT_UNLINK, reflector->m_yourAddress, reflector->m_yourPort);
@@ -376,7 +376,7 @@ void CDCSHandler::unlink(IReflectorCallback* handler, const std::string& callsig
 				}
 			} else {
 				if (reflector->m_destination == handler && reflector->m_reflector == callsign) {
-					wxLogMessage("Removing DCS link %s, %s", reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
+					CLog::logInfo("Removing DCS link %s, %s", reflector->m_repeater.c_str(), reflector->m_reflector.c_str());
 
 					if (reflector->m_linkState == DCS_LINKING || reflector->m_linkState == DCS_LINKED) {
 						CConnectData connect(reflector->m_repeater, reflector->m_reflector, CT_UNLINK, reflector->m_yourAddress, reflector->m_yourPort);
@@ -420,7 +420,7 @@ void CDCSHandler::unlink()
 
 		if (reflector != NULL) {
 			if (!reflector->m_repeater.empty()) {
-				wxLogMessage("Unlinking from DCS reflector %s", reflector->m_reflector.c_str());
+				CLog::logInfo("Unlinking from DCS reflector %s", reflector->m_reflector.c_str());
 
 				CConnectData connect(reflector->m_repeater, reflector->m_reflector, CT_UNLINK, reflector->m_yourAddress, reflector->m_yourPort);
 				reflector->m_handler->writeConnect(connect);
@@ -460,10 +460,10 @@ void CDCSHandler::gatewayUpdate(const std::string& reflector, const std::string&
 			if (reflector->m_reflector.substr(0, LONG_CALLSIGN_LENGTH - 1U) == gateway) {
 				if (!address.empty()) {
 					// A new address, change the value
-					wxLogMessage("Changing IP address of DCS gateway or reflector %s to %s", reflector->m_reflector.c_str(), address.c_str());
+					CLog::logInfo("Changing IP address of DCS gateway or reflector %s to %s", reflector->m_reflector.c_str(), address.c_str());
 					reflector->m_yourAddress.s_addr = ::inet_addr(address.c_str());
 				} else {
-					wxLogMessage("IP address for DCS gateway or reflector %s has been removed", reflector->m_reflector.c_str());
+					CLog::logInfo("IP address for DCS gateway or reflector %s has been removed", reflector->m_reflector.c_str());
 
 					// No address, this probably shouldn't happen....
 					if (reflector->m_direction == DIR_OUTGOING && reflector->m_destination != NULL)
@@ -515,7 +515,7 @@ void CDCSHandler::processInt(CAMBEData& data)
 	if (m_whiteList != NULL) {
 		bool res = m_whiteList->isInList(my);
 		if (!res) {
-			wxLogMessage("%s rejected from DCS as not found in the white list", my.c_str());
+			CLog::logInfo("%s rejected from DCS as not found in the white list", my.c_str());
 			m_dcsId = 0x00U;
 			return;
 		}
@@ -524,7 +524,7 @@ void CDCSHandler::processInt(CAMBEData& data)
 	if (m_blackList != NULL) {
 		bool res = m_blackList->isInList(my);
 		if (res) {
-			wxLogMessage("%s rejected from DCS as found in the black list", my.c_str());
+			CLog::logInfo("%s rejected from DCS as found in the black list", my.c_str());
 			m_dcsId = 0x00U;
 			return;
 		}
@@ -644,7 +644,7 @@ bool CDCSHandler::processInt(CConnectData& connect, CD_TYPE type)
 				return false;
 
 			if (m_linkState == DCS_LINKING) {
-				wxLogMessage("DCS ACK message received from %s", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS ACK message received from %s", GET_DISP_REFLECTOR(this).c_str());
 
 				if (m_direction == DIR_OUTGOING && m_destination != NULL)
 					m_destination->linkUp(DP_DCS, GET_DISP_REFLECTOR(this));
@@ -661,7 +661,7 @@ bool CDCSHandler::processInt(CConnectData& connect, CD_TYPE type)
 				return false;
 
 			if (m_linkState == DCS_LINKING) {
-				wxLogMessage("DCS NAK message received from %s", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS NAK message received from %s", GET_DISP_REFLECTOR(this).c_str());
 
 				if (m_direction == DIR_OUTGOING && m_destination != NULL)
 					m_destination->linkRefused(DP_DCS, GET_DISP_REFLECTOR(this));
@@ -670,7 +670,7 @@ bool CDCSHandler::processInt(CConnectData& connect, CD_TYPE type)
 			}
 
 			if (m_linkState == DCS_UNLINKING) {
-				wxLogMessage("DCS NAK message received from %s", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS NAK message received from %s", GET_DISP_REFLECTOR(this).c_str());
 
 				if (m_direction == DIR_OUTGOING && m_destination != NULL)
 					m_destination->linkFailed(DP_DCS, m_reflector, false);
@@ -685,7 +685,7 @@ bool CDCSHandler::processInt(CConnectData& connect, CD_TYPE type)
 				return false;
 
 			if (m_linkState == DCS_LINKED) {
-				wxLogMessage("DCS disconnect message received from %s", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS disconnect message received from %s", GET_DISP_REFLECTOR(this).c_str());
 
 				if (m_direction == DIR_OUTGOING && m_destination != NULL)
 					m_destination->linkFailed(DP_DCS, GET_DISP_REFLECTOR(this), false);
@@ -716,13 +716,13 @@ bool CDCSHandler::clockInt(unsigned int ms)
 
 		switch (m_linkState) {
 			case DCS_LINKING:
-				wxLogMessage("DCS link to %s has failed to connect", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS link to %s has failed to connect", GET_DISP_REFLECTOR(this).c_str());
 				break;
 			case DCS_LINKED:
-				wxLogMessage("DCS link to %s has failed (poll inactivity)", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS link to %s has failed (poll inactivity)", GET_DISP_REFLECTOR(this).c_str());
 				break;
 			case DCS_UNLINKING:
-				wxLogMessage("DCS link to %s has failed to disconnect cleanly", GET_DISP_REFLECTOR(this).c_str());
+				CLog::logInfo("DCS link to %s has failed to disconnect cleanly", GET_DISP_REFLECTOR(this).c_str());
 				break;
 			default:
 				break;

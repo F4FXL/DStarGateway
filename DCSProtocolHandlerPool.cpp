@@ -22,6 +22,7 @@
 
 #include "DCSProtocolHandlerPool.h"
 #include "Utils.h"
+#include "Log.h"
 
 CDCSProtocolHandlerPool::CDCSProtocolHandlerPool(const unsigned int port, const std::string &addr) :
 m_basePort(port),
@@ -29,7 +30,7 @@ m_address(addr)
 {
 	assert(port > 0U);
 	m_index = m_pool.end();
-	printf("DCS UDP port base = %u\n", port);
+	CLog::logInfo("DCS UDP port base = %u\n", port);
 }
 
 CDCSProtocolHandlerPool::~CDCSProtocolHandlerPool()
@@ -59,14 +60,14 @@ CDCSProtocolHandler *CDCSProtocolHandlerPool::getHandler(unsigned int port)
 	if (proto) {
 		if (proto->open()) {
 			m_pool[port] = proto;
-			printf("New CDCSProtocolHandler now on port %u.\n", port);
+			CLog::logInfo("New CDCSProtocolHandler now on port %u.\n", port);
 		} else {
 			delete proto;
 			proto = NULL;
-			printf("ERROR: Can't open new DCS UDP port %u!\n", port);
+			CLog::logInfo("ERROR: Can't open new DCS UDP port %u!\n", port);
 		}
 	} else
-		printf("ERROR: Can't allocate new CDCSProtocolHandler at port %u\n", port);
+		CLog::logInfo("ERROR: Can't allocate new CDCSProtocolHandler at port %u\n", port);
 	return proto;
 }
 
@@ -77,13 +78,13 @@ void CDCSProtocolHandlerPool::release(CDCSProtocolHandler *handler)
 		if (it->second == handler) {
 			it->second->close();
 			delete it->second;
-			printf("Releasing CDCSProtocolHandler on port %u.\n", it->first);
+			CLog::logInfo("Releasing CDCSProtocolHandler on port %u.\n", it->first);
 			m_pool.erase(it);
 			return;
 		}
 	}
 	// we should never get here!
-	printf("ERROR: could not find CDCSProtocolHander (port=%u) to release!\n", handler->getPort());
+	CLog::logInfo("ERROR: could not find CDCSProtocolHander (port=%u) to release!\n", handler->getPort());
 }
 
 DCS_TYPE CDCSProtocolHandlerPool::read()

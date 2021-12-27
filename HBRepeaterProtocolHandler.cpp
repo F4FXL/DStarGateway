@@ -201,7 +201,7 @@ CHeaderData* CHBRepeaterProtocolHandler::readHeader()
 
 	bool res = header->setHBRepeaterData(m_buffer, m_length, true, m_address, m_port);
 	if (!res) {
-		wxLogError("Invalid checksum from the repeater");
+		CLog::logError("Invalid checksum from the repeater");
 		delete header;
 		return NULL;
 	}
@@ -218,7 +218,7 @@ CAMBEData* CHBRepeaterProtocolHandler::readAMBE()
 
 	bool res = data->setHBRepeaterData(m_buffer, m_length, m_address, m_port);
 	if (!res) {
-		wxLogError("Invalid AMBE data from the repeater");
+		CLog::logError("Invalid AMBE data from the repeater");
 		delete data;
 		return NULL;
 	}
@@ -235,7 +235,7 @@ CHeaderData* CHBRepeaterProtocolHandler::readBusyHeader()
 
 	bool res = header->setHBRepeaterData(m_buffer, m_length, true, m_address, m_port);
 	if (!res) {
-		wxLogError("Invalid checksum from the repeater");
+		CLog::logError("Invalid checksum from the repeater");
 		delete header;
 		return NULL;
 	}
@@ -252,7 +252,7 @@ CAMBEData* CHBRepeaterProtocolHandler::readBusyAMBE()
 
 	bool res = data->setHBRepeaterData(m_buffer, m_length, m_address, m_port);
 	if (!res) {
-		wxLogError("Invalid AMBE data from the repeater");
+		CLog::logError("Invalid AMBE data from the repeater");
 		delete data;
 		return NULL;
 	}
@@ -274,7 +274,7 @@ CDDData* CHBRepeaterProtocolHandler::readDD()
 
 	bool res = data->setHBRepeaterData(m_buffer, m_length, m_address, m_port);
 	if (!res) {
-		wxLogError("Invalid DD data from the repeater");
+		CLog::logError("Invalid DD data from the repeater");
 		delete data;
 		return NULL;
 	}

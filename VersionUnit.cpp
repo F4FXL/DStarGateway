@@ -28,6 +28,7 @@
 #include "HeaderData.h"
 #include "Version.h"
 #include "Utils.h"
+#include "Log.h"
 
 const unsigned int NUM_FRAMES = 20U;
 
@@ -47,7 +48,7 @@ m_out(0U)
 	char vstr[32];
 	snprintf(vstr, 32, "ircDDB GW - %s", VERSION.substr(0, 8).c_str());
 
-	printf("Version text set to \"%s\"\n", vstr);
+	CLog::logInfo("Version text set to \"%s\"\n", vstr);
 
 	CSlowDataEncoder encoder;
 	encoder.setTextData(std::string(vstr));

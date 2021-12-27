@@ -25,7 +25,7 @@
 #include "TCPReaderWriterClient.h"
 #include "UDPReaderWriter.h"
 #include "Utils.h"
-
+#include "Log.h"
 
 CTCPReaderWriterClient::CTCPReaderWriterClient(const std::string& address, unsigned int port, const std::string& localAddress) :
 m_address(address),
@@ -77,7 +77,7 @@ bool CTCPReaderWriterClient::open()
 
 	m_fd = ::socket(PF_INET, SOCK_STREAM, 0);
 	if (m_fd < 0) {
-		printf("Cannot create the TCP client socket, err=%d\n", errno);
+		CLog::logInfo("Cannot create the TCP client socket, err=%d\n", errno);
 		return false;
 	}
 
@@ -88,13 +88,13 @@ bool CTCPReaderWriterClient::open()
 		addr.sin_port   = 0U;
 		addr.sin_addr.s_addr = ::inet_addr(m_localAddress.c_str());
 		if (addr.sin_addr.s_addr == INADDR_NONE) {
-			printf("The address is invalid - %s\n", m_localAddress.c_str());
+			CLog::logInfo("The address is invalid - %s\n", m_localAddress.c_str());
 			close();
 			return false;
 		}
 
 		if (::bind(m_fd, (sockaddr*)&addr, sizeof(sockaddr_in)) == -1) {
-		printf("Cannot bind the TCP client address, err=%d\n", errno);
+		CLog::logInfo("Cannot bind the TCP client address, err=%d\n", errno);
 			close();
 			return false;
 		}
@@ -112,14 +112,14 @@ bool CTCPReaderWriterClient::open()
 	}
 
 	if (::connect(m_fd, (sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1) {
-		printf("Cannot connect the TCP client socket, err=%d\n", errno);
+		CLog::logInfo("Cannot connect the TCP client socket, err=%d\n", errno);
 		close();
 		return false;
 	}
 
 	int noDelay = 1;
 	if (::setsockopt(m_fd, IPPROTO_TCP, TCP_NODELAY, (char *)&noDelay, sizeof(noDelay)) == -1) {
-		printf("Cannot set the TCP client socket option, err=%d\n", errno);
+		CLog::logInfo("Cannot set the TCP client socket option, err=%d\n", errno);
 		close();
 		return false;
 	}
@@ -145,7 +145,7 @@ int CTCPReaderWriterClient::read(unsigned char* buffer, unsigned int length, uns
 
 	int ret = ::select(m_fd + 1, &readFds, NULL, NULL, &tv);
 	if (ret < 0) {
-		printf("Error returned from TCP client select, err=%d\n", errno);
+		CLog::logInfo("Error returned from TCP client select, err=%d\n", errno);
 		return -1;
 	}
 
@@ -156,7 +156,7 @@ int CTCPReaderWriterClient::read(unsigned char* buffer, unsigned int length, uns
 	if (len == 0) {
 		return -2;
 	} else if (len < 0) {
-		printf("Error returned from recv, err=%d\n", errno);
+		CLog::logInfo("Error returned from recv, err=%d\n", errno);
 		return -1;
 	}
 
@@ -192,7 +192,7 @@ bool CTCPReaderWriterClient::write(const unsigned char* buffer, unsigned int len
 
 	ssize_t ret = ::send(m_fd, (char *)buffer, length, 0);
 	if (ret != ssize_t(length)) {
-		printf("Error returned from send, err=%d\n", errno);
+		CLog::logInfo("Error returned from send, err=%d\n", errno);
 		return false;
 	}
 

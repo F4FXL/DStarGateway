@@ -295,7 +295,7 @@ void CRepeaterHandler::add(const std::string& callsign, const std::string& band,
 		}
 	}
 
-	wxLogError("Cannot add repeater with callsign %s, no space", callsign.c_str());
+	CLog::logError("Cannot add repeater with callsign %s, no space", callsign.c_str());
 
 	delete repeater;
 }
@@ -589,12 +589,12 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 			m_band1 = band1;
 			m_band2 = band2;
 			m_band3 = band3;
-			wxLogMessage("Repeater %s registered with bands %u %u %u", m_rptCall1.c_str(), m_band1, m_band2, m_band3);
+			CLog::logInfo("Repeater %s registered with bands %u %u %u", m_rptCall1.c_str(), m_band1, m_band2, m_band3);
 		}
 	}
 
 	if (m_flag1 == 0x01) {
-		wxLogMessage("Received a busy message from repeater %s", m_rptCall1.c_str());
+		CLog::logInfo("Received a busy message from repeater %s", m_rptCall1.c_str());
 		return;
 	}
 
@@ -690,13 +690,13 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	if (m_rptCall2 != (m_gwyCallsign) && m_rptCall2 != m_gateway) {
 		CRepeaterHandler* repeater = findDVRepeater(m_rptCall2);
 		if (repeater != NULL) {
-			wxLogMessage("Cross-band routing by %s from %s to %s", m_myCall1.c_str(), m_rptCallsign.c_str(), m_rptCall2.c_str());
+			CLog::logInfo("Cross-band routing by %s from %s to %s", m_myCall1.c_str(), m_rptCallsign.c_str(), m_rptCall2.c_str());
 			m_xBandRptr = repeater;
 			m_xBandRptr->process(header, DIR_INCOMING, AS_XBAND);
 			m_g2Status = G2_XBAND;
 		} else {
 			// Keep the transmission local
-			wxLogMessage("Invalid cross-band route by %s from %s to %s", m_myCall1.c_str(), m_rptCallsign.c_str(), m_rptCall2.c_str());
+			CLog::logInfo("Invalid cross-band route by %s from %s to %s", m_myCall1.c_str(), m_rptCallsign.c_str(), m_rptCall2.c_str());
 			m_g2Status = G2_LOCAL;
 		}
 		return;
@@ -705,7 +705,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 #ifdef USE_STARNET
 	m_starNet = CStarNetHandler::findStarNet(header);
 	if (m_starNet != NULL && !m_restricted) {
-		wxLogMessage(wxT("StarNet routing by %s to %s"), m_myCall1.c_str(), m_yourCall.c_str());
+		CLog::logInfo(wxT("StarNet routing by %s to %s"), m_myCall1.c_str(), m_yourCall.c_str());
 		m_starNet->process(header);
 		m_g2Status = G2_STARNET;
 		return;
@@ -992,12 +992,12 @@ void CRepeaterHandler::processBusy(CHeaderData& header)
 			m_band1 = band1;
 			m_band2 = band2;
 			m_band3 = band3;
-			wxLogMessage("Repeater %s registered with bands %u %u %u", rptCall1.c_str(), m_band1, m_band2, m_band3);
+			CLog::logInfo("Repeater %s registered with bands %u %u %u", rptCall1.c_str(), m_band1, m_band2, m_band3);
 		}
 	}
 
 	if (header.getFlag1() == 0x01) {
-		wxLogMessage("Received a busy message from repeater %s", rptCall1.c_str());
+		CLog::logInfo("Received a busy message from repeater %s", rptCall1.c_str());
 		return;
 	}
 
@@ -1139,7 +1139,7 @@ void CRepeaterHandler::processRepeater(CDDData& data)
 
 	if (m_ddCallsign.empty()) {
 		m_ddCallsign = data.getYourCall();
-		wxLogMessage("Added DD callsign %s", m_ddCallsign.c_str());
+		CLog::logInfo("Added DD callsign %s", m_ddCallsign.c_str());
 	}
 
 	CDDHandler::process(data);
@@ -1345,7 +1345,7 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
 						m_linkStatus = LS_LINKING_DPLUS;
 					} else {
-						wxLogMessage("Require D-Plus for linking to %s, but D-Plus is disabled", repeater.c_str());
+						CLog::logInfo("Require D-Plus for linking to %s, but D-Plus is disabled", repeater.c_str());
 						m_linkStatus = LS_NONE;
 						m_linkRepeater.clear();
 						m_linkGateway.clear();
@@ -1361,7 +1361,7 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 						CDCSHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
 						m_linkStatus = LS_LINKING_DCS;
 					} else {
-						wxLogMessage("Require DCS for linking to %s, but DCS is disabled", repeater.c_str());
+						CLog::logInfo("Require DCS for linking to %s, but DCS is disabled", repeater.c_str());
 						m_linkStatus = LS_NONE;
 						m_linkRepeater.clear();
 						m_linkGateway.clear();
@@ -1384,7 +1384,7 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
 						m_linkStatus = LS_LINKING_DEXTRA;
 					} else {
-						wxLogMessage("Require DExtra for linking to %s, but DExtra is disabled", repeater.c_str());
+						CLog::logInfo("Require DExtra for linking to %s, but DExtra is disabled", repeater.c_str());
 						m_linkStatus = LS_NONE;
 						m_linkRepeater.clear();
 						m_linkGateway.clear();
@@ -1426,7 +1426,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 	if (m_linkReconnectTimer.isRunning() && m_linkReconnectTimer.hasExpired()) {
 		if (m_linkStatus != LS_NONE && (m_linkStartup.empty() || m_linkStartup == "        ")) {
 			// Unlink if linked to something
-			wxLogMessage("Reconnect timer has expired, unlinking %s from %s", m_rptCallsign.c_str(), m_linkRepeater.c_str());
+			CLog::logInfo("Reconnect timer has expired, unlinking %s from %s", m_rptCallsign.c_str(), m_linkRepeater.c_str());
 
 			CDExtraHandler::unlink(this);
 			CDPlusHandler::unlink(this);
@@ -1441,7 +1441,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 		} else if ((m_linkStatus == LS_NONE && !m_linkStartup.empty() && m_linkStartup != "        ") ||
 				   (m_linkStatus != LS_NONE && m_linkRepeater != m_linkStartup)) {
 			// Relink if not linked or linked to the wrong reflector
-			wxLogMessage("Reconnect timer has expired, relinking %s to %s", m_rptCallsign.c_str(), m_linkStartup.c_str());
+			CLog::logInfo("Reconnect timer has expired, relinking %s to %s", m_rptCallsign.c_str(), m_linkStartup.c_str());
 
 			// Check for just a change of letter
 			if (m_linkStatus != LS_NONE) {
@@ -1522,7 +1522,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 
 		if (m_g2Status == G2_USER || m_g2Status == G2_REPEATER) {
 			// User or repeater not found in time, remove G2 settings
-			wxLogMessage("ircDDB did not reply within five seconds");
+			CLog::logInfo("ircDDB did not reply within five seconds");
 
 			m_g2Status = G2_LOCAL;
 			m_g2User.clear();
@@ -1533,7 +1533,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 			m_g2Header = NULL;
 		} else if (m_linkStatus == LS_PENDING_IRCDDB) {
 			// Repeater not found in time
-			wxLogMessage("ircDDB did not reply within five seconds");
+			CLog::logInfo("ircDDB did not reply within five seconds");
 
 			m_linkStatus = LS_NONE;
 			m_linkRepeater.clear();
@@ -1545,7 +1545,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 #ifdef USE_CCS
 		else if (m_linkStatus == LS_LINKING_CCS) {
 			// CCS didn't reply in time
-			wxLogMessage(wxT("CCS did not reply within five seconds"));
+			CLog::logInfo(wxT("CCS did not reply within five seconds"));
 
 			m_ccsHandler->stopLink();
 
@@ -1565,7 +1565,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 
 	// If the watchdog timer has expired, clean up
 	if (m_watchdogTimer.isRunning() && m_watchdogTimer.hasExpired()) {
-		wxLogMessage("Radio watchdog timer for %s has expired", m_rptCallsign.c_str());
+		CLog::logInfo("Radio watchdog timer for %s has expired", m_rptCallsign.c_str());
 		m_watchdogTimer.stop();
 
 		if (m_repeaterId != 0x00U) {
@@ -1657,28 +1657,28 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 void CRepeaterHandler::linkUp(DSTAR_PROTOCOL protocol, const std::string& callsign)
 {
 	if (protocol == DP_DEXTRA && m_linkStatus == LS_LINKING_DEXTRA) {
-		wxLogMessage("DExtra link to %s established", callsign.c_str());
+		CLog::logInfo("DExtra link to %s established", callsign.c_str());
 		m_linkStatus = LS_LINKED_DEXTRA;
 		writeLinkedTo(callsign);
 		triggerInfo();
 	}
 
 	if (protocol == DP_DPLUS && m_linkStatus == LS_LINKING_DPLUS) {
-		wxLogMessage("D-Plus link to %s established", callsign.c_str());
+		CLog::logInfo("D-Plus link to %s established", callsign.c_str());
 		m_linkStatus = LS_LINKED_DPLUS;
 		writeLinkedTo(callsign);
 		triggerInfo();
 	}
 
 	if (protocol == DP_DCS && m_linkStatus == LS_LINKING_DCS) {
-		wxLogMessage("DCS link to %s established", callsign.c_str());
+		CLog::logInfo("DCS link to %s established", callsign.c_str());
 		m_linkStatus = LS_LINKED_DCS;
 		writeLinkedTo(callsign);
 		triggerInfo();
 	}
 
 	if (protocol == DP_DCS && m_linkStatus == LS_LINKING_LOOPBACK) {
-		wxLogMessage("Loopback link to %s established", callsign.c_str());
+		CLog::logInfo("Loopback link to %s established", callsign.c_str());
 		m_linkStatus = LS_LINKED_LOOPBACK;
 		writeLinkedTo(callsign);
 		triggerInfo();
@@ -1690,7 +1690,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 	// Is relink to another module required?
 	if (!isRecoverable && m_linkRelink) {
 		m_linkRelink = false;
-		wxLogMessage("Relinking %s from %s to %s", m_rptCallsign.c_str(), callsign.c_str(), m_linkRepeater.c_str());
+		CLog::logInfo("Relinking %s from %s to %s", m_rptCallsign.c_str(), callsign.c_str(), m_linkRepeater.c_str());
 		linkInt(m_linkRepeater);
 		return false;
 	}
@@ -1699,13 +1699,13 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 	if (m_linkStatus == LS_NONE || m_linkRepeater != callsign) {
 		switch (protocol) {
 			case DP_DCS:
-				wxLogMessage("DCS link to %s has failed", callsign.c_str());
+				CLog::logInfo("DCS link to %s has failed", callsign.c_str());
 				break;
 			case DP_DEXTRA:
-				wxLogMessage("DExtra link to %s has failed", callsign.c_str());
+				CLog::logInfo("DExtra link to %s has failed", callsign.c_str());
 				break;
 			case DP_DPLUS:
-				wxLogMessage("D-Plus link to %s has failed", callsign.c_str());
+				CLog::logInfo("D-Plus link to %s has failed", callsign.c_str());
 				break;
 			default:
 				break;
@@ -1716,7 +1716,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 
 	if (!isRecoverable) {
 		if (protocol == DP_DEXTRA && callsign == m_linkRepeater) {
-			wxLogMessage("DExtra link to %s has failed", m_linkRepeater.c_str());
+			CLog::logInfo("DExtra link to %s has failed", m_linkRepeater.c_str());
 			m_linkRepeater.clear();
 			m_linkStatus = LS_NONE;
 			writeNotLinked();
@@ -1724,7 +1724,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 		}
 
 		if (protocol == DP_DPLUS && callsign == m_linkRepeater) {
-			wxLogMessage("D-Plus link to %s has failed", m_linkRepeater.c_str());
+			CLog::logInfo("D-Plus link to %s has failed", m_linkRepeater.c_str());
 			m_linkRepeater.clear();
 			m_linkStatus = LS_NONE;
 			writeNotLinked();
@@ -1733,9 +1733,9 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 
 		if (protocol == DP_DCS && callsign == m_linkRepeater) {
 			if (m_linkStatus == LS_LINKED_DCS || m_linkStatus == LS_LINKING_DCS)
-				wxLogMessage("DCS link to %s has failed", m_linkRepeater.c_str());
+				CLog::logInfo("DCS link to %s has failed", m_linkRepeater.c_str());
 			else
-				wxLogMessage("Loopback link to %s has failed", m_linkRepeater.c_str());
+				CLog::logInfo("Loopback link to %s has failed", m_linkRepeater.c_str());
 			m_linkRepeater.clear();
 			m_linkStatus = LS_NONE;
 			writeNotLinked();
@@ -1748,7 +1748,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 	if (protocol == DP_DEXTRA) {
 		switch (m_linkStatus) {
 			case LS_LINKED_DEXTRA:
-				wxLogMessage("DExtra link to %s has failed, relinking", m_linkRepeater.c_str());
+				CLog::logInfo("DExtra link to %s has failed, relinking", m_linkRepeater.c_str());
 				m_linkStatus = LS_LINKING_DEXTRA;
 				writeLinkingTo(m_linkRepeater);
 				triggerInfo();
@@ -1765,7 +1765,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 	if (protocol == DP_DPLUS) {
 		switch (m_linkStatus) {
 			case LS_LINKED_DPLUS:
-				wxLogMessage("D-Plus link to %s has failed, relinking", m_linkRepeater.c_str());
+				CLog::logInfo("D-Plus link to %s has failed, relinking", m_linkRepeater.c_str());
 				m_linkStatus = LS_LINKING_DPLUS;
 				writeLinkingTo(m_linkRepeater);
 				triggerInfo();
@@ -1782,14 +1782,14 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 	if (protocol == DP_DCS) {
 		switch (m_linkStatus) {
 			case LS_LINKED_DCS:
-				wxLogMessage("DCS link to %s has failed, relinking", m_linkRepeater.c_str());
+				CLog::logInfo("DCS link to %s has failed, relinking", m_linkRepeater.c_str());
 				m_linkStatus = LS_LINKING_DCS;
 				writeLinkingTo(m_linkRepeater);
 				triggerInfo();
 				return true;
 
 			case LS_LINKED_LOOPBACK:
-				wxLogMessage("Loopback link to %s has failed, relinking", m_linkRepeater.c_str());
+				CLog::logInfo("Loopback link to %s has failed, relinking", m_linkRepeater.c_str());
 				m_linkStatus = LS_LINKING_LOOPBACK;
 				writeLinkingTo(m_linkRepeater);
 				triggerInfo();
@@ -1810,7 +1810,7 @@ bool CRepeaterHandler::linkFailed(DSTAR_PROTOCOL protocol, const std::string& ca
 void CRepeaterHandler::linkRefused(DSTAR_PROTOCOL protocol, const std::string& callsign)
 {
 	if (protocol == DP_DEXTRA && callsign == m_linkRepeater) {
-		wxLogMessage("DExtra link to %s was refused", m_linkRepeater.c_str());
+		CLog::logInfo("DExtra link to %s was refused", m_linkRepeater.c_str());
 		m_linkRepeater.clear();
 		m_linkStatus = LS_NONE;
 		writeIsBusy(callsign);
@@ -1818,7 +1818,7 @@ void CRepeaterHandler::linkRefused(DSTAR_PROTOCOL protocol, const std::string& c
 	}
 
 	if (protocol == DP_DPLUS && callsign == m_linkRepeater) {
-		wxLogMessage("D-Plus link to %s was refused", m_linkRepeater.c_str());
+		CLog::logInfo("D-Plus link to %s was refused", m_linkRepeater.c_str());
 		m_linkRepeater.clear();
 		m_linkStatus = LS_NONE;
 		writeIsBusy(callsign);
@@ -1827,9 +1827,9 @@ void CRepeaterHandler::linkRefused(DSTAR_PROTOCOL protocol, const std::string& c
 
 	if (protocol == DP_DCS && callsign == m_linkRepeater) {
 		if (m_linkStatus == LS_LINKED_DCS || m_linkStatus == LS_LINKING_DCS)
-			wxLogMessage("DCS link to %s was refused", m_linkRepeater.c_str());
+			CLog::logInfo("DCS link to %s was refused", m_linkRepeater.c_str());
 		else
-			wxLogMessage("Loopback link to %s was refused", m_linkRepeater.c_str());
+			CLog::logInfo("Loopback link to %s was refused", m_linkRepeater.c_str());
 		m_linkRepeater.clear();
 		m_linkStatus = LS_NONE;
 		writeIsBusy(callsign);
@@ -1842,7 +1842,7 @@ void CRepeaterHandler::link(RECONNECT reconnect, const std::string& reflector)
 #ifdef USE_CCS
 	// CCS removal
 	if (m_linkStatus == LS_LINKING_CCS || m_linkStatus == LS_LINKED_CCS) {
-		wxLogMessage(wxT("Dropping CCS link to %s"), m_linkRepeater.c_str());
+		CLog::logInfo(wxT("Dropping CCS link to %s"), m_linkRepeater.c_str());
 
 		m_ccsHandler->stopLink();
 
@@ -1899,7 +1899,7 @@ void CRepeaterHandler::link(RECONNECT reconnect, const std::string& reflector)
 
 	// Handle unlinking
 	if (m_linkStatus != LS_NONE && (reflector.empty() || reflector == "        ")) {
-		wxLogMessage("Unlinking %s from %s", m_rptCallsign.c_str(), m_linkRepeater.c_str());
+		CLog::logInfo("Unlinking %s from %s", m_rptCallsign.c_str(), m_linkRepeater.c_str());
 
 		CDExtraHandler::unlink(this);
 		CDPlusHandler::unlink(this);
@@ -1914,7 +1914,7 @@ void CRepeaterHandler::link(RECONNECT reconnect, const std::string& reflector)
 		return;
 	}
 
-	wxLogMessage("Linking %s to %s", m_rptCallsign.c_str(), reflector.c_str());
+	CLog::logInfo("Linking %s to %s", m_rptCallsign.c_str(), reflector.c_str());
 
 	// Check for just a change of letter
 	if (m_linkStatus != LS_NONE) {
@@ -1996,7 +1996,7 @@ void CRepeaterHandler::unlink(PROTOCOL protocol, const std::string& reflector)
 #endif
 
 	if (m_linkReconnect == RECONNECT_FIXED && m_linkRepeater == (reflector)) {
-		wxLogMessage("Cannot unlink %s because it is fixed", reflector.c_str());
+		CLog::logInfo("Cannot unlink %s because it is fixed", reflector.c_str());
 		return;
 	}
 
@@ -2025,7 +2025,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 
 	if (callsign.substr(0,1) == "/") {
 		if (m_irc == NULL) {
-			wxLogMessage("%s is trying to G2 route with ircDDB disabled", user.c_str());
+			CLog::logInfo("%s is trying to G2 route with ircDDB disabled", user.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
 		}
@@ -2037,18 +2037,18 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		repeater += callsign.substr(callsign.length() - 1, 1);
 
 		if (repeater == m_rptCallsign) {
-			wxLogMessage("%s is trying to G2 route to self, ignoring", user.c_str());
+			CLog::logInfo("%s is trying to G2 route to self, ignoring", user.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
 		}
 
 		if (repeater.substr(0,3U) == "REF" || repeater.substr(0,3U) == "XRF" || repeater.substr(0,3U) == "DCS") {
-			wxLogMessage("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), repeater.c_str());
+			CLog::logInfo("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), repeater.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
 		}
 
-		wxLogMessage("%s is trying to G2 route to repeater %s", user.c_str(), repeater.c_str());
+		CLog::logInfo("%s is trying to G2 route to repeater %s", user.c_str(), repeater.c_str());
 
 		m_g2Repeater = repeater;
 		m_g2User = wxT("CQCQCQ  ");
@@ -2071,19 +2071,19 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		}
 	} else if (string_right(callsign, 1) != "L" && string_right(callsign, 1) == "U") {
 		if (m_irc == NULL) {
-			wxLogMessage("%s is trying to G2 route with ircDDB disabled", user.c_str());
+			CLog::logInfo("%s is trying to G2 route with ircDDB disabled", user.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
 		}
 
 		// This a callsign route
 		if (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) ==  "XRF" || callsign.substr(0,3U) == "DCS") {
-			wxLogMessage("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), callsign.c_str());
+			CLog::logInfo("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), callsign.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
 		}
 
-		wxLogMessage("%s is trying to G2 route to callsign %s", user.c_str(), callsign.c_str());
+		CLog::logInfo("%s is trying to G2 route to callsign %s", user.c_str(), callsign.c_str());
 
 		CUserData* data = m_cache->findUser(callsign);
 
@@ -2150,7 +2150,7 @@ void CRepeaterHandler::reflectorCommandHandler(const std::string& callsign, cons
 		if (m_linkStatus == LS_NONE)
 			return;
 
-		wxLogMessage("Unlink command issued via %s by %s", type.c_str(), user.c_str());
+		CLog::logInfo("Unlink command issued via %s by %s", type.c_str(), user.c_str());
 
 		CDExtraHandler::unlink(this);
 		CDPlusHandler::unlink(this);
@@ -2183,12 +2183,12 @@ void CRepeaterHandler::reflectorCommandHandler(const std::string& callsign, cons
 
 		// We can't link to ourself
 		if (reflector == m_rptCallsign) {
-			wxLogMessage("%s is trying to link with self via %s, ignoring", user.c_str(), type.c_str());
+			CLog::logInfo("%s is trying to link with self via %s, ignoring", user.c_str(), type.c_str());
 			triggerInfo();
 			return;
 		}
 
-		wxLogMessage("Link command from %s to %s issued via %s by %s", m_rptCallsign.c_str(), reflector.c_str(), type.c_str(), user.c_str());
+		CLog::logInfo("Link command from %s to %s issued via %s by %s", m_rptCallsign.c_str(), reflector.c_str(), type.c_str(), user.c_str());
 
 		// Check for just a change of letter
 		if (m_linkStatus != LS_NONE) {
@@ -2268,7 +2268,7 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 
 	// Are we trying to link to an unknown DExtra, D-Plus, or DCS reflector?
 	if (data == NULL && (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) == "XRF" || callsign.substr(0,3U) == "DCS")) {
-		wxLogMessage("%s is unknown, ignoring link request", callsign.c_str());
+		CLog::logInfo("%s is unknown, ignoring link request", callsign.c_str());
 		triggerInfo();
 		return;
 	}
@@ -2286,7 +2286,7 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
-					wxLogMessage("Require D-Plus for linking to %s, but D-Plus is disabled", callsign.c_str());
+					CLog::logInfo("Require D-Plus for linking to %s, but D-Plus is disabled", callsign.c_str());
 					m_linkStatus = LS_NONE;
 					writeNotLinked();
 					triggerInfo();
@@ -2300,7 +2300,7 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
-					wxLogMessage("Require DCS for linking to %s, but DCS is disabled", callsign.c_str());
+					CLog::logInfo("Require DCS for linking to %s, but DCS is disabled", callsign.c_str());
 					m_linkStatus = LS_NONE;
 					writeNotLinked();
 					triggerInfo();
@@ -2321,7 +2321,7 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
-					wxLogMessage("Require DExtra for linking to %s, but DExtra is disabled", callsign.c_str());
+					CLog::logInfo("Require DExtra for linking to %s, but DExtra is disabled", callsign.c_str());
 					m_linkStatus = LS_NONE;
 					writeNotLinked();
 					triggerInfo();
@@ -2435,7 +2435,7 @@ void CRepeaterHandler::startupInt()
 
 	// Link to a startup reflector/repeater
 	if (m_linkAtStartup && !m_linkStartup.empty()) {
-		wxLogMessage("Linking %s at startup to %s", m_rptCallsign.c_str(), m_linkStartup.c_str());
+		CLog::logInfo("Linking %s at startup to %s", m_rptCallsign.c_str(), m_linkStartup.c_str());
 
 		// Find the repeater to link to
 		CRepeaterData* data = m_cache->findRepeater(m_linkStartup);
@@ -2454,7 +2454,7 @@ void CRepeaterHandler::startupInt()
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {
-						wxLogMessage("Require D-Plus for linking to %s, but D-Plus is disabled", m_linkRepeater.c_str());
+						CLog::logInfo("Require D-Plus for linking to %s, but D-Plus is disabled", m_linkRepeater.c_str());
 						m_linkStatus = LS_NONE;
 						writeNotLinked();
 						triggerInfo();
@@ -2468,7 +2468,7 @@ void CRepeaterHandler::startupInt()
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {
-						wxLogMessage("Require DCS for linking to %s, but DCS is disabled", m_linkRepeater.c_str());
+						CLog::logInfo("Require DCS for linking to %s, but DCS is disabled", m_linkRepeater.c_str());
 						m_linkStatus = LS_NONE;
 						writeNotLinked();
 						triggerInfo();
@@ -2489,7 +2489,7 @@ void CRepeaterHandler::startupInt()
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {
-						wxLogMessage("Require DExtra for linking to %s, but DExtra is disabled", m_linkRepeater.c_str());
+						CLog::logInfo("Require DExtra for linking to %s, but DExtra is disabled", m_linkRepeater.c_str());
 						m_linkStatus = LS_NONE;
 						writeNotLinked();
 						triggerInfo();

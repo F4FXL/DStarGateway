@@ -18,8 +18,10 @@
  */
 
 #include <string>
+
 #include "G2ProtocolHandler.h"
 #include "Utils.h"
+#include "Log.h"
 
 // #define	DUMP_TX
 
@@ -109,11 +111,11 @@ bool CG2ProtocolHandler::readPackets()
 
 	// save the incoming port (this is to enable mobile hotspots)
 	if (portmap.end() == portmap.find(m_address.s_addr)) {
-		printf("new address %s on port %u\n", inet_ntoa(m_address), m_port);
+		CLog::logInfo("new address %s on port %u\n", inet_ntoa(m_address), m_port);
 		portmap[m_address.s_addr] = m_port;
 	} else {
 		if (portmap[m_address.s_addr] != m_port) {
-			printf("new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, portmap[m_address.s_addr]);
+			CLog::logInfo("new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, portmap[m_address.s_addr]);
 			portmap[m_address.s_addr] = m_port;
 		}
 	}

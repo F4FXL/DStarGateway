@@ -29,13 +29,14 @@
 #include <fstream>
 
 #include "Utils.h"
+#include "Log.h"
 
 void CUtils::dump(const char* title, const bool* data, unsigned int length)
 {
 	assert(title != NULL);
 	assert(data != NULL);
 
-	printf("%s\n", title);
+	CLog::logInfo("%s\n", title);
 
 	unsigned int offset = 0U;
 
@@ -69,7 +70,7 @@ void CUtils::dump(const char* title, const bool* data, unsigned int length)
 
 		output += "*'";
 
-		printf("%04X:  %s\n", offset / 8U, output.c_str());
+		CLog::logInfo("%04X:  %s\n", offset / 8U, output.c_str());
 
 		offset += 128U;
 	}
@@ -80,7 +81,7 @@ void CUtils::dumpRev(const char* title, const bool* data, unsigned int length)
 	assert(title != NULL);
 	assert(data != NULL);
 
-	printf("%s\n", title);
+	CLog::logInfo("%s\n", title);
 
 	unsigned int offset = 0U;
 
@@ -114,7 +115,7 @@ void CUtils::dumpRev(const char* title, const bool* data, unsigned int length)
 
 		output += "*";
 
-		printf("%04X:  %s\n", offset / 8U, output.c_str());
+		CLog::logInfo("%04X:  %s\n", offset / 8U, output.c_str());
 
 		offset += 128U;
 	}
@@ -125,7 +126,7 @@ void CUtils::dump(const char* title, const unsigned char* data, unsigned int len
 	assert(title != NULL);
 	assert(data != NULL);
 
-	printf("%s\n", title);
+	CLog::logInfo("%s\n", title);
 
 	unsigned int offset = 0U;
 
@@ -156,7 +157,7 @@ void CUtils::dump(const char* title, const unsigned char* data, unsigned int len
 
 		output += "*";
 
-		printf("%04X:  %s\n", offset, output.c_str());
+		CLog::logInfo("%04X:  %s\n", offset, output.c_str());
 
 		offset += 16U;
 
@@ -374,7 +375,7 @@ int CUtils::getAllIPV4Addresses(const char *name, unsigned short port, unsigned 
 		return 0;
 	} else {
 		std::string e(gai_strerror(r));
-		printf("getaddrinfo: %s\n", e.c_str());
+		CLog::logInfo("getaddrinfo: %s\n", e.c_str());
 		return 1;
 	}
 }

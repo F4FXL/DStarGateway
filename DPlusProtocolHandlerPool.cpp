@@ -22,6 +22,7 @@
 
 #include "DPlusProtocolHandlerPool.h"
 #include "Utils.h"
+#include "Log.h"
 
 CDPlusProtocolHandlerPool::CDPlusProtocolHandlerPool(const unsigned int port, const std::string &addr) :
 m_basePort(port),
@@ -29,7 +30,7 @@ m_address(addr)
 {
 	assert(port > 0U);
 	m_index = m_pool.end();
-	printf("DExtra UDP port base = %u\n", port);
+	CLog::logInfo("DExtra UDP port base = %u\n", port);
 }
 
 CDPlusProtocolHandlerPool::~CDPlusProtocolHandlerPool()
@@ -60,14 +61,14 @@ CDPlusProtocolHandler* CDPlusProtocolHandlerPool::getHandler(unsigned int port)
 	if (proto) {
 		if (proto->open()) {
 			m_pool[port] = proto;
-			printf("New CDPlusProtocolHandler now on UDP port %u.\n", port);
+			CLog::logInfo("New CDPlusProtocolHandler now on UDP port %u.\n", port);
 		} else {
 			delete proto;
 			proto = NULL;
-			printf("ERROR: Can't open new DPlus UDP port %u!\n", port);
+			CLog::logInfo("ERROR: Can't open new DPlus UDP port %u!\n", port);
 		}
 	} else
-		printf("ERROR: Can't allocate new CDPlusProtocolHandler at port %u\n", port);
+		CLog::logInfo("ERROR: Can't allocate new CDPlusProtocolHandler at port %u\n", port);
 	return proto;
 }
 
@@ -78,13 +79,13 @@ void CDPlusProtocolHandlerPool::release(CDPlusProtocolHandler *handler)
 		if (it->second == handler) {
 			it->second->close();
 			delete it->second;
-			printf("Releasing CDPlusProtocolHandler on port %u.\n", it->first);
+			CLog::logInfo("Releasing CDPlusProtocolHandler on port %u.\n", it->first);
 			m_pool.erase(it);
 			return;
 		}
 	}
 	// we should never get here!
-	printf("ERROR: could not find CDPlusProtocolHander (port=%u) to release!\n", handler->getPort());
+	CLog::logInfo("ERROR: could not find CDPlusProtocolHander (port=%u) to release!\n", handler->getPort());
 }
 
 DPLUS_TYPE CDPlusProtocolHandlerPool::read()
