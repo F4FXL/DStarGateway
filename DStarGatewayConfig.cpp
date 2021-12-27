@@ -293,7 +293,7 @@ bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
 
 	if(this->m_ircDDB.size() == 0) {//no ircddb network specified? Default to openquad!
 		TircDDB * ircddb  = new TircDDB();
-		ircddb->hostname  = "ipv4.openquad.net";
+		ircddb->hostname  = "ircv4.openquad.net";
 		ircddb->password  = "";
 		ircddb->username  = m_gateway.callsign;
 		ircddb->isQuadNet = true;
