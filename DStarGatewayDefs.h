@@ -23,7 +23,7 @@
 
 const std::string APPLICATION_NAME("ircDDB Gateway");
 
-const std::string CONFIG_FILE_NAME("ircddbgateway");
+const std::string CONFIG_FILE_NAME("dstargateway");
 
 const std::string STATUS1_FILE_NAME("status1.txt");
 const std::string STATUS2_FILE_NAME("status2.txt");
