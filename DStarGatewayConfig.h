@@ -103,6 +103,11 @@ typedef struct {
 
 typedef struct {
 	bool enabled;
+	std::string url;
+} TXLX;
+
+typedef struct {
+	bool enabled;
 	unsigned int port;
 	std::string login;
 	std::string password;
@@ -125,6 +130,7 @@ public:
 	void getDPlus(TDplus & dplus) const;
 	void getDCS(TDCS & dcs) const;
 	void getRemote(TRemote & remote) const;
+	void getXLX(TXLX & xlx) const;
 
 private:
 	bool open(Config & cfg);
@@ -137,6 +143,7 @@ private:
 	bool loadDPlus(const Config & cfg);
 	bool loadDCS(const Config & cfg);
 	bool loadRemote(const Config & cfg);
+	bool loadXLX(const Config & cfg);
 	bool get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value);
 	bool get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value);
 	bool get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value);
@@ -153,6 +160,7 @@ private:
 	TDplus m_dplus;
 	TDCS m_dcs;
 	TRemote m_remote;
+	TXLX m_xlx;
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };

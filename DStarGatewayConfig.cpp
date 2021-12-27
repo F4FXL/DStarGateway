@@ -46,7 +46,8 @@ bool CDStarGatewayConfig::load()
 	&& loadDextra(cfg)
 	&& loadDCS(cfg)
 	&& loadDPlus(cfg)
-	&& loadRemote(cfg)) {
+	&& loadRemote(cfg)
+	&& loadXLX(cfg)) {
 
 		//properly size values
 		m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
@@ -58,6 +59,14 @@ bool CDStarGatewayConfig::load()
 	CLog::logError("Loading configuration from %s failed", m_fileName.c_str());
 
 	return false;
+}
+
+bool CDStarGatewayConfig::loadXLX(const Config & cfg)
+{
+	bool ret = get_value(cfg, "xlx.enabled", m_xlx.enabled, true);
+	ret = get_value(cfg, "xlx.hostfileUrl", m_xlx.url, 0, 1024, "", false) && ret;
+
+	return ret;
 }
 
 bool CDStarGatewayConfig::loadRemote(const Config & cfg)
@@ -513,4 +522,9 @@ void CDStarGatewayConfig::getDCS(TDCS & dcs) const
 void CDStarGatewayConfig::getRemote(TRemote & remote) const
 {
 	remote = m_remote;
+}
+
+void CDStarGatewayConfig::getXLX(TXLX & xlx) const
+{
+	xlx = m_xlx;
 }
