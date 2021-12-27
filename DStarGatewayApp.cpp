@@ -93,7 +93,7 @@ bool CDStarGatewayApp::createThread()
 
 	CDStarGatewayConfig config(m_configFile);
 	if(!config.load()) {
-		CLog::logError("FATAL: Invalid configuration");
+		CLog::logFatal("Invalid configuration, aborting");
 		return false;
 	}
 
@@ -107,6 +107,7 @@ bool CDStarGatewayApp::createThread()
 	config.getGateway(gatewayConfig);
 	m_thread->setGateway(gatewayConfig.type, gatewayConfig.callsign, gatewayConfig.address);
 	m_thread->setLanguage(gatewayConfig.language);
+	m_thread->setLocation(gatewayConfig.latitude, gatewayConfig.longitude);
 
 	// Setup APRS
 	TAPRS aprsConfig;
@@ -123,35 +124,16 @@ bool CDStarGatewayApp::createThread()
 		}
 	}
 
-	// Setup ircddb
-	std::vector<CIRCDDB *> clients;
-	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
-		TircDDB ircDDBConfig;
-		config.getIrcDDB(i, ircDDBConfig);
-		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
-		clients.push_back(ircDDB);
-	}
-	
-	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
-	bool res = multiClient->open();
-	if (!res) {
-		CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
-		return false;
-	}
-
-	m_thread->setIRC(multiClient);
-
 	// Setup the repeaters
 	if(config.getRepeaterCount() == 0U) {
 		CLog::logInfo("No repeater configured\n");
 		return false;
 	}
-	CRepeaterHandlerFactory repeaterProtocolFactory;
+	bool ddEnabled = false;
+	CRepeaterProtocolHandlerFactory repeaterProtocolFactory;
 	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
 		config.getRepeater(i, rptrConfig);
-
 		m_thread->addRepeater(rptrConfig.callsign,
 								rptrConfig.band,
 								rptrConfig.address,
@@ -173,39 +155,68 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
+		
+		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
+	m_thread->setDDModeEnabled(ddEnabled);
+	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
 
+	// Setup ircddb
+	std::vector<CIRCDDB *> clients;
+	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
+		TircDDB ircDDBConfig;
+		config.getIrcDDB(i, ircDDBConfig);
+		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		clients.push_back(ircDDB);
+	}
+	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
+	bool res = multiClient->open();
+	if (!res) {
+		CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
+		return false;
+	}
+	m_thread->setIRC(multiClient);
 
+	// Setup Dextra
+	TDextra dextraConfig;
+	config.getDExtra(dextraConfig);
+	CLog::logInfo("DExtra enabled: %d, max. dongles: %u", int(dextraConfig.enabled), dextraConfig.maxDongles);
+	m_thread->setDExtra(dextraConfig.enabled, dextraConfig.maxDongles);
 
-	// for (unsigned int i=0; i<config.getModCount(); i++) {
-	// 	std::string band, callsign, logoff, info, permanent, reflector;
-	// 	unsigned int usertimeout;
-	// 	CALLSIGN_SWITCH callsignswitch;
-	// 	bool txmsgswitch;
+	// Setup DCS
+	TDCS dcsConfig;
+	config.getDCS(dcsConfig);
+	CLog::logInfo("DCS enabled: %d", int(dcsConfig.enabled));
+	m_thread->setDCS(dcsConfig.enabled);
 
-	// 	config.getGroup(i, band, callsign, logoff, info, permanent, usertimeout, callsignswitch, txmsgswitch, reflector);
+	// Setup DPlus
+	TDplus dplusConfig;
+	config.getDPlus(dplusConfig);
+	CLog::logInfo("D-Plus enabled: %d, max. dongles; %u, login: %s", int(dplusConfig.enabled), dplusConfig.maxDongles, dplusConfig.login.c_str());
+	m_thread->setDPlus(dplusConfig.enabled, dplusConfig.maxDongles, dplusConfig.login);
 
-	// 	if (callsign.size() && isalnum(callsign[0])) {
-	// 		std::string repeater(CallSign);
-	// 		repeater.resize(7, ' ');
-	// 		repeater.push_back(band[0]);
-	// 		m_thread->addGroup(callsign, logoff, repeater, info, permanent, usertimeout, callsignswitch, txmsgswitch, reflector);
-	// 		CLog::logInfo("Group %d: %s/%s using %s, \"%s\", perm: %s, timeout: %u mins, c/s switch: %s, msg switch: %s, Linked: %s\n",
-	// 			i, callsign.c_str(), logoff.c_str(), repeater.c_str(), info.c_str(), permanent.c_str(), usertimeout,
-	// 			SCS_GROUP_CALLSIGN==callsignswitch ? "Group" : "User", txmsgswitch ? "true" : "false", reflector.c_str());
-	// 	}
-	// }
+	// Setup XLX
+	TXLX xlxConfig;
+	config.getXLX(xlxConfig);
+	CLog::logInfo("XLX enabled: %d, Hosts file url: %s", int(xlxConfig.enabled), xlxConfig.url.c_str());
+	m_thread->setXLX(xlxConfig.enabled, xlxConfig.url);
 
-	// bool remoteEnabled;
-	// std::string remotePassword;
-	// unsigned int remotePort;
-	// config.getRemote(remoteEnabled, remotePassword, remotePort);
-	// CLog::logInfo("Remote enabled set to %d, port set to %u\n", int(remoteEnabled), remotePort);
-	// m_thread->setRemote(remoteEnabled, remotePassword, remotePort);
+	// Setup Remote
+	TRemote remoteConfig;
+	config.getRemote(remoteConfig);
+	CLog::logInfo("Remote enabled: %d, port %u", int(remoteConfig.enabled), remoteConfig.port);
+	m_thread->setRemote(remoteConfig.enabled, remoteConfig.password, remoteConfig.port);
 
-	// m_thread->setAddress(address);
-	// m_thread->setCallsign(CallSign);
+	// Get final things ready
+	m_thread->setIcomRepeaterHandler(repeaterProtocolFactory.getIcomProtocolHandler());
+	m_thread->setHBRepeaterHandler(repeaterProtocolFactory.getHBProtocolHandler());
+	m_thread->setDummyRepeaterHandler(repeaterProtocolFactory.getDummyProtocolHandler());
+	m_thread->setInfoEnabled(true);
+	m_thread->setEchoEnabled(true);
+	m_thread->setDTMFEnabled(true);
+	m_thread->setLog(true);
 
-	// return true;
+	return true;
 }
 

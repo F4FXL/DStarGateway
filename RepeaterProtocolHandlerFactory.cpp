@@ -19,15 +19,16 @@
 #include "RepeaterProtocolHandlerFactory.h"
 #include "Log.h"
 
-CRepeaterHandlerFactory::CRepeaterHandlerFactory() :
+CRepeaterProtocolHandlerFactory::CRepeaterProtocolHandlerFactory() :
 m_icomRepeaterHandler(NULL),
 m_hbRepeaterHandler(NULL),
-m_dummyRepeaterHandler(NULL)
+m_dummyRepeaterHandler(NULL),
+m_icomCount(0U)
 {
 
 }
 
-IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(HW_TYPE hwType, const TGateway & gatewayConfig, const std::string & repeaterAddress, unsigned int repeaterPort)
+IRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getRepeaterProtocolHandler(HW_TYPE hwType, const TGateway & gatewayConfig, const std::string & repeaterAddress, unsigned int repeaterPort)
 {
     IRepeaterProtocolHandler * handler = NULL;
     switch (hwType)
@@ -44,6 +45,10 @@ IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(H
             m_icomRepeaterHandler = icomRepeaterHandler;
         }
         handler = m_icomRepeaterHandler;
+        
+        if(m_icomRepeaterHandler != NULL)
+            m_icomRepeaterHandler->setCount(++m_icomCount);
+
         break;
     case HW_HOMEBREW:
         if(m_hbRepeaterHandler == NULL) {
@@ -76,4 +81,19 @@ IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(H
     }
 
     return handler;
+}
+
+CIcomRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getIcomProtocolHandler()
+{
+    return m_icomRepeaterHandler;
+}
+
+CHBRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getHBProtocolHandler()
+{
+    return m_hbRepeaterHandler;
+}
+
+CDummyRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getDummyProtocolHandler()
+{
+    return m_dummyRepeaterHandler;
 }

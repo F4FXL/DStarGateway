@@ -26,15 +26,19 @@
 #include "RepeaterProtocolHandler.h"
 #include "DStarGatewayConfig.h"
 
-class CRepeaterHandlerFactory
+class CRepeaterProtocolHandlerFactory
 {
 public:
-    CRepeaterHandlerFactory();
+    CRepeaterProtocolHandlerFactory();
 
     IRepeaterProtocolHandler * getRepeaterProtocolHandler(HW_TYPE hwType, const TGateway & gatewyaConfig, const std::string & repeaterAddress, unsigned int repeaterPort);
 
+	CIcomRepeaterProtocolHandler * getIcomProtocolHandler();
+	CHBRepeaterProtocolHandler * getHBProtocolHandler();
+	CDummyRepeaterProtocolHandler * getDummyProtocolHandler();
 private:
-	CIcomRepeaterProtocolHandler* m_icomRepeaterHandler;
-	CHBRepeaterProtocolHandler* m_hbRepeaterHandler;
-	CDummyRepeaterProtocolHandler* m_dummyRepeaterHandler;
+	CIcomRepeaterProtocolHandler * m_icomRepeaterHandler;
+	CHBRepeaterProtocolHandler * m_hbRepeaterHandler;
+	CDummyRepeaterProtocolHandler * m_dummyRepeaterHandler;
+	unsigned int m_icomCount;
 };
