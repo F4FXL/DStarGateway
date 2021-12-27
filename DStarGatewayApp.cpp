@@ -33,6 +33,7 @@
 #include "Utils.h"
 #include "GitVersion.h"
 #include "RepeaterProtocolHandlerFactory.h"
+#include "Log.h"
 
 int main(int argc, char *argv[])
 {
@@ -91,7 +92,7 @@ bool CDStarGatewayApp::createThread()
 
 	CDStarGatewayConfig config(m_configFile);
 	if(!config.load()) {
-		printf("FATAL: Invalid configuration");
+		wxLogError("FATAL: Invalid configuration");
 		return false;
 	}
 
@@ -99,11 +100,28 @@ bool CDStarGatewayApp::createThread()
 	config.getPaths(paths);
 	m_thread = new CDStarGatewayThread(paths.logDir, paths.dataDir, "");
 
+	// Setup the gateway
 	TGateway gatewayConfig;
 	config.getGateway(gatewayConfig);
+	m_thread->setGateway(gatewayConfig.type, gatewayConfig.callsign, gatewayConfig.address);
+	m_thread->setLanguage(gatewayConfig.language);
 
-	// printf("Gateway callsign set to %s, local address set to %s\n", CallSign.c_str(), address.c_str());
+	// Setup APRS
+	TAPRS aprsConfig;
+	config.getAPRS(aprsConfig);
+	CAPRSWriter * aprsWriter = NULL;
+	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
+		aprsWriter = new CAPRSWriter(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
+		if(aprsWriter->open()) {
+			m_thread->setAPRSWriter(aprsWriter);
+		}
+		else {
+			delete aprsWriter;
+			aprsWriter = NULL;
+		}
+	}
 
+	// Setup ircddb
 	std::vector<CIRCDDB *> clients;
 	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
 		TircDDB ircDDBConfig;
@@ -117,14 +135,18 @@ bool CDStarGatewayApp::createThread()
 	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
 	bool res = multiClient->open();
 	if (!res) {
-		printf("Cannot initialise the ircDDB protocol handler\n");
+		wxLogMessage("Cannot initialise the ircDDB protocol handler\n");
 		return false;
 	}
 
 	m_thread->setIRC(multiClient);
 
+	// Setup the repeaters
+	if(config.getRepeaterCount() == 0U) {
+		wxLogMessage("No repeater configured\n");
+		return false;
+	}
 	CRepeaterHandlerFactory repeaterProtocolFactory;
-
 	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
 		config.getRepeater(i, rptrConfig);
@@ -151,6 +173,8 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band2,
 								rptrConfig.band3);
 	}
+
+
 
 	// for (unsigned int i=0; i<config.getModCount(); i++) {
 	// 	std::string band, callsign, logoff, info, permanent, reflector;
