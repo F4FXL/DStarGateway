@@ -49,17 +49,16 @@ m_locks()
 			char * lineDup = strdup(line.c_str());
 
 			char * t = std::strtok(lineDup, delimiters.c_str());
-			std::string name(t);
+			std::string name(t != NULL ? t : "");
 			t = std::strtok(NULL, delimiters.c_str());
-			std::string address(t);
+			std::string address(t != NULL ? t : "");
 			t = std::strtok(NULL, delimiters.c_str());
-			std::string lock(t);
+			std::string lock(t != NULL ? t : "");
 
 			free(lineDup);
 
-			name.resize(LONG_CALLSIGN_LENGTH, ' ');
-
 			if (!name.empty() && !address.empty()) {
+				name.resize(LONG_CALLSIGN_LENGTH, ' ');
 				m_names.push_back(name);
 				m_addresses.push_back(address);
 				m_locks.push_back(!lock.empty());
