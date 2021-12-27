@@ -46,7 +46,7 @@ m_out(0U)
 	m_data = new CAMBEData*[NUM_FRAMES];
 
 	char vstr[32];
-	snprintf(vstr, 32, "ircDDB GW - %s", VERSION.substr(0, 8).c_str());
+	snprintf(vstr, 32, "DStar GW - %s", VERSION.substr(0, 8).c_str());
 
 	CLog::logInfo("Version text set to \"%s\"\n", vstr);
 

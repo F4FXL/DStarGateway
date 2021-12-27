@@ -44,7 +44,7 @@ m_reconnectTimer(1000U),
 m_tries(0U),
 m_APRSReadCallback(NULL),
 m_filter(""),
-m_clientName("ircDDBGateway")
+m_clientName("DStarGateway")
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -249,7 +249,7 @@ bool CAPRSWriterThread::connect()
 	std::stringstream connectString;
 	connectString 	<< "User " << m_username << "-" << m_ssid
 					<< " pass " << m_password
-					<< " vers " << (m_clientName.length() ? m_clientName : "ircDDBGateway")
+					<< " vers " << (m_clientName.length() ? m_clientName : "DStarGateway")
 					<< filter;
 	//CLog::logInfo("Connect String : ") + connectString);
 	ret = m_socket.writeLine(connectString.str());
