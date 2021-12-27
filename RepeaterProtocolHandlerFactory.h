@@ -24,7 +24,7 @@
 #include "HBRepeaterProtocolHandler.h"
 #include "DummyRepeaterProtocolHandler.h"
 #include "RepeaterProtocolHandler.h"
-#include "Defs.h"
+#include "DStarGatewayConfig.h"
 
 class CRepeaterHandlerFactory
 {

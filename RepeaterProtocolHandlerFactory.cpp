@@ -34,7 +34,7 @@ IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(H
     {
     case HW_ICOM:
         if(m_icomRepeaterHandler == NULL) {
-            auto icomRepeaterHandler = new CIcomRepeaterProtocolHandler(gatewayConfig.icomAddress, gatewayConfig.icomPort, repeaterAddress, repeaterPort);
+            CIcomRepeaterProtocolHandler * icomRepeaterHandler = new CIcomRepeaterProtocolHandler(gatewayConfig.icomAddress, gatewayConfig.icomPort, repeaterAddress, repeaterPort);
 			bool res = icomRepeaterHandler->open();
             if (!res) {
 				wxLogError("Cannot open the Icom repeater protocol handler");
@@ -47,7 +47,7 @@ IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(H
         break;
     case HW_HOMEBREW:
         if(m_hbRepeaterHandler == NULL) {
-    		auto hbRepeaterHandler = new CHBRepeaterProtocolHandler(gatewayConfig.hbAddress, gatewayConfig.hbPort);
+    		CHBRepeaterProtocolHandler * hbRepeaterHandler = new CHBRepeaterProtocolHandler(gatewayConfig.hbAddress, gatewayConfig.hbPort);
 			bool res = hbRepeaterHandler->open();
 			if (!res) {
 				wxLogError("Cannot open the Homebrew repeater protocol handler");
@@ -60,7 +60,7 @@ IRepeaterProtocolHandler * CRepeaterHandlerFactory::getRepeaterProtocolHandler(H
         break;
     case HW_DUMMY:
         if(m_dummyRepeaterHandler == NULL) {
-            auto dummyRepeaterHandler = new CDummyRepeaterProtocolHandler;
+            CDummyRepeaterProtocolHandler * dummyRepeaterHandler = new CDummyRepeaterProtocolHandler;
 			bool res = dummyRepeaterHandler->open();
 			if (!res) {
 				wxLogError("Cannot open the Dummy repeater protocol handler");
