@@ -491,6 +491,8 @@ void* CDStarGatewayThread::Entry()
 		headerLogger->close();
 		delete headerLogger;
 	}
+
+	return NULL;
 }
 
 void CDStarGatewayThread::kill()
