@@ -86,6 +86,28 @@ typedef struct {
 	std::string password;
 } TAPRS;
 
+typedef struct {
+	bool enabled;
+	unsigned int maxDongles;
+} TDextra;
+
+typedef struct {
+	bool enabled;
+	std::string login;
+	unsigned int maxDongles;
+} TDplus;
+
+typedef struct {
+	bool enabled;
+} TDCS;
+
+typedef struct {
+	bool enabled;
+	unsigned int port;
+	std::string login;
+	std::string password;
+} TRemote;
+
 class CDStarGatewayConfig {
 public:
 	CDStarGatewayConfig(const std::string &pathname);
@@ -99,6 +121,10 @@ public:
 	unsigned int getRepeaterCount() const;
 	void getPaths(Tpaths & paths) const;
 	void getAPRS(TAPRS & aprs) const;
+	void getDExtra(TDextra & dextra) const;
+	void getDPlus(TDplus & dplus) const;
+	void getDCS(TDCS & dcs) const;
+	void getRemote(TRemote & remote) const;
 
 private:
 	bool open(Config & cfg);
@@ -107,6 +133,10 @@ private:
 	bool loadRepeaters(const Config & cfg);
 	bool loadPaths(const Config & cfg);
 	bool loadAPRS(const Config & cfg);
+	bool loadDextra(const Config & cfg);
+	bool loadDPlus(const Config & cfg);
+	bool loadDCS(const Config & cfg);
+	bool loadRemote(const Config & cfg);
 	bool get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value);
 	bool get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value);
 	bool get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value);
@@ -119,6 +149,10 @@ private:
 	TGateway m_gateway;
 	Tpaths m_paths;
 	TAPRS m_aprs;
+	TDextra m_dextra;
+	TDplus m_dplus;
+	TDCS m_dcs;
+	TRemote m_remote;
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };

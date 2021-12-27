@@ -42,7 +42,11 @@ bool CDStarGatewayConfig::load()
 	&& loadIrcDDB(cfg)
 	&& loadRepeaters(cfg)
 	&& loadPaths(cfg)
-	&& loadAPRS(cfg)) {
+	&& loadAPRS(cfg)
+	&& loadDextra(cfg)
+	&& loadDCS(cfg)
+	&& loadDPlus(cfg)
+	&& loadRemote(cfg)) {
 
 		//properly size values
 		m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
@@ -54,6 +58,38 @@ bool CDStarGatewayConfig::load()
 	CLog::logError("Loading configuration from %s failed", m_fileName.c_str());
 
 	return false;
+}
+
+bool CDStarGatewayConfig::loadRemote(const Config & cfg)
+{
+	bool ret = get_value(cfg, "remote.enabled", m_remote.enabled, false);
+	ret = get_value(cfg, "remote.port", m_remote.port, 1U, 65535U, 4242U) && ret;
+	ret = get_value(cfg, "remote.password", m_remote.password, 0, 1024, "", true) && ret;
+
+	m_remote.enabled = m_remote.enabled && !m_remote.password.empty();
+
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDextra(const Config & cfg)
+{
+	bool ret = get_value(cfg, "dextra.enabled", m_dextra.enabled, true);
+	ret = get_value(cfg, "dextra.maxDongles", m_dextra.maxDongles, 1U, 5U, 5U) && ret;
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDPlus(const Config & cfg)
+{
+	bool ret = get_value(cfg, "dplus.enabled", m_dplus.enabled, true);
+	ret = get_value(cfg, "dplus.maxDongles", m_dplus.maxDongles, 1U, 5U, 5U) && ret;
+	ret = get_value(cfg, "dplus.maxDongles", m_dplus.login, 0, LONG_CALLSIGN_LENGTH, m_gateway.callsign, true) && ret;
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDCS(const Config & cfg)
+{
+	bool ret = get_value(cfg, "dcs.enabled", m_dcs.enabled, true);
+	return ret;
 }
 
 bool CDStarGatewayConfig::loadAPRS(const Config & cfg)
@@ -457,4 +493,24 @@ void CDStarGatewayConfig::getPaths(Tpaths & paths) const
 void CDStarGatewayConfig::getAPRS(TAPRS & aprs) const
 {
 	aprs = m_aprs;
+}
+
+void CDStarGatewayConfig::getDExtra(TDextra & dextra) const
+{
+	dextra = m_dextra;
+}
+
+void CDStarGatewayConfig::getDPlus(TDplus & dplus) const
+{
+	dplus = m_dplus;
+}
+
+void CDStarGatewayConfig::getDCS(TDCS & dcs) const
+{
+	dcs = m_dcs;
+}
+
+void CDStarGatewayConfig::getRemote(TRemote & remote) const
+{
+	remote = m_remote;
 }
