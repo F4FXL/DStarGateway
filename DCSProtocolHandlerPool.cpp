@@ -60,14 +60,14 @@ CDCSProtocolHandler *CDCSProtocolHandlerPool::getHandler(unsigned int port)
 	if (proto) {
 		if (proto->open()) {
 			m_pool[port] = proto;
-			CLog::logError("New CDCSProtocolHandler now on port %u.\n", port);
+			CLog::logInfo("New DCS Protocol Handler now on port %u.\n", port);
 		} else {
 			delete proto;
 			proto = NULL;
-			CLog::logError("ERROR: Can't open new DCS UDP port %u!\n", port);
+			CLog::logError("Can't open new DCS UDP port %u!\n", port);
 		}
 	} else
-		CLog::logError("ERROR: Can't allocate new CDCSProtocolHandler at port %u\n", port);
+		CLog::logError("Can't allocate new CDCSProtocolHandler at port %u\n", port);
 	return proto;
 }
 
