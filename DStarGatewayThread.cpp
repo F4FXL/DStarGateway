@@ -332,8 +332,6 @@ void* CDStarGatewayThread::Entry()
 
 	CRepeaterHandler::startup();
 
-	m_statusFileTimer.start();
-
 #ifdef USE_CALLSIGN_SERVER
 	CCallsignServer* server = NULL;
 	if (m_dextraEnabled || m_dcsEnabled) {
@@ -344,6 +342,7 @@ void* CDStarGatewayThread::Entry()
 
 	auto timePoint = std::chrono::steady_clock::now();
 
+	m_statusFileTimer.start();
 	m_statusTimer2.start();
 
 	try {
@@ -420,7 +419,6 @@ void* CDStarGatewayThread::Entry()
 				}
 			}
 
-			// wxLog::FlushActive();
 			::std::this_thread::sleep_for(std::chrono::milliseconds(TIME_PER_TIC_MS));
 		}
 	}
