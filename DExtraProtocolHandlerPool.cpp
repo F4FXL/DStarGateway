@@ -76,15 +76,17 @@ void CDExtraProtocolHandlerPool::release(CDExtraProtocolHandler *handler)
 	assert(handler != NULL);
 	for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
 		if (it->second == handler) {
-			it->second->close();
-			delete it->second;
-			CLog::logInfo("Releasing CDExtraProtocolHandler on port %u.\n", it->first);
 			m_pool.erase(it);
+			handler->close();
+			delete handler;
+			m_index = m_pool.end(); // m_index might be out of order, reset it
+			CLog::logInfo("Releasing DExtra Protocol Handler on port %u.\n", it->first);
+
 			return;
 		}
 	}
 	// we should never get here!
-	CLog::logInfo("ERROR: could not find CDExtraProtocolHander (port=%u) to release!\n", handler->getPort());
+	CLog::logInfo("ERROR: could not find DExtra Protocol Hander (port=%u) to release!\n", handler->getPort());
 }
 
 DEXTRA_TYPE CDExtraProtocolHandlerPool::read()
