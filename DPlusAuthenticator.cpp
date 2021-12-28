@@ -86,10 +86,10 @@ void* CDPlusAuthenticator::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		CLog::logInfo("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
+		CLog::logError("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		CLog::logInfo("Unknown exception raised in the D-Plus Authenticator thread");
+		CLog::logError("Unknown exception raised in the D-Plus Authenticator thread");
 	}
 
 	CLog::logInfo("Stopping the D-Plus Authenticator thread");
@@ -182,8 +182,8 @@ bool CDPlusAuthenticator::authenticate(const std::string& callsign, const std::s
 			bool active = (buffer[i + 25U] & 0x80U) == 0x80U;
 
 			// An empty name or IP address or an inactive gateway/reflector is not written out
-			if (address.length() > 0U && name.length() > 0U && !name.compare(0, 3, "XRF") == 0 && active && writeToCache){
-				if (name.compare(0, 3, "REF") == 0)
+			if (address.length() > 0U && name.length() > 0U && name.substr(0, 3) != "XRF" && active && writeToCache){
+				if (name.substr(0, 3) == "REF")
 					CLog::logInfo("D-Plus: %s\t%s", name.c_str(), address.c_str());
 
 				name += "        ";
