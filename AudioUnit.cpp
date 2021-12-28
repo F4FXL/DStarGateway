@@ -466,7 +466,7 @@ void CAudioUnit::sendStatus(LINK_STATUS status, const std::string& reflector, co
 				break;
 			case LS_LINKED_CCS:
 			case LS_LINKED_DCS:
-//			case LS_LINKED_DPLUS:
+			case LS_LINKED_DPLUS:
 			case LS_LINKED_DEXTRA:
 			case LS_LINKED_LOOPBACK:
 				found = lookup(id, "linkedto");
