@@ -2042,7 +2042,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			return;
 		}
 
-		if (repeater.substr(0,3U) == "REF" || repeater.substr(0,3U) == "XRF" || repeater.substr(0,3U) == "DCS") {
+		if (repeater.substr(0,3U) == "REF" || repeater.substr(0,3U) == "XRF" || repeater.substr(0,3U) == "DCS" || repeater.substr(0,3U) == "XLX") {
 			CLog::logInfo("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), repeater.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
@@ -2077,7 +2077,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		}
 
 		// This a callsign route
-		if (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) ==  "XRF" || callsign.substr(0,3U) == "DCS") {
+		if (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) ==  "XRF" || callsign.substr(0,3U) == "DCS" || callsign.substr(0,3U) == "XLX") {
 			CLog::logInfo("%s is trying to G2 route to reflector %s, ignoring", user.c_str(), callsign.c_str());
 			m_g2Status = G2_LOCAL;
 			return;
@@ -2267,7 +2267,7 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 	CRepeaterData* data = m_cache->findRepeater(callsign);
 
 	// Are we trying to link to an unknown DExtra, D-Plus, or DCS reflector?
-	if (data == NULL && (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) == "XRF" || callsign.substr(0,3U) == "DCS")) {
+	if (data == NULL && (callsign.substr(0,3U) == "REF" || callsign.substr(0,3U) == "XRF" || callsign.substr(0,3U) == "DCS" || callsign.substr(0,3U) == "XLX")) {
 		CLog::logInfo("%s is unknown, ignoring link request", callsign.c_str());
 		triggerInfo();
 		return;
@@ -2981,7 +2981,7 @@ void CRepeaterHandler::sendHeard(const std::string& text)
 	if (m_g2Status == G2_OK) {
 		destination = m_g2Repeater;
 	} else if (m_g2Status == G2_NONE && (m_linkStatus == LS_LINKED_DPLUS || m_linkStatus == LS_LINKED_DEXTRA || m_linkStatus == LS_LINKED_DCS)) {
-		if (m_linkRepeater.substr(0,3U) == "REF" || m_linkRepeater.substr(0,3U) == "XRF" || m_linkRepeater.substr(0,3U) == "DCS")
+		if (m_linkRepeater.substr(0,3U) == "REF" || m_linkRepeater.substr(0,3U) == "XRF" || m_linkRepeater.substr(0,3U) == "DCS" || m_linkRepeater.substr(0,3U) == "XLX")
 			destination = m_linkRepeater;
 	}
 
