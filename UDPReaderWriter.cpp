@@ -115,7 +115,7 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 
 	int ret = ::select(m_fd + 1, &readFds, NULL, NULL, &tv);
 	if (ret < 0) {
-		CLog::logInfo("Error returned from UDP select (port: %u), err: %s\n", m_port, strerror(errno));
+		CLog::logError("Error returned from UDP select (port: %u), err: %s\n", m_port, strerror(errno));
 		return -1;
 	}
 
@@ -127,7 +127,7 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 
 	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&addr, &size);
 	if (len <= 0) {
-		CLog::logInfo("Error returned from recvfrom (port: %u), err: %s\n", m_port, strerror(errno));
+		CLog::logError("Error returned from recvfrom (port: %u), err: %s\n", m_port, strerror(errno));
 		return -1;
 	}
 
