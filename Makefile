@@ -64,7 +64,7 @@ endif
 	if [ $$RETVAL -ne 0 ]; then \
 		echo "Git version has changed"; \
 		cp -f /tmp/$@ $@; \
-		rm /tmp/$@; \
-	fi;
+	fi; \
+	rm /tmp/$@;
 
 FORCE:
