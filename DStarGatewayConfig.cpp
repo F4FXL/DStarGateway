@@ -91,7 +91,7 @@ bool CDStarGatewayConfig::loadDPlus(const Config & cfg)
 {
 	bool ret = get_value(cfg, "dplus.enabled", m_dplus.enabled, true);
 	ret = get_value(cfg, "dplus.maxDongles", m_dplus.maxDongles, 1U, 5U, 5U) && ret;
-	ret = get_value(cfg, "dplus.maxDongles", m_dplus.login, 0, LONG_CALLSIGN_LENGTH, m_gateway.callsign, true) && ret;
+	ret = get_value(cfg, "dplus.login", m_dplus.login, 0, LONG_CALLSIGN_LENGTH, m_gateway.callsign, true) && ret;
 	return ret;
 }
 
