@@ -34,6 +34,7 @@
 #include "Version.h"
 #include "GitVersion.h"
 #include "RepeaterProtocolHandlerFactory.h"
+#include "XLXHostsFileDownloader.h"
 #include "Log.h"
 
 int main(int argc, char *argv[])
@@ -201,7 +202,7 @@ bool CDStarGatewayApp::createThread()
 	TXLX xlxConfig;
 	config.getXLX(xlxConfig);
 	CLog::logInfo("XLX enabled: %d, Hosts file url: %s", int(xlxConfig.enabled), xlxConfig.url.c_str());
-	m_thread->setXLX(xlxConfig.enabled, xlxConfig.url);
+	m_thread->setXLX(xlxConfig.enabled, xlxConfig.enabled ? CXLXHostsFileDownloader::download(xlxConfig.url) : "");
 
 	// Setup Remote
 	TRemote remoteConfig;
