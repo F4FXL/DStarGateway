@@ -298,7 +298,7 @@ bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
 		ircddb->username  = m_gateway.callsign;
 		ircddb->isQuadNet = true;
 		this->m_ircDDB.push_back(ircddb);
-		CLog::logError("No ircDDB networks configured, defaulting to IRCDDB: host=%s user=%s", ircddb->hostname.c_str(), ircddb->username.c_str());
+		CLog::logInfo("No ircDDB networks configured, defaulting to IRCDDB: host=%s user=%s", ircddb->hostname.c_str(), ircddb->username.c_str());
 	}
 
 	return true;
