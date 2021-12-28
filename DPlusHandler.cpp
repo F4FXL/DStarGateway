@@ -463,6 +463,9 @@ void CDPlusHandler::unlink(IReflectorCallback* handler, const std::string& calls
 				}
 
 				m_stateChange = true;
+
+				delete m_reflectors[i];
+				m_reflectors[i] =  NULL;
 			}
 		}
 	}
