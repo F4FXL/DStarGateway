@@ -355,15 +355,15 @@ bool CAudioUnit::readAMBE(const std::string& dir, const std::string& name)
 
 	unsigned char buffer[VOICE_FRAME_LENGTH_BYTES];
 
-	size_t n = fread(buffer, 4, 1, file);
+	size_t n = fread(buffer, sizeof(unsigned char), 4, file);
 	if (n != 4) {
-		CLog::logInfo("Unable to read the header from %s\n", fileName.c_str());
+		CLog::logError("Unable to read the header from %s\n", fileName.c_str());
 		fclose(file);
 		return false;
 	}
 
 	if (memcmp(buffer, "AMBE", 4)) {
-		CLog::logInfo("Invalid header from %s\n", fileName.c_str());
+		CLog::logError("Invalid header from %s\n", fileName.c_str());
 		fclose(file);
 		return false;
 	}
@@ -380,9 +380,9 @@ bool CAudioUnit::readAMBE(const std::string& dir, const std::string& name)
 	for (unsigned int i = 0U; i < SILENCE_LENGTH; i++, p += VOICE_FRAME_LENGTH_BYTES)
 		memcpy(p, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
 
-	n = fread(p, length, 1, file);
+	n = fread(p, 1, length, file);
 	if (n != length) {
-		CLog::logInfo("Unable to read the AMBE data from %s\n", fileName.c_str());
+		CLog::logError("Unable to read the AMBE data from %s\n", fileName.c_str());
 		fclose(file);
 		delete[] m_ambe;
 		m_ambe = NULL;
