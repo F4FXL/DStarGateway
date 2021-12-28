@@ -1121,7 +1121,7 @@ void CDStarGatewayThread::loadAllReflectors()
 	}
 
 	if (m_dextraEnabled) {
-		std::string fileName = m_dataDir + "/" + DCS_HOSTS_FILE_NAME;
+		std::string fileName = m_dataDir + "/" + DEXTRA_HOSTS_FILE_NAME;
 		loadReflectors(fileName, DP_DEXTRA);
 	}
 
