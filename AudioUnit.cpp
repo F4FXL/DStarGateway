@@ -248,7 +248,7 @@ bool CAudioUnit::lookup(unsigned int id, const std::string &name)
 {
 	CIndexRecord* info = m_index[name];
 	if (info == NULL) {
-		// CLog::logError(wxT("Cannot find the AMBE index for *%s*"), name.c_str());
+		// CLog::logError("Cannot find the AMBE index for *%s*", name.c_str());
 		return false;
 	}
 

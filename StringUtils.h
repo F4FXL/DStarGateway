@@ -24,7 +24,6 @@
 #include <string>
 #include <stdexcept>
 
-#define wxT(x) std::string(x)
 #define string_right(s,l) (s.substr(s.length() - l, l))
 
 class CStringUtils {

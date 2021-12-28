@@ -149,7 +149,7 @@ void* CAPRSWriterThread::Entry()
 					int length = m_socket.readLine(line, APRS_TIMEOUT);
 
 					/*if (length == 0)
-						CLog::logWarning((wxT("No response from the APRS server after %u seconds"), APRS_TIMEOUT);*/
+						CLog::logWarning(("No response from the APRS server after %u seconds", APRS_TIMEOUT);*/
 
 					if (length < 0) {
 						m_connected = false;

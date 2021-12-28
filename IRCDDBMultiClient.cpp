@@ -287,11 +287,11 @@ bool CIRCDDBMultiClient::receiveUser(std::string & userCallsign, std::string & r
 {
 	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_USER, "CIRCDDBMultiClient::receiveUser: unexpected response type");
 	if (item == NULL) {
-		//CLog::logInfo(wxT("CIRCDDBMultiClient::receiveUser NO USER IN QUEUE"));
+		//CLog::logInfo("CIRCDDBMultiClient::receiveUser NO USER IN QUEUE"));
 		return false;
 	}
 
-	//CLog::logInfo(wxT("CIRCDDBMultiClient::receiveUser : %s"), item->toString());
+	//CLog::logInfo("CIRCDDBMultiClient::receiveUser : %s", item->toString());
 
 	userCallsign = item->getUser();
 	repeaterCallsign = item->getRepeater();

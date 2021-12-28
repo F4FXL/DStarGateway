@@ -590,7 +590,7 @@ void CDCSHandler::processInt(CAMBEData& data)
 			if (m_dcsId == 0x00U) {		// && seqNo == 0U) {
 				// Write to Header.log if it's enabled
 				if (m_headerLogger != NULL)
-					m_headerLogger->write(wxT("DCS"), header);
+					m_headerLogger->write("DCS", header);
 
 				m_dcsId  = id;
 				m_dcsSeq = 0x00U;

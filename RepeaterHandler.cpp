@@ -211,16 +211,16 @@ m_heardTimer(1000U, 0U, 100U)		// 100ms
 #ifdef USE_ANNOUNCE
 	wxFileName messageFile;
 	messageFile.SetPath(::wxGetHomeDir());
-	messageFile.SetName(wxT("message"));
-	messageFile.SetExt(wxT("dvtool"));
+	messageFile.SetName("message"));
+	messageFile.SetExt("dvtool"));
 
 	wxFileName weatherFile;
 	weatherFile.SetPath(::wxGetHomeDir());
-	weatherFile.SetName(wxT("weather"));
-	weatherFile.SetExt(wxT("dvtool"));
+	weatherFile.SetName("weather"));
+	weatherFile.SetExt("dvtool"));
 
-	m_msgAudio  = new CAnnouncementUnit(this, callsign, messageFile.GetFullPath(), wxT("MSG"));
-	m_wxAudio   = new CAnnouncementUnit(this, callsign, weatherFile.GetFullPath(), wxT("WX"));
+	m_msgAudio  = new CAnnouncementUnit(this, callsign, messageFile.GetFullPath(), "MSG"));
+	m_wxAudio   = new CAnnouncementUnit(this, callsign, weatherFile.GetFullPath(), "WX"));
 #endif
 
 	m_echo      = new CEchoUnit(this, callsign);
@@ -599,7 +599,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	}
 
 	if (!m_heardUser.empty() && m_myCall1 != m_heardUser && m_irc != NULL)
-		m_irc->sendHeard(m_heardUser, wxT("    "), wxT("        "), m_heardRepeater, wxT("        "), 0x00U, 0x00U, 0x00U);
+		m_irc->sendHeard(m_heardUser, "    ", "        ", m_heardRepeater, "        ", 0x00U, 0x00U, 0x00U);
 
 #ifdef USE_CCS
 	// Inform CCS
@@ -639,7 +639,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 
 	// Write to Header.log if it's enabled
 	if (m_headerLogger != NULL)
-		m_headerLogger->write(wxT("Repeater"), header);
+		m_headerLogger->write("Repeater", header);
 
 	// Reset the DTMF decoder
 	m_dtmf.reset();
@@ -683,7 +683,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	}
 
 	// Reject silly RPT2 values
-	if (m_rptCall2 == (m_rptCallsign) || m_rptCall2 == (wxT("        ")))
+	if (m_rptCall2 == (m_rptCallsign) || m_rptCall2 == ("        "))
 		return;
 
 	// Do cross-band routing if RPT2 is not one of the gateway callsigns
@@ -705,7 +705,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 #ifdef USE_STARNET
 	m_starNet = CStarNetHandler::findStarNet(header);
 	if (m_starNet != NULL && !m_restricted) {
-		CLog::logInfo(wxT("StarNet routing by %s to %s"), m_myCall1.c_str(), m_yourCall.c_str());
+		CLog::logInfo("StarNet routing by %s to %s", m_myCall1.c_str(), m_yourCall.c_str());
 		m_starNet->process(header);
 		m_g2Status = G2_STARNET;
 		return;
@@ -713,20 +713,20 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 #endif
 
 	// Reject simple cases
-	if (m_yourCall.substr(0,4) == (wxT("CQCQ"))) {
+	if (m_yourCall.substr(0,4) == ("CQCQ")) {
 		sendToOutgoing(header);
 		return;
 	}
 
 	// Handle the Echo command
-	if (m_echoEnabled && m_yourCall == (wxT("       E"))) {
+	if (m_echoEnabled && m_yourCall == ("       E")) {
 		m_g2Status = G2_ECHO;
 		m_echo->writeHeader(header);
 		return;
 	}
 
 	// Handle the Info command
-	if (m_infoEnabled && m_yourCall == (wxT("       I"))) {
+	if (m_infoEnabled && m_yourCall == ("       I")) {
 		m_g2Status = G2_LOCAL;
 		m_infoNeeded = true;
 		return;
@@ -734,14 +734,14 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 
 #ifdef USE_ANNOUNCE
 	// Handle the MSG command
-	if (m_infoEnabled && m_yourCall == (wxT("       M"))) {
+	if (m_infoEnabled && m_yourCall == ("       M")) {
 		m_g2Status = G2_LOCAL;
 		m_msgNeeded = true;
 		return;
 	}
 
 	// Handle the WX command
-	if (m_infoEnabled && m_yourCall == (wxT("       W"))) {
+	if (m_infoEnabled && m_yourCall == ("       W")) {
 		m_g2Status = G2_LOCAL;
 		m_wxNeeded = true;
 		return;
@@ -749,7 +749,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 #endif
 
 	// Handle the Version command
-	if (m_infoEnabled && m_yourCall == (wxT("       V"))) {
+	if (m_infoEnabled && m_yourCall == ("       V")) {
 		m_g2Status = G2_VERSION;
 		sendToOutgoing(header);
 		return;
@@ -762,7 +762,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 
 #ifdef USE_CCS
 	if (isCCSCommand(m_yourCall)) {
-		ccsCommandHandler(m_yourCall, m_myCall1, wxT("UR Call"));
+		ccsCommandHandler(m_yourCall, m_myCall1, "UR Call"));
 		sendToOutgoing(header);
 	} else
 #endif
@@ -770,7 +770,7 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 		g2CommandHandler(m_yourCall, m_myCall1, header);
 
 		if (m_g2Status == G2_NONE) {
-			reflectorCommandHandler(m_yourCall, m_myCall1, wxT("UR Call"));
+			reflectorCommandHandler(m_yourCall, m_myCall1, "UR Call");
 			sendToOutgoing(header);
 		}
 	}
@@ -820,13 +820,13 @@ void CRepeaterHandler::processRepeater(CAMBEData& data)
 					}
 #ifdef USE_CCS
 					else if (isCCSCommand(command)) {
-						ccsCommandHandler(command, m_myCall1, wxT("DTMF"));
+						ccsCommandHandler(command, m_myCall1, "DTMF"));
 					}
 #endif
 					else if (command == "       I") {
 						m_infoNeeded = true;
 					} else {
-						reflectorCommandHandler(command, m_myCall1, wxT("DTMF"));
+						reflectorCommandHandler(command, m_myCall1, "DTMF");
 					}
 				}
 			}
@@ -1149,7 +1149,7 @@ bool CRepeaterHandler::process(CDDData& data)
 {
 	unsigned char* address = data.getDestinationAddress();
 	if (::memcmp(address, ETHERNET_BROADCAST_ADDRESS, ETHERNET_ADDRESS_LENGTH) == 0)
-		data.setRepeaters(m_gwyCallsign, wxT("        "));
+		data.setRepeaters(m_gwyCallsign, "        ");
 	else if (::memcmp(address, TOALL_MULTICAST_ADDRESS, ETHERNET_ADDRESS_LENGTH) == 0)
 		data.setRepeaters(m_gwyCallsign, m_rptCallsign);
 	else if (::memcmp(address, DX_MULTICAST_ADDRESS, ETHERNET_ADDRESS_LENGTH) == 0)
@@ -1160,7 +1160,7 @@ bool CRepeaterHandler::process(CDDData& data)
 	data.setDestination(m_address, m_port);
 	data.setFlags(0xC0U, 0x00U, 0x00U);
 	data.setMyCall1(m_ddCallsign);
-	data.setMyCall2(wxT("    "));
+	data.setMyCall2("    ");
 
 	m_repeaterHandler->writeDD(data);
 
@@ -1545,7 +1545,7 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 #ifdef USE_CCS
 		else if (m_linkStatus == LS_LINKING_CCS) {
 			// CCS didn't reply in time
-			CLog::logInfo(wxT("CCS did not reply within five seconds"));
+			CLog::logInfo("CCS did not reply within five seconds"));
 
 			m_ccsHandler->stopLink();
 
@@ -1842,7 +1842,7 @@ void CRepeaterHandler::link(RECONNECT reconnect, const std::string& reflector)
 #ifdef USE_CCS
 	// CCS removal
 	if (m_linkStatus == LS_LINKING_CCS || m_linkStatus == LS_LINKED_CCS) {
-		CLog::logInfo(wxT("Dropping CCS link to %s"), m_linkRepeater.c_str());
+		CLog::logInfo("Dropping CCS link to %s", m_linkRepeater.c_str());
 
 		m_ccsHandler->stopLink();
 
@@ -2051,7 +2051,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		CLog::logInfo("%s is trying to G2 route to repeater %s", user.c_str(), repeater.c_str());
 
 		m_g2Repeater = repeater;
-		m_g2User = wxT("CQCQCQ  ");
+		m_g2User = "CQCQCQ  ";
 
 		CRepeaterData* data = m_cache->findRepeater(m_g2Repeater);
 
@@ -2118,7 +2118,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 #ifdef USE_CCS
 void CRepeaterHandler::ccsCommandHandler(const std::string& callsign, const std::string& user, const std::string& type)
 {
-	if (callsign.IsSameAs(wxT("CA      "))) {
+	if (callsign.IsSameAs("CA      "))) {
 		m_ccsHandler->stopLink(user, type);
 	} else {
 		CCS_STATUS status = m_ccsHandler->getStatus();
@@ -2523,38 +2523,38 @@ void CRepeaterHandler::writeLinkingTo(const std::string &callsign)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = CStringUtils::string_format(wxT("Verbinde mit %s"), callsign.c_str());
+			text = CStringUtils::string_format("Verbinde mit %s", callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = CStringUtils::string_format(wxT("Linker til %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linker til %s", callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = CStringUtils::string_format(wxT("Connexion a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Connexion a %s", callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = CStringUtils::string_format(wxT("In conn con %s"), callsign.c_str());
+			text = CStringUtils::string_format("In conn con %s", callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = CStringUtils::string_format(wxT("Linkuje do %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linkuje do %s", callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = CStringUtils::string_format(wxT("Enlazando %s"), callsign.c_str());
+			text = CStringUtils::string_format("Enlazando %s", callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = CStringUtils::string_format(wxT("Lankar till %s"), callsign.c_str());
+			text = CStringUtils::string_format("Lankar till %s", callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = CStringUtils::string_format(wxT("Linken naar %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linken naar %s", callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = CStringUtils::string_format(wxT("Kobler til %s"), callsign.c_str());
+			text = CStringUtils::string_format("Kobler til %s", callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = CStringUtils::string_format(wxT("Conectando, %s"), callsign.c_str());
+			text = CStringUtils::string_format("Conectando, %s", callsign.c_str());
 			break;
 		default:
-			text = CStringUtils::string_format(wxT("Linking to %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linking to %s", callsign.c_str());
 			break;
 	}
 
@@ -2575,38 +2575,38 @@ void CRepeaterHandler::writeLinkedTo(const std::string &callsign)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = CStringUtils::string_format(wxT("Verlinkt zu %s"), callsign.c_str());
+			text = CStringUtils::string_format("Verlinkt zu %s", callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = CStringUtils::string_format(wxT("Linket til %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linket til %s", callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = CStringUtils::string_format(wxT("Connecte a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Connecte a %s", callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = CStringUtils::string_format(wxT("Connesso a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Connesso a %s", callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = CStringUtils::string_format(wxT("Polaczony z %s"), callsign.c_str());
+			text = CStringUtils::string_format("Polaczony z %s", callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = CStringUtils::string_format(wxT("Enlazado %s"), callsign.c_str());
+			text = CStringUtils::string_format("Enlazado %s", callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = CStringUtils::string_format(wxT("Lankad till %s"), callsign.c_str());
+			text = CStringUtils::string_format("Lankad till %s", callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = CStringUtils::string_format(wxT("Gelinkt met %s"), callsign.c_str());
+			text = CStringUtils::string_format("Gelinkt met %s", callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = CStringUtils::string_format(wxT("Tilkoblet %s"), callsign.c_str());
+			text = CStringUtils::string_format("Tilkoblet %s", callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = CStringUtils::string_format(wxT("Conectado a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Conectado a %s", callsign.c_str());
 			break;
 		default:
-			text = CStringUtils::string_format(wxT("Linked to %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linked to %s", callsign.c_str());
 			break;
 	}
 
@@ -2627,38 +2627,38 @@ void CRepeaterHandler::writeNotLinked()
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = wxT("Nicht verbunden");
+			text = "Nicht verbunden";
 			break;
 		case TL_DANSK:
-			text = wxT("Ikke forbundet");
+			text = "Ikke forbundet";
 			break;
 		case TL_FRANCAIS:
-			text = wxT("Non connecte");
+			text = "Non connecte";
 			break;
 		case TL_ITALIANO:
-			text = wxT("Non connesso");
+			text = "Non connesso";
 			break;
 		case TL_POLSKI:
-			text = wxT("Nie polaczony");
+			text = "Nie polaczony";
 			break;
 		case TL_ESPANOL:
-			text = wxT("No enlazado");
+			text = "No enlazado";
 			break;
 		case TL_SVENSKA:
-			text = wxT("Ej lankad");
+			text = "Ej lankad";
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = wxT("Niet gelinkt");
+			text = "Niet gelinkt";
 			break;
 		case TL_NORSK:
-			text = wxT("Ikke linket");
+			text = "Ikke linket";
 			break;
 		case TL_PORTUGUES:
-			text = wxT("Desconectado");
+			text = "Desconectado";
 			break;
 		default:
-			text = wxT("Not linked");
+			text = "Not linked";
 			break;
 	}
 
@@ -2680,49 +2680,49 @@ void CRepeaterHandler::writeIsBusy(const std::string& callsign)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = wxT("Nicht verbunden");
-			tempText = CStringUtils::string_format(wxT("%s ist belegt"), callsign.c_str());
+			text = "Nicht verbunden";
+			tempText = CStringUtils::string_format("%s ist belegt", callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = wxT("Ikke forbundet");
-			tempText = CStringUtils::string_format(wxT("Optaget fra %s"), callsign.c_str());
+			text = "Ikke forbundet";
+			tempText = CStringUtils::string_format("Optaget fra %s", callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = wxT("Non connecte");
-			tempText = CStringUtils::string_format(wxT("Occupe par %s"), callsign.c_str());
+			text = "Non connecte";
+			tempText = CStringUtils::string_format("Occupe par %s", callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = wxT("Non connesso");
-			tempText = CStringUtils::string_format(wxT("Occupado da%s"), callsign.c_str());
+			text = "Non connesso";
+			tempText = CStringUtils::string_format("Occupado da%s", callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = wxT("Nie polaczony");
-			tempText = CStringUtils::string_format(wxT("%s jest zajety"), callsign.c_str());
+			text = "Nie polaczony";
+			tempText = CStringUtils::string_format("%s jest zajety", callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = wxT("No enlazado");
-			tempText = CStringUtils::string_format(wxT("%s ocupado"), callsign.c_str());
+			text = "No enlazado";
+			tempText = CStringUtils::string_format("%s ocupado", callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = wxT("Ej lankad");
-			tempText = CStringUtils::string_format(wxT("%s ar upptagen"), callsign.c_str());
+			text = "Ej lankad";
+			tempText = CStringUtils::string_format("%s ar upptagen", callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = wxT("Niet gelinkt");
-			tempText = CStringUtils::string_format(wxT("%s is bezet"), callsign.c_str());
+			text = "Niet gelinkt";
+			tempText = CStringUtils::string_format("%s is bezet", callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = wxT("Ikke linket");
-			tempText = CStringUtils::string_format(wxT("%s er opptatt"), callsign.c_str());
+			text = "Ikke linket";
+			tempText = CStringUtils::string_format("%s er opptatt", callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = wxT("Desconectado");
-			tempText = CStringUtils::string_format(wxT("%s, ocupado"), callsign.c_str());
+			text = "Desconectado";
+			tempText = CStringUtils::string_format("%s, ocupado", callsign.c_str());
 			break;
 		default:
-			text = wxT("Not linked");
-			tempText = CStringUtils::string_format(wxT("%s is busy"), callsign.c_str());
+			text = "Not linked";
+			tempText = CStringUtils::string_format("%s is busy", callsign.c_str());
 			break;
 	}
 
@@ -2747,38 +2747,38 @@ void CRepeaterHandler::ccsLinkMade(const std::string& callsign, DIRECTION direct
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = CStringUtils::string_format(wxT("Verlinkt zu %s"), callsign.c_str());
+			text = CStringUtils::string_format("Verlinkt zu %s", callsign.c_str());
 			break;
 		case TL_DANSK:
-			text = CStringUtils::string_format(wxT("Linket til %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linket til %s", callsign.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = CStringUtils::string_format(wxT("Connecte a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Connecte a %s", callsign.c_str());
 			break;
 		case TL_ITALIANO:
-			text = CStringUtils::string_format(wxT("Connesso a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Connesso a %s", callsign.c_str());
 			break;
 		case TL_POLSKI:
-			text = CStringUtils::string_format(wxT("Polaczony z %s"), callsign.c_str());
+			text = CStringUtils::string_format("Polaczony z %s", callsign.c_str());
 			break;
 		case TL_ESPANOL:
-			text = CStringUtils::string_format(wxT("Enlazado %s"), callsign.c_str());
+			text = CStringUtils::string_format("Enlazado %s", callsign.c_str());
 			break;
 		case TL_SVENSKA:
-			text = CStringUtils::string_format(wxT("Lankad till %s"), callsign.c_str());
+			text = CStringUtils::string_format("Lankad till %s", callsign.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = CStringUtils::string_format(wxT("Gelinkt met %s"), callsign.c_str());
+			text = CStringUtils::string_format("Gelinkt met %s", callsign.c_str());
 			break;
 		case TL_NORSK:
-			text = CStringUtils::string_format(wxT("Tilkoblet %s"), callsign.c_str());
+			text = CStringUtils::string_format("Tilkoblet %s", callsign.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = CStringUtils::string_format(wxT("Conectado a %s"), callsign.c_str());
+			text = CStringUtils::string_format("Conectado a %s", callsign.c_str());
 			break;
 		default:
-			text = CStringUtils::string_format(wxT("Linked to %s"), callsign.c_str());
+			text = CStringUtils::string_format("Linked to %s", callsign.c_str());
 			break;
 	}
 
@@ -2810,49 +2810,49 @@ void CRepeaterHandler::ccsLinkEnded(const std::string&, DIRECTION direction)
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = wxT("Nicht verbunden");
-			tempText = wxT("CCS ist beendet");
+			text = "Nicht verbunden";
+			tempText = "CCS ist beendet";
 			break;
 		case TL_DANSK:
-			text = wxT("Ikke forbundet");
-			tempText = wxT("CCS er afsluttet");
+			text = "Ikke forbundet";
+			tempText = "CCS er afsluttet";
 			break;
 		case TL_FRANCAIS:
-			text = wxT("Non connecte");
-			tempText = wxT("CCS a pris fin");
+			text = "Non connecte";
+			tempText = "CCS a pris fin";
 			break;
 		case TL_ITALIANO:
-			text = wxT("Non connesso");
-			tempText = wxT("CCS e finita");
+			text = "Non connesso";
+			tempText = "CCS e finita";
 			break;
 		case TL_POLSKI:
-			text = wxT("Nie polaczony");
-			tempText = wxT("CCS zakonczyl");
+			text = "Nie polaczony";
+			tempText = "CCS zakonczyl";
 			break;
 		case TL_ESPANOL:
-			text = wxT("No enlazado");
-			tempText = wxT("CCS ha terminado");
+			text = "No enlazado";
+			tempText = "CCS ha terminado";
 			break;
 		case TL_SVENSKA:
-			text = wxT("Ej lankad");
-			tempText = wxT("CCS har upphort");
+			text = "Ej lankad";
+			tempText = "CCS har upphort";
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = wxT("Niet gelinkt");
-			tempText = wxT("CCS is afgelopen");
+			text = "Niet gelinkt";
+			tempText = "CCS is afgelopen";
 			break;
 		case TL_NORSK:
-			text = wxT("Ikke linket");
-			tempText = wxT("CCS er avsluttet");
+			text = "Ikke linket";
+			tempText = "CCS er avsluttet";
 			break;
 		case TL_PORTUGUES:
-			text = wxT("Desconectado");
-			tempText = wxT("CCS terminou");
+			text = "Desconectado";
+			tempText = "CCS terminou";
 			break;
 		default:
-			text = wxT("Not linked");
-			tempText = wxT("CCS has ended");
+			text = "Not linked";
+			tempText = "CCS has ended";
 			break;
 	}
 
@@ -2889,49 +2889,49 @@ void CRepeaterHandler::ccsLinkFailed(const std::string& dtmf, DIRECTION directio
 
 	switch (m_language) {
 		case TL_DEUTSCH:
-			text = wxT("Nicht verbunden");
-			tempText = CStringUtils::string_format(wxT("%s unbekannt"), dtmf.c_str());
+			text = "Nicht verbunden";
+			tempText = CStringUtils::string_format("%s unbekannt", dtmf.c_str());
 			break;
 		case TL_DANSK:
-			text = wxT("Ikke forbundet");
-			tempText = CStringUtils::string_format(wxT("%s unknown"), dtmf.c_str());
+			text = "Ikke forbundet";
+			tempText = CStringUtils::string_format("%s unknown", dtmf.c_str());
 			break;
 		case TL_FRANCAIS:
-			text = wxT("Non connecte");
-			tempText = CStringUtils::string_format(wxT("%s inconnu"), dtmf.c_str());
+			text = "Non connecte";
+			tempText = CStringUtils::string_format("%s inconnu", dtmf.c_str());
 			break;
 		case TL_ITALIANO:
-			text = wxT("Non connesso");
-			tempText = CStringUtils::string_format(wxT("Sconosciuto %s"), dtmf.c_str());
+			text = "Non connesso";
+			tempText = CStringUtils::string_format("Sconosciuto %s", dtmf.c_str());
 			break;
 		case TL_POLSKI:
-			text = wxT("Nie polaczony");
-			tempText = CStringUtils::string_format(wxT("%s nieznany"), dtmf.c_str());
+			text = "Nie polaczony";
+			tempText = CStringUtils::string_format("%s nieznany", dtmf.c_str());
 			break;
 		case TL_ESPANOL:
-			text = wxT("No enlazado");
-			tempText = CStringUtils::string_format(wxT("Desconocido %s"), dtmf.c_str());
+			text = "No enlazado";
+			tempText = CStringUtils::string_format("Desconocido %s", dtmf.c_str());
 			break;
 		case TL_SVENSKA:
-			text = wxT("Ej lankad");
-			tempText = CStringUtils::string_format(wxT("%s okand"), dtmf.c_str());
+			text = "Ej lankad";
+			tempText = CStringUtils::string_format("%s okand", dtmf.c_str());
 			break;
 		case TL_NEDERLANDS_NL:
 		case TL_NEDERLANDS_BE:
-			text = wxT("Niet gelinkt");
-			tempText = CStringUtils::string_format(wxT("%s bekend"), dtmf.c_str());
+			text = "Niet gelinkt";
+			tempText = CStringUtils::string_format("%s bekend", dtmf.c_str());
 			break;
 		case TL_NORSK:
-			text = wxT("Ikke linket");
-			tempText = CStringUtils::string_format(wxT("%s ukjent"), dtmf.c_str());
+			text = "Ikke linket";
+			tempText = CStringUtils::string_format("%s ukjent", dtmf.c_str());
 			break;
 		case TL_PORTUGUES:
-			text = wxT("Desconectado");
-			tempText = CStringUtils::string_format(wxT("%s desconhecido"), dtmf.c_str());
+			text = "Desconectado";
+			tempText = CStringUtils::string_format("%s desconhecido", dtmf.c_str());
 			break;
 		default:
-			text = wxT("Not linked");
-			tempText = CStringUtils::string_format(wxT("%s unknown"), dtmf.c_str());
+			text = "Not linked";
+			tempText = CStringUtils::string_format("%s unknown", dtmf.c_str());
 			break;
 	}
 
@@ -3061,7 +3061,7 @@ void CRepeaterHandler::triggerInfo()
 #ifdef USE_CCS
 bool CRepeaterHandler::isCCSCommand(const std::string& command) const
 {
-	if (command.IsSameAs(wxT("CA      ")))
+	if (command.IsSameAs("CA      ")))
 		return true;
 
 	wxChar c = command.GetChar(0U);

@@ -57,7 +57,7 @@ bool CHBRepeaterProtocolHandler::writeHeader(CHeaderData& header)
 	unsigned int length = header.getHBRepeaterData(buffer, 50U, true);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Header"), buffer, length);
+	CUtils::dump("Sending Header", buffer, length);
 	return true;
 #else
 	return m_socket.write(buffer, length, header.getYourAddress(), header.getYourPort());
@@ -70,7 +70,7 @@ bool CHBRepeaterProtocolHandler::writeAMBE(CAMBEData& data)
 	unsigned int length = data.getHBRepeaterData(buffer, 30U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Data"), buffer, length);
+	CUtils::dump("Sending Data", buffer, length);
 	return true;
 #else
 	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
@@ -83,7 +83,7 @@ bool CHBRepeaterProtocolHandler::writeDD(CDDData& data)
 	unsigned int length = data.getHBRepeaterData(buffer, 2000U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending DD Data"), buffer, length);
+	CUtils::dump("Sending DD Data", buffer, length);
 	return true;
 #else
 	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
@@ -96,7 +96,7 @@ bool CHBRepeaterProtocolHandler::writeText(CTextData& text)
 	unsigned int length = text.getHBRepeaterData(buffer, 40U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Text"), buffer, length);
+	CUtils::dump("Sending Text", buffer, length);
 	return true;
 #else
 	return m_socket.write(buffer, length, text.getAddress(), text.getPort());
@@ -109,7 +109,7 @@ bool CHBRepeaterProtocolHandler::writeStatus(CStatusData& status)
 	unsigned int length = status.getHBRepeaterData(buffer, 30U);
 
 #if defined(DUMP_TX)
-	CUtils::dump(wxT("Sending Status"), buffer, length);
+	CUtils::dump("Sending Status", buffer, length);
 	return true;
 #else
 	return m_socket.write(buffer, length, status.getAddress(), status.getPort());

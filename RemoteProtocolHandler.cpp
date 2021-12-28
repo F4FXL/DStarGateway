@@ -66,7 +66,7 @@ RPH_TYPE CRemoteProtocolHandler::readType()
 	if (length <= 0)
 		return m_type;
 
-	// CUtils::dump(wxT("Incoming"), m_inBuffer, length);
+	// CUtils::dump("Incoming", m_inBuffer, length);
 
 	if (::memcmp(m_inBuffer, "LIN", 3U) == 0) {
 		m_loggedIn = false;
@@ -86,7 +86,7 @@ RPH_TYPE CRemoteProtocolHandler::readType()
 
 	if (m_loggedIn) {
 		if (address.s_addr != m_address.s_addr || port != m_port) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 	}
@@ -95,49 +95,49 @@ RPH_TYPE CRemoteProtocolHandler::readType()
 
 	if (::memcmp(m_inBuffer, "SHA", 3U) == 0) {
 		if (m_loggedIn) {
-			sendNAK(wxT("Someone is already logged in"));
+			sendNAK("Someone is already logged in");
 			return m_type;
 		}
 		m_type = RPHT_HASH;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "GCS", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_CALLSIGNS;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "GRP", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_REPEATER;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "GSN", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_STARNET;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "LNK", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_LINK;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "UNL", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_UNLINK;
 		return m_type;
 	} else if (::memcmp(m_inBuffer, "LGO", 3U) == 0) {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_LOGOFF;
@@ -149,7 +149,7 @@ RPH_TYPE CRemoteProtocolHandler::readType()
 		return m_type;
 	} else {
 		if (!m_loggedIn) {
-			sendNAK(wxT("You are not logged in"));
+			sendNAK("You are not logged in");
 			return m_type;
 		}
 		m_type = RPHT_UNKNOWN;
@@ -298,7 +298,7 @@ bool CRemoteProtocolHandler::sendCallsigns(const std::vector<std::string> & repe
 		p += LONG_CALLSIGN_LENGTH;
 	}
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, p - m_outBuffer);
+	// CUtils::dump("Outgoing", m_outBuffer, p - m_outBuffer);
 
 	return m_socket.write(m_outBuffer, p - m_outBuffer, m_address, m_port);
 }
@@ -349,7 +349,7 @@ bool CRemoteProtocolHandler::sendRepeater(const CRemoteRepeaterData& data)
 		p += sizeof(int32_t);
 	}
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, p - m_outBuffer);
+	// CUtils::dump("Outgoing", m_outBuffer, p - m_outBuffer);
 
 	return m_socket.write(m_outBuffer, p - m_outBuffer, m_address, m_port);
 }
@@ -397,7 +397,7 @@ bool CRemoteProtocolHandler::sendStarNetGroup(const CRemoteStarNetGroup& data)
 		p += sizeof(uint32_t);
 	}
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, p - m_outBuffer);
+	// CUtils::dump("Outgoing", m_outBuffer, p - m_outBuffer);
 
 	return m_socket.write(m_outBuffer, p - m_outBuffer, m_address, m_port);
 }
@@ -417,7 +417,7 @@ bool CRemoteProtocolHandler::sendACK()
 {
 	::memcpy(m_outBuffer + 0U, "ACK", 3U);
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, 3U);
+	// CUtils::dump("Outgoing", m_outBuffer, 3U);
 
 	return m_socket.write(m_outBuffer, 3U, m_address, m_port);
 }
@@ -431,7 +431,7 @@ bool CRemoteProtocolHandler::sendNAK(const std::string& text)
 	for (unsigned int i = 0U; i < text.length(); i++)
 		m_outBuffer[i + 3U] = text[i];
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, 3U + text.length() + 1U);
+	// CUtils::dump("Outgoing", m_outBuffer, 3U + text.length() + 1U);
 
 	return m_socket.write(m_outBuffer, 3U + text.length() + 1U, m_address, m_port);
 }
@@ -443,7 +443,7 @@ bool CRemoteProtocolHandler::sendRandom(uint32_t random)
 	uint32_t temp = CUtils::swap_endian(random);
 	::memcpy(m_outBuffer + 3U, &temp, sizeof(uint32_t));
 
-	// CUtils::dump(wxT("Outgoing"), m_outBuffer, 3U + sizeof(uint32_t));
+	// CUtils::dump("Outgoing", m_outBuffer, 3U + sizeof(uint32_t));
 
 	return m_socket.write(m_outBuffer, 3U + sizeof(uint32_t), m_address, m_port);
 }

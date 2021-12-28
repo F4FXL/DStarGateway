@@ -93,7 +93,7 @@ bool CCCSData::setCCSData(const unsigned char *data, unsigned int length, const 
 			if (0 == memcmp(data + 8U, "0001", 4U)) {
 				m_type = CT_TERMINATE;
 			} else {
-				// CUtils::dump(wxT("Invalid CCS packet"), data, length);
+				// CUtils::dump("Invalid CCS packet", data, length);
 				return false;
 			}
 			memcpy(buffer, data+12, LONG_CALLSIGN_LENGTH);

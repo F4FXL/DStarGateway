@@ -181,11 +181,11 @@ void CAPRSCollector::addGGAData()
 
 	bool ret = checkXOR(m_ggaData + 1U, m_ggaLength - 1U);
 	if (ret) {
-		// CUtils::dump(wxT("$GPGGA Valid"), m_ggaData, m_ggaLength);
+		// CUtils::dump("$GPGGA Valid", m_ggaData, m_ggaLength);
 		m_ggaValid  = true;
 		m_state     = AS_RMC;
 	} else {
-		// CUtils::dump(wxT("$GPGGA Bad checksum"), m_ggaData, m_ggaLength);
+		// CUtils::dump("$GPGGA Bad checksum", m_ggaData, m_ggaLength);
 		m_ggaLength = 0U;
 		m_ggaValid  = false;
 		m_state     = AS_RMC;
@@ -225,10 +225,10 @@ bool CAPRSCollector::addRMCData()
 
 	bool ret = checkXOR(m_rmcData + 1U, m_rmcLength - 1U);
 	if (ret) {
-		// CUtils::dump(wxT("$GPRMC Valid"), m_rmcData, m_rmcLength);
+		// CUtils::dump("$GPRMC Valid", m_rmcData, m_rmcLength);
 		m_rmcValid = true;
 	} else {
-		// CUtils::dump(wxT("$GPRMC Bad checksum"), m_rmcData, m_rmcLength);
+		// CUtils::dump("$GPRMC Bad checksum", m_rmcData, m_rmcLength);
 		m_rmcLength = 0U;
 		m_rmcValid  = false;
 	}
@@ -270,13 +270,13 @@ bool CAPRSCollector::addCRCData()
 
 	bool ret = checkCRC(m_crcData, m_crcLength);
 	if (ret) {
-		// CUtils::dump(wxT("$$CRC Valid"), m_crcData, m_crcLength);
+		// CUtils::dump("$$CRC Valid", m_crcData, m_crcLength);
 		m_crcValid = true;
 		m_state = AS_NONE;
 		m_collector = m_collector.substr(n2);
 		return true;
 	} else {
-		// CUtils::dump(wxT("$$CRC Bad checksum"), m_crcData, m_crcLength);
+		// CUtils::dump("$$CRC Bad checksum", m_crcData, m_crcLength);
 		m_crcLength = 0U;
 		m_crcValid  = false;
 		m_state     = AS_NONE;

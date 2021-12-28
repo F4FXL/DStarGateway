@@ -84,7 +84,7 @@ public:
 	unsigned int incrementResponseCount()
 	{
 		++m_responseCount;
-		//wxLogMessage(wxT("Resp Count : %s %d"), toString(), m_responseCount);
+		//wxLogMessage("Resp Count : %s %d"), toString(), m_responseCount);
 		return m_responseCount;
 	}
 
@@ -93,7 +93,7 @@ public:
 	*/
 	void Update(const std::string& user, const std::string& repeater, const std::string& gateway, const std::string& address, const std::string& timestamp)
 	{
-		//wxLogMessage(wxT("Before : %s"), toString());
+		//wxLogMessage("Before : %s"), toString());
 		if (timestamp.empty() || timestamp.compare(m_timestamp) >= 0) {
 			m_user = user;
 			m_repeater = repeater;
@@ -103,7 +103,7 @@ public:
 			if(m_address.empty() && !address.empty())
 				m_address = address;
 		}
-		//wxLogMessage(wxT("After : %s"), toString());
+		//wxLogMessage("After : %s"), toString());
 	}
 
 	IRCDDB_RESPONSE_TYPE getType()

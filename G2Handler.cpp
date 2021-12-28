@@ -78,7 +78,7 @@ void CG2Handler::process(CHeaderData& header)
 	unsigned char flag1 = header.getFlag1();
 	if (flag1 == 0x01) {
 		// Don't check the incoming stream
-		// CLog::logInfo(wxT("G2 busy message received"));
+		// CLog::logInfo("G2 busy message received"));
 		return;
 	}
 
@@ -88,7 +88,7 @@ void CG2Handler::process(CHeaderData& header)
 	if (handler != NULL) {
 		// Write to Header.log if it's enabled
 		if (m_headerLogger != NULL)
-			m_headerLogger->write(wxT("StarNet"), header);
+			m_headerLogger->write("StarNet", header);
 
 		handler->process(header);
 		return;
