@@ -148,7 +148,7 @@ bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, c
 
 	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
 	if (ret < 0) {
-		CLog::logInfo("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
+		CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
 		return false;
 	}
 
