@@ -307,8 +307,10 @@ void CAPRSWriter::clock(unsigned int ms)
 		}
 	}
 
-	for (auto it = m_array.begin(); it != m_array.end(); ++it)
-		it->second->clock(ms);
+	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
+		if(it->second != NULL)
+			it->second->clock(ms);
+	}
 }
 
 bool CAPRSWriter::isConnected() const
