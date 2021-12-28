@@ -2069,7 +2069,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			m_g2Handler->writeHeader(header);
 			delete data;
 		}
-	} else if (string_right(callsign, 1) != "L" && string_right(callsign, 1) == "U") {
+	} else if (string_right(callsign, 1) != "L" && string_right(callsign, 1) != "U") {
 		if (m_irc == NULL) {
 			CLog::logInfo("%s is trying to G2 route with ircDDB disabled", user.c_str());
 			m_g2Status = G2_LOCAL;
