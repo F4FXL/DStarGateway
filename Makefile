@@ -13,6 +13,9 @@ SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
+.PHONY: all
+all: dstargateway
+
 dstargateway : GitVersion.h $(OBJS) 
 	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lconfig++ -pthread
 
@@ -20,7 +23,6 @@ dstargateway : GitVersion.h $(OBJS)
 	g++ $(CPPFLAGS) -MMD -MD -c $< -o $@
 
 .PHONY: clean
-
 clean:
 	$(RM) GitVersion.h $(OBJS) $(DEPS) dstargateway
 
