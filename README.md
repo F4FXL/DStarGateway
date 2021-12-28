@@ -21,19 +21,20 @@ The code has also been amended to no longer rely on compiler defines for paths l
 - Thomas A. Early N7TAE (Code taken from his [smart-group](https://github.com/n7tae/smart-group-server) software)
 - Geoffrey Merck F4FXL / KC3FRA [That's me !](https://github.com/F4FXL/)
 ## 2.3. Features
-All the features found in ircddbGateway are supposed to be working.
+All the features found in ircddbGateway are supposed to be working. I have mixed feelings about putting these back in or not.
 
 Features that where left out :
 
 - CCS (is still being used ?) 
 - Starnet (you might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead)
+- Announcement (same can be achieved using transmitd)
 
 # 3. Building and installing
 It is assumed you know how to clone a git repository.
 ## 3.1. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
-apt install build-essential libconfig++-dev libcurl4-openssl-dev
+apt install build-essential libconfig++-dev libcurl4-openssl-dev libboost-dev
 ```
 ## 3.2. Building
 ```
