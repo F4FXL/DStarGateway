@@ -60,14 +60,14 @@ CDCSProtocolHandler *CDCSProtocolHandlerPool::getHandler(unsigned int port)
 	if (proto) {
 		if (proto->open()) {
 			m_pool[port] = proto;
-			CLog::logInfo("New CDCSProtocolHandler now on port %u.\n", port);
+			CLog::logError("New CDCSProtocolHandler now on port %u.\n", port);
 		} else {
 			delete proto;
 			proto = NULL;
-			CLog::logInfo("ERROR: Can't open new DCS UDP port %u!\n", port);
+			CLog::logError("ERROR: Can't open new DCS UDP port %u!\n", port);
 		}
 	} else
-		CLog::logInfo("ERROR: Can't allocate new CDCSProtocolHandler at port %u\n", port);
+		CLog::logError("ERROR: Can't allocate new CDCSProtocolHandler at port %u\n", port);
 	return proto;
 }
 
@@ -76,15 +76,17 @@ void CDCSProtocolHandlerPool::release(CDCSProtocolHandler *handler)
 	assert(handler != NULL);
 	for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
 		if (it->second == handler) {
-			it->second->close();
-			delete it->second;
-			CLog::logInfo("Releasing CDCSProtocolHandler on port %u.\n", it->first);
 			m_pool.erase(it);
+			handler->close();
+			delete handler ;
+			m_index = m_pool.end(); // since we removed an element, m_index is ouot of order, just move it back to the end
+			CLog::logInfo("Released DCS ProtocolHandler on port %u.\n", it->first);
+
 			return;
 		}
 	}
 	// we should never get here!
-	CLog::logInfo("ERROR: could not find CDCSProtocolHander (port=%u) to release!\n", handler->getPort());
+	CLog::logInfo("ERROR: could not find DCS ProtocolHander (port=%u) to release!\n", handler->getPort());
 }
 
 DCS_TYPE CDCSProtocolHandlerPool::read()
