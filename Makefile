@@ -51,11 +51,17 @@ removehostfiles :
 	/bin/rm -f $(CFGDIR)/DExtra_Hosts.txt
 	/bin/rm -f $(CFGDIR)/DCS_Hosts.txt
 
-GitVersion.h : FORCE
+GitVersion.h : FORCE 
 ifneq ("$(wildcard .git/index)","")
-	echo "#pragma once\nconst char *gitversion = \"$(shell git rev-parse HEAD)\";" > $@
+	@echo "#pragma once\nconst char *gitversion = \"$(shell git rev-parse HEAD)\";" > /tmp/$@
 else
-	echo "#pragma once\nconst char *gitversion = \"0000000000000000000000000000000000000000\";" > $@
+	@echo "#pragma once\nconst char *gitversion = \"0000000000000000000000000000000000000000\";" > /tmp/$@
 endif
+	@cmp -s /tmp/$@ $@; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -ne 0 ]; then \
+		echo "Git version has changed"; \
+		cp -f /tmp/$@ $@; \
+	fi;
 
 FORCE:
