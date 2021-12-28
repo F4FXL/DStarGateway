@@ -67,7 +67,7 @@ bool CUDPReaderWriter::open()
 {
 	m_fd = ::socket(PF_INET, SOCK_DGRAM, 0);
 	if (m_fd < 0) {
-		CLog::logInfo("Cannot create the UDP socket, err: %s\n", strerror(errno));
+		CLog::logError("Cannot create the UDP socket, err: %s\n", strerror(errno));
 		return false;
 	}
 
@@ -81,19 +81,19 @@ bool CUDPReaderWriter::open()
 		if (m_address.size()) {
 			addr.sin_addr.s_addr = ::inet_addr(m_address.c_str());
 			if (addr.sin_addr.s_addr == INADDR_NONE) {
-				CLog::logInfo("The address is invalid - %s\n", m_address.c_str());
+				CLog::logError("The address is invalid - %s\n", m_address.c_str());
 				return false;
 			}
 		}
 
 		int reuse = 1;
 		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == -1) {
-			CLog::logInfo("Cannot set the UDP socket option (port: %u), err: %s\n", m_port, strerror(errno));
+			CLog::logError("Cannot set the UDP socket option (port: %u), err: %s\n", m_port, strerror(errno));
 			return false;
 		}
 
 		if (::bind(m_fd, (sockaddr*)&addr, sizeof(sockaddr_in)) == -1) {
-			CLog::logInfo("Cannot bind the UDP address (port: %u), err: %s\n", m_port, strerror(errno));
+			CLog::logError("Cannot bind the UDP address (port: %u), err: %s\n", m_port, strerror(errno));
 			return false;
 		}
 	}
