@@ -308,7 +308,7 @@ bool CDStarGatewayConfig::loadGateway(const Config & cfg)
 {
 	bool ret = get_value(cfg, "gateway.callsign", m_gateway.callsign, 3, 8, "");
 	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true) && ret;
-	get_value(cfg, "gateway.hbaddress", m_gateway.hbAddress, 0, 20, "127.0.0.1", true) && ret;
+	get_value(cfg, "gateway.hbAddress", m_gateway.hbAddress, 0, 20, "127.0.0.1", true) && ret;
 	get_value(cfg, "gateway.hbport", m_gateway.hbPort, 1U, 65535U, 20010U) && ret;
 	get_value(cfg, "gateway.icomAddress", m_gateway.icomAddress, 0, 20, "127.0.0.1", true) && ret;
 	get_value(cfg, "gateway.icomPort", m_gateway.icomPort, 1U, 65535U, 20000U) && ret;
