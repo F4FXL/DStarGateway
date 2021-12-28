@@ -417,7 +417,7 @@ void CAPRSWriter::sendIdFramesFixed()
 		boost::replace_all(lon, ",", wxT("."));
 
 		std::string output;
-		output = CStringUtils::string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s"),
+		output = CStringUtils::string_format(wxT("%s-S>APDST1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s"),
 			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 			tm->tm_mday, tm->tm_hour, tm->tm_min,
 			lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
@@ -432,7 +432,7 @@ void CAPRSWriter::sendIdFramesFixed()
 		m_thread->write(ascii);
 
 		if (entry->getBand().length() == 1U) {
-			output = CStringUtils::string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s"),
+			output = CStringUtils::string_format(wxT("%s-%s>APDST2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s"),
 				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 				lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
 				lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
@@ -549,7 +549,7 @@ void CAPRSWriter::sendIdFramesMobile()
 		boost::replace_all(lon, ",", ".");
 
 		std::string output1;
-		output1 = CStringUtils::string_format(wxT("%s-S>APDG01,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf"),
+		output1 = CStringUtils::string_format(wxT("%s-S>APDST1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf"),
 			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 			tm->tm_mday, tm->tm_hour, tm->tm_min,
 			lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
@@ -580,7 +580,7 @@ void CAPRSWriter::sendIdFramesMobile()
 		m_thread->write(ascii);
 
 		if (entry->getBand().length() == 1U) {
-			output1 = CStringUtils::string_format(wxT("%s-%s>APDG02,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf"),
+			output1 = CStringUtils::string_format(wxT("%s-%s>APDST2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf"),
 				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
 				lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
 				lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
