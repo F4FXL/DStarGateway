@@ -37,8 +37,10 @@ IRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getRepeaterProtocolH
         if(m_icomRepeaterHandler == NULL) {
             CIcomRepeaterProtocolHandler * icomRepeaterHandler = new CIcomRepeaterProtocolHandler(gatewayConfig.icomAddress, gatewayConfig.icomPort, repeaterAddress, repeaterPort);
 			bool res = icomRepeaterHandler->open();
-            if (!res) {
-				CLog::logError("Cannot open the Icom repeater protocol handler");
+            if (res) {
+                CLog::logInfo("Icom repeater controller listening on %s:%u", gatewayConfig.icomAddress.c_str(), gatewayConfig.icomPort);
+            } else {
+				CLog::logError("Cannot open the Icom repeater protocol handler on %s:%u", gatewayConfig.icomAddress.c_str(), gatewayConfig.icomPort);
 				delete icomRepeaterHandler;
 				icomRepeaterHandler = NULL;
 			}
@@ -54,8 +56,10 @@ IRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getRepeaterProtocolH
         if(m_hbRepeaterHandler == NULL) {
     		CHBRepeaterProtocolHandler * hbRepeaterHandler = new CHBRepeaterProtocolHandler(gatewayConfig.hbAddress, gatewayConfig.hbPort);
 			bool res = hbRepeaterHandler->open();
-			if (!res) {
-				CLog::logError("Cannot open the Homebrew repeater protocol handler");
+			if (res) {
+                CLog::logInfo("Home Brew repeater controller listening on %s:%u", gatewayConfig.hbAddress.c_str(), gatewayConfig.hbPort);
+            } else {
+				CLog::logError("Cannot open the Homebrew repeater protocol handler on %s:%u", gatewayConfig.hbAddress.c_str(), gatewayConfig.hbPort);
 				delete hbRepeaterHandler;
 				hbRepeaterHandler = NULL;
 			}
@@ -67,7 +71,9 @@ IRepeaterProtocolHandler * CRepeaterProtocolHandlerFactory::getRepeaterProtocolH
         if(m_dummyRepeaterHandler == NULL) {
             CDummyRepeaterProtocolHandler * dummyRepeaterHandler = new CDummyRepeaterProtocolHandler;
 			bool res = dummyRepeaterHandler->open();
-			if (!res) {
+			if (res) {
+                CLog::logInfo("Dummy repeater controller is open");
+            } else {
 				CLog::logError("Cannot open the Dummy repeater protocol handler");
 				delete dummyRepeaterHandler;
 				dummyRepeaterHandler = NULL;
