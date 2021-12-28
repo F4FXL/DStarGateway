@@ -57,7 +57,7 @@ in_addr CUDPReaderWriter::lookup(const std::string& hostname)
 		return addr;
 	}
 
-	CLog::logInfo("Cannot find address for host %s\n", hostname.c_str());
+	CLog::logWarning("Cannot find address for host %s\n", hostname.c_str());
 
 	addr.s_addr = INADDR_NONE;
 	return addr;
