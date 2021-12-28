@@ -193,7 +193,7 @@ bool CDStarGatewayApp::createThread()
 	// Setup DPlus
 	TDplus dplusConfig;
 	config.getDPlus(dplusConfig);
-	CLog::logInfo("D-Plus enabled: %d, max. dongles; %u, login: %s", int(dplusConfig.enabled), dplusConfig.maxDongles, dplusConfig.login.c_str());
+	CLog::logInfo("D-Plus enabled: %d, max. dongles: %u, login: %s", int(dplusConfig.enabled), dplusConfig.maxDongles, dplusConfig.login.c_str());
 	m_thread->setDPlus(dplusConfig.enabled, dplusConfig.maxDongles, dplusConfig.login);
 
 	// Setup XLX
