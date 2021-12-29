@@ -19,7 +19,7 @@
 export BIN_DIR=/usr/local/bin
 export CFG_DIR=/usr/local/etc/
 export DATA_DIR=/usr/local/share/dstargateway.d/
-export LOG_DIR=/var/log/dstargateway
+export LOG_DIR=/var/log/dstargateway/
 
 # choose this if you want debugging help
 CPPFLAGS=-g -ggdb -W -Wall -std=c++17
@@ -86,8 +86,8 @@ install : dstargateway
 
 # copy and adjust config
 	@cp -fn example.cfg $(CFG_DIR)/dstargateway.cfg
-	@sed -i "s|log=.*|log=\"$(LOG_DIR)\"|g" $(CFG_DIR)/dstargateway.cfg
-	@sed -i "s|data=.*|data=\"$(DATA_DIR)\"|g" $(CFG_DIR)/dstargateway.cfg
+	@sed -i "s|path=/var/log/dstargateway/|path=$(LOG_DIR)|g" $(CFG_DIR)/dstargateway.cfg
+	@sed -i "s|data=/usr/local/share/dstargateway.d/|data=$(DATA_DIR)|g" $(CFG_DIR)/dstargateway.cfg
 
 # copy binary
 	@cp -f dstargateway $(BIN_DIR)
