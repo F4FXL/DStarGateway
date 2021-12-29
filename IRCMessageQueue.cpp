@@ -7,6 +7,9 @@ Copyright (C) 2010   Michael Dirska, DL1BFF (dl1bff@mdx.de)
 Completely rewritten by:
 Copyright (c) 2017 by Thomas A. Early N7TAE
 
+Bug fixed by:
+Copyright (c) 2021 by Thomas Geoffrey Merck F4FXL / KC3FRA
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
