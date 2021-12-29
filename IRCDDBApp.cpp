@@ -177,7 +177,7 @@ void IRCDDBApp::rptrQTH(const std::string& callsign, double latitude, double lon
 	CUtils::ReplaceChar(d2, ' ', '_');
 	CUtils::ReplaceChar(cs, ' ', '_');
 
-	d->moduleQTHURLMutex.lock();
+	std::lock_guard lochQTHURL(d->moduleQTHURLMutex);
 
 	d->moduleQTH[cs] = cs + std::string(" ") + pos + std::string(" ") + d1 + std::string(" ") + d2;
 
@@ -194,7 +194,6 @@ void IRCDDBApp::rptrQTH(const std::string& callsign, double latitude, double lon
 		CLog::logInfo("URL: %s\n", d->moduleURL[cs].c_str());
 	}
 
-	d->moduleQTHURLMutex.unlock();
 	d->infoTimer = 5; // send info in 5 seconds
 }
 
@@ -208,10 +207,9 @@ void IRCDDBApp::rptrQRG(const std::string& callsign, double txFrequency, double 
 	std::string f(fstr);
 	CUtils::ReplaceChar(f, ',', '.');
 
-	d->moduleQRGMutex.lock();
+	std::lock_guard lockModuleQRG(d->moduleQRGMutex);
 	d->moduleQRG[cs] = cs + std::string(" ") + f;
 	CLog::logInfo("QRG: %s\n", d->moduleQRG[cs].c_str());
-	d->moduleQRGMutex.unlock();
 
 	d->infoTimer = 5; // send info in 5 seconds
 }
@@ -229,9 +227,8 @@ void IRCDDBApp::kickWatchdog(const std::string& callsign, const std::string& s)
 		std::string cs = callsign;
 		CUtils::ReplaceChar(cs, ' ', '_');
 
-		d->moduleWDMutex.lock();
+		std::lock_guard lockModuleWD(d->moduleWDMutex);
 		d->moduleWD[cs] = cs + std::string(" ") + text;
-		d->moduleWDMutex.unlock();
 		d->wdTimer = 60;
 	}
 }
@@ -300,7 +297,7 @@ unsigned int IRCDDBApp::calculateUsn(const std::string& nick)
 
 void IRCDDBApp::userJoin(const std::string& nick, const std::string& name, const std::string& host)
 {
-	d->userMapMutex.lock();
+	std::lock_guard lockUserMap(d->userMapMutex);
 
 	std::string lnick = nick;
 	CUtils::ToLower(lnick);
@@ -325,7 +322,6 @@ void IRCDDBApp::userJoin(const std::string& nick, const std::string& name, const
 			d->replyQ.putMessage(m2);
 		}
 	}
-	d->userMapMutex.unlock();
 }
 
 void IRCDDBApp::userLeave(const std::string& nick)
@@ -333,13 +329,12 @@ void IRCDDBApp::userLeave(const std::string& nick)
 	std::string lnick = nick;
 	CUtils::ToLower(lnick);
 
-	d->userMapMutex.lock();
+	std::lock_guard lockUserMap(d->userMapMutex);
 	d->user.erase(lnick);
 
 	if (d->currentServer.size()) {
 		if (d->user.count(d->myNick) != 1) {
 			CLog::logInfo("IRCDDBApp::userLeave: could not find own nick\n");
-			d->userMapMutex.unlock();
 			return;
 		}
 
@@ -356,14 +351,12 @@ void IRCDDBApp::userLeave(const std::string& nick)
 			}
 		}
 	}
-	d->userMapMutex.unlock();
 }
 
 void IRCDDBApp::userListReset()
 {
-  d->userMapMutex.lock();
+  std::lock_guard lockUserMap(d->userMapMutex);
   d->user.clear();
-  d->userMapMutex.unlock();
 }
 
 void IRCDDBApp::setCurrentNick(const std::string& nick)
@@ -386,7 +379,7 @@ void IRCDDBApp::setTopic(const std::string& topic)
 bool IRCDDBApp::findServerUser()
 {
 	bool found = false;
-	d->userMapMutex.lock();
+	std::lock_guard lockUserMap(d->userMapMutex);
 
 	std::map<std::string, IRCDDBAppUserObject>::iterator it;
 
@@ -401,7 +394,6 @@ bool IRCDDBApp::findServerUser()
 	}
 
 	if (found) {
-		d->userMapMutex.unlock();
 		return true;
 	}
 
@@ -418,7 +410,6 @@ bool IRCDDBApp::findServerUser()
 	}
 
 	if (found) {
-		d->userMapMutex.unlock();
 		return true;
 	}
 
@@ -430,20 +421,18 @@ bool IRCDDBApp::findServerUser()
 			break;
 		}
 	}
-	d->userMapMutex.unlock();
 	return found;
 }
 
 void IRCDDBApp::userChanOp(const std::string& nick, bool op)
 {
-	d->userMapMutex.lock();
+	std::lock_guard lockUserMap(d->userMapMutex);
 
 	std::string lnick = nick;
 	CUtils::ToLower(lnick);
 
 	if (d->user.count(lnick) == 1)
 		d->user[lnick].op = op;
-	d->userMapMutex.unlock();
 }
 
 static const int numberOfTables = 2;
@@ -457,7 +446,7 @@ std::string IRCDDBApp::getIPAddress(std::string& zonerp_cs)
 	CUtils::ToLower(gw);
 	CUtils::Trim(gw);
 
-	d->userMapMutex.lock();
+	std::lock_guard lockUserMap(d->userMapMutex);
 	for (int j=1; j <= 4; j++) {
 		std::string ircUser = gw + std::string("-") + std::to_string(j);
 
@@ -470,7 +459,6 @@ std::string IRCDDBApp::getIPAddress(std::string& zonerp_cs)
 			}
 		}
 	}
-	d->userMapMutex.unlock();
 	return ipAddr;
 }
 
@@ -977,27 +965,28 @@ void IRCDDBApp::Entry()
 					d->infoTimer--;
 
 					if (0 == d->infoTimer) {
-						d->moduleQTHURLMutex.lock();
-						for (auto it = d->moduleQTH.begin(); it != d->moduleQTH.end(); ++it) {
-							std::string value = it->second;
-							IRCMessage *m = new IRCMessage(d->currentServer, std::string("IRCDDB RPTRQTH: ") + value);
-							IRCMessageQueue *q = getSendQ();
-							if (q != NULL)
-								q->putMessage(m);
-						}
-						d->moduleQTH.clear();
+						{	// Scope for mutext locking
+							std::lock_guard lochQTHURL(d->moduleQTHURLMutex);
+							for (auto it = d->moduleQTH.begin(); it != d->moduleQTH.end(); ++it) {
+								std::string value = it->second;
+								IRCMessage *m = new IRCMessage(d->currentServer, std::string("IRCDDB RPTRQTH: ") + value);
+								IRCMessageQueue *q = getSendQ();
+								if (q != NULL)
+									q->putMessage(m);
+							}
+							d->moduleQTH.clear();
 
-						for (auto it = d->moduleURL.begin(); it != d->moduleURL.end(); ++it) {
-							std::string value = it->second;
-							IRCMessage *m = new IRCMessage(d->currentServer, std::string("IRCDDB RPTRURL: ") + value);
-							IRCMessageQueue *q = getSendQ();
-							if (q != NULL)
-								q->putMessage(m);
+							for (auto it = d->moduleURL.begin(); it != d->moduleURL.end(); ++it) {
+								std::string value = it->second;
+								IRCMessage *m = new IRCMessage(d->currentServer, std::string("IRCDDB RPTRURL: ") + value);
+								IRCMessageQueue *q = getSendQ();
+								if (q != NULL)
+									q->putMessage(m);
+							}
+							d->moduleURL.clear();
 						}
-						d->moduleURL.clear();
-						d->moduleQTHURLMutex.unlock();
 
-						d->moduleQRGMutex.lock();
+						std::lock_guard lockModuleQRG(d->moduleQRGMutex);
 						for (auto it = d->moduleQRG.begin(); it != d->moduleQRG.end(); ++it) {
 							std::string value = it->second;
 							IRCMessage* m = new IRCMessage(d->currentServer, std::string("IRCDDB RPTRQRG: ") + value);
@@ -1006,7 +995,6 @@ void IRCDDBApp::Entry()
 								q->putMessage(m);
 						}
 						d->moduleQRG.clear();
-						d->moduleQRGMutex.unlock();
 					}
 				}
 
@@ -1014,7 +1002,7 @@ void IRCDDBApp::Entry()
 					d->wdTimer--;
 
 					if (0 == d->wdTimer) {
-						d->moduleWDMutex.lock();
+						std::lock_guard lockModuleWD(d->moduleWDMutex);
 
 						for (auto it = d->moduleWD.begin(); it != d->moduleWD.end(); ++it) {
 							std::string value = it->second;
@@ -1024,7 +1012,6 @@ void IRCDDBApp::Entry()
 								q->putMessage(m);
 						}
 						d->moduleWD.clear();
-						d->moduleWDMutex.unlock();
 					}
 				}
 				break;
