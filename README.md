@@ -12,7 +12,8 @@
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
 - [5. Version History](#5-version-history)
-  - [5.1. v0.1](#51-v01)
+  - [5.1. v0.x](#51-v0x)
+  - [5.2. v0.1](#52-v01)
 
 # 1. Introduction
 This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only), libconfig++ and libcurl
@@ -74,5 +75,7 @@ sudo systemctl stop dstargateway.service
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
 
 # 5. Version History
-## 5.1. v0.1
+## 5.1. v0.x
+- Code sanitization
+## 5.2. v0.1
 First working version
