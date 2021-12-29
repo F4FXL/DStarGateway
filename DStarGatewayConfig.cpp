@@ -153,7 +153,7 @@ bool CDStarGatewayConfig::loadPaths(const CConfig & cfg)
 bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 {
 	for(unsigned int i = 0; i < 4; i++) {
-		std::string section = ((std::stringstream() << "repeater_" << (i + 1))).str();
+		std::string section = CStringUtils::string_format("repeater_%d", i+ 1);
 		bool repeaterEnabled;
 
 		bool ret = cfg.getValue(section, "enabled", repeaterEnabled, false);
@@ -226,7 +226,7 @@ bool CDStarGatewayConfig::loadIrcDDB(const CConfig & cfg)
 {
 	bool ret = true;
 	for(unsigned int i = 0; i < 4; i++) {
-		std::string section = ((std::stringstream() << "ircddb_" << (i + 1))).str();
+		std::string section = CStringUtils::string_format("ircddb_%d", i + 1);
 		bool ircEnabled;
 
 		ret = cfg.getValue(section, "enabled", ircEnabled, false) && ret;
