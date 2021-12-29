@@ -37,9 +37,11 @@ GitVersion.h
 
 # test files
 ___test.cfg
+Sandbox/*
 
 # Executables
 *.exe
 *.out
 *.app
 dstargateway
+
