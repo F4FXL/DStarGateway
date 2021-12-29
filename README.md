@@ -76,7 +76,7 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 
 # 5. Version History
 ## 5.1. v0.2
-- [bugfix] ircDDBFreeze when repeater not found ([#1](i1))
+- [bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
 ## 5.2. v0.1
 First working version
