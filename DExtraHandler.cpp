@@ -945,7 +945,7 @@ bool CDExtraHandler::stateChange()
 	return stateChange;
 }
 
-void CDExtraHandler::writeStatus(ofstream& file)
+void CDExtraHandler::writeStatus(std::ofstream& file)
 {
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDExtraHandler* reflector = m_reflectors[i];

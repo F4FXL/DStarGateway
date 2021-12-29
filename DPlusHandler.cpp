@@ -909,7 +909,7 @@ bool CDPlusHandler::stateChange()
 	return stateChange;
 }
 
-void CDPlusHandler::writeStatus(ofstream& file)
+void CDPlusHandler::writeStatus(std::ofstream& file)
 {
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDPlusHandler* reflector = m_reflectors[i];

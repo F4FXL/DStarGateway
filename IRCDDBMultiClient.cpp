@@ -4,6 +4,7 @@ CIRCDDBClient - ircDDB client library in C++
 
 Copyright (C) 2010-2011   Michael Dirska, DL1BFF (dl1bff@mdx.de)
 Copyright (C) 2011,2012   Jonathan Naylor, G4KLX
+Copyright (c) 2021 by Thomas Geoffrey Merck F4FXL / KC3FRA
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
