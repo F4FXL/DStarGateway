@@ -4,6 +4,7 @@
   - [2.2. Code Credit](#22-code-credit)
   - [2.3. Features](#23-features)
 - [3. Building and installing](#3-building-and-installing)
+  - [Get latest stable code](#get-latest-stable-code)
   - [3.1. Prerequisites and dependencies](#31-prerequisites-and-dependencies)
   - [3.2. Building](#32-building)
   - [3.3. Installing](#33-installing)
@@ -36,7 +37,14 @@ Features that where left out :
 - Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
 
 # 3. Building and installing
-It is assumed you know how to clone a git repository.
+## Get latest stable code
+From inside the already cloned repository run following commands
+```
+git fetch --tags
+latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+git checkout $latestTag
+```
+
 ## 3.1. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
