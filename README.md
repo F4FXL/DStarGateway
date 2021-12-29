@@ -31,7 +31,7 @@ Features that where left out :
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using transmitd.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not.
-- Mobile APRS: Low priority ...
+- Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
 
 # 3. Building and installing
 It is assumed you know how to clone a git repository.
