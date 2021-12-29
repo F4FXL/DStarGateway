@@ -35,340 +35,274 @@ CDStarGatewayConfig::CDStarGatewayConfig(const std::string &pathname)
 
 bool CDStarGatewayConfig::load()
 {
-	CLog::logInfo("Loading configuration from %s", m_fileName.c_str());
-	Config cfg;
-	if(open(cfg)
-	&& loadGateway(cfg)
-	&& loadIrcDDB(cfg)
-	&& loadRepeaters(cfg)
-	&& loadPaths(cfg)
-	&& loadAPRS(cfg)
-	&& loadDextra(cfg)
-	&& loadDCS(cfg)
-	&& loadDPlus(cfg)
-	&& loadRemote(cfg)
-	&& loadXLX(cfg)) {
+	bool ret = false;
+	CLog::logInfo("Loading Configuration from %s", m_fileName.c_str());
+	CConfig cfg(m_fileName);
 
+	ret = open(cfg);
+	if(ret) {
+		ret = loadGateway(cfg) && ret;
+		ret = loadIrcDDB(cfg) && ret;
+		ret = loadRepeaters(cfg) && ret;
+		ret = loadPaths(cfg) && ret;
+		ret = loadLog(cfg) && ret;
+		ret = loadAPRS(cfg) && ret;
+		ret = loadDextra(cfg) && ret;
+		ret = loadDCS(cfg) && ret;
+		ret = loadDPlus(cfg) && ret;
+		ret = loadRemote(cfg) && ret;
+		ret = loadXLX(cfg) && ret;
+	}
+
+	if(ret) {
 		//properly size values
 		m_gateway.callsign.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
 		m_gateway.callsign.push_back('G');
-		
-		return true;
 	}
-
-	CLog::logError("Loading configuration from %s failed", m_fileName.c_str());
-
-	return false;
-}
-
-bool CDStarGatewayConfig::loadXLX(const Config & cfg)
-{
-	bool ret = get_value(cfg, "xlx.enabled", m_xlx.enabled, true);
-	ret = get_value(cfg, "xlx.hostfileUrl", m_xlx.url, 0, 1024, "", false) && ret;
+	else {
+		CLog::logError("Loading Configuration from %s failed", m_fileName.c_str());
+	}
 
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadRemote(const Config & cfg)
+bool CDStarGatewayConfig::loadXLX(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "remote.enabled", m_remote.enabled, false);
-	ret = get_value(cfg, "remote.port", m_remote.port, 1U, 65535U, 4242U) && ret;
-	ret = get_value(cfg, "remote.password", m_remote.password, 0, 1024, "", true) && ret;
+	bool ret = cfg.getValue("xlx", "enabled", m_xlx.enabled, true);
+	ret = cfg.getValue("xlx", "hostfileUrl", m_xlx.url, 0, 1024, "") && ret;
+
+	m_xlx.enabled = m_xlx.enabled && !m_xlx.url.empty();
+
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadRemote(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("remote", "enabled", m_remote.enabled, false);
+	ret = cfg.getValue("remote", "port", m_remote.port, 1U, 65535U, 4242U) && ret;
+	ret = cfg.getValue("remote", "password", m_remote.password, 0, 1024, "") && ret;
 
 	m_remote.enabled = m_remote.enabled && !m_remote.password.empty();
 
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadDextra(const Config & cfg)
+bool CDStarGatewayConfig::loadDextra(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "dextra.enabled", m_dextra.enabled, true);
-	ret = get_value(cfg, "dextra.maxDongles", m_dextra.maxDongles, 1U, 5U, 5U) && ret;
+	bool ret = cfg.getValue("dextra", "enabled", m_dextra.enabled, true);
+	ret = cfg.getValue("dextra", "maxDongles", m_dextra.maxDongles, 1U, 5U, 5U) && ret;
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadDPlus(const Config & cfg)
+bool CDStarGatewayConfig::loadDPlus(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "dplus.enabled", m_dplus.enabled, true);
-	ret = get_value(cfg, "dplus.maxDongles", m_dplus.maxDongles, 1U, 5U, 5U) && ret;
-	ret = get_value(cfg, "dplus.login", m_dplus.login, 0, LONG_CALLSIGN_LENGTH, m_gateway.callsign, true) && ret;
+	bool ret = cfg.getValue("dplus", "enabled", m_dplus.enabled, true);
+	ret = cfg.getValue("dplus", "maxDongles", m_dplus.maxDongles, 1U, 5U, 5U) && ret;
+	ret = cfg.getValue("dplus", "login", m_dplus.login, 0, LONG_CALLSIGN_LENGTH, m_gateway.callsign) && ret;
 
+	m_dplus.enabled = m_dplus.enabled && !m_dplus.login.empty();
 	m_dplus.login = CUtils::ToUpper(m_dplus.login);
 
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadDCS(const Config & cfg)
+bool CDStarGatewayConfig::loadDCS(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "dcs.enabled", m_dcs.enabled, true);
+	bool ret = cfg.getValue("dcs", "enabled", m_dcs.enabled, true);
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadAPRS(const Config & cfg)
+bool CDStarGatewayConfig::loadAPRS(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "aprs.enabled", m_aprs.enabled, false);
-	ret = get_value(cfg, "aprs.port", m_aprs.port, 1U, 65535U, 14580U) && ret;
-	ret = get_value(cfg, "aprs.hostname", m_aprs.hostname, 0, 1024, "rotate.aprs2.net", true) && ret;
-	ret = get_value(cfg, "aprs.password", m_aprs.password, 0U, 30U, "", true) && ret;
+	bool ret = cfg.getValue("aprs", "enabled", m_aprs.enabled, false);
+	ret = cfg.getValue("aprs", "port", m_aprs.port, 1U, 65535U, 14580U) && ret;
+	ret = cfg.getValue("aprs", "hostname", m_aprs.hostname, 0, 1024, "rotate.aprs2.net") && ret;
+	ret = cfg.getValue("aprs", "password", m_aprs.password, 0U, 30U, "") && ret;
+
+	m_aprs.enabled = m_aprs.enabled && !m_aprs.password.empty();
 
 	return ret;
 }
 
-bool CDStarGatewayConfig::loadPaths(const Config & cfg)
+bool CDStarGatewayConfig::loadLog(const CConfig & cfg)
 {
-	get_value(cfg, "paths.log", m_paths.logDir, 0, 2048, "/var/log/dstargateway/", true);
-	get_value(cfg, "paths.data", m_paths.dataDir, 0, 2048, "/var/log/dstargateway/", true);
+	bool ret =cfg.getValue("log", "path", m_log.logDir, 0, 2048, "/var/log/dstargateway/");
 
-	if(m_paths.logDir[m_paths.logDir.length() - 1] != '/') {
-		m_paths.logDir.push_back('/');
+	if(ret && m_log.logDir[m_log.logDir.length() - 1] != '/') {
+		m_log.logDir.push_back('/');
 	}
 
-	if(m_paths.dataDir[m_paths.dataDir.length() - 1] != '/') {
+	//TODO 20211226 check if directory are accessible
+
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadPaths(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("paths", "data", m_paths.dataDir, 0, 2048, "/usr/local/share/dstargateway.d/");
+
+	if(ret && m_paths.dataDir[m_paths.dataDir.length() - 1] != '/') {
 		m_paths.dataDir.push_back('/');
 	}
 
 	//TODO 20211226 check if directory are accessible
 
-	return true;
+	return ret;
 }
 
-bool CDStarGatewayConfig::loadRepeaters(const Config & cfg)
+bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 {
-	cfg.lookup("repeaters");
-	// repeater parameters
-	for (int i=0; i<cfg.lookup("repeaters").getLength(); i++) {
-		std::stringstream key;
-		bool isOk = false;
+	for(unsigned int i = 0; i < 4; i++) {
+		std::string section = ((std::stringstream() << "repeater_" << (i + 1))).str();
+		bool repeaterEnabled;
+
+		bool ret = cfg.getValue(section, "enabled", repeaterEnabled, false);
+		if(!ret || !repeaterEnabled)
+			continue;
+		
 		TRepeater * repeater = new TRepeater;
-		key << "repeaters.[" << i << "]";
-
-		if (get_value(cfg, key.str() + ".callsign", repeater->callsign, 0, 7, m_gateway.callsign, true)) {
-			CUtils::ToUpper(repeater->callsign);
-		}
-
-		if(get_value(cfg, key.str() + ".band", repeater->band, 1, 1, "A")) {
-			CUtils::ToUpper(repeater->band);
-		}
-
-		if (get_value(cfg, key.str() + ".address", repeater->address, 0, 15, "127.0.0.1", true)) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".port", repeater->port, 1U, 65535U, 20011U)) {
-			// ???
-		}
+		ret = cfg.getValue(section, "band", repeater->band, 1, 2, "B") && ret;
+		ret = cfg.getValue(section, "callsign", repeater->callsign, 0, LONG_CALLSIGN_LENGTH - 1, m_gateway.callsign);
+		ret = cfg.getValue(section, "address", repeater->address, 0, 15, "127.0.0.1") && ret;
+		ret = cfg.getValue(section, "port", repeater->port, 1U, 65535U, 20011U) && ret;
 
 		std::string hwType;
-		if(get_value(cfg, key.str() + ".type", hwType, 1, 5, "", false, {"hb", "icom"} )) {
-			if(hwType == "hb") repeater->hwType = HW_HOMEBREW;
-			else if(hwType == "icom") repeater->hwType = HW_ICOM;
+		ret = cfg.getValue(section, "type", hwType, "", {"hb", "icom"}) && ret;
+		if(ret) {
+			if(hwType == "hb") 			repeater->hwType = HW_HOMEBREW;
+			else if(hwType == "icom")	repeater->hwType = HW_ICOM;
 		}
 
-		if (get_value(cfg, key.str() + ".reflector", repeater->reflector, 0, LONG_CALLSIGN_LENGTH, "", true)) {
-			// ???
-		}
-
-		if (get_value(cfg, key.str() + ".reflectorAtStartup", repeater->reflectorAtStartup, true)) {
-			// ???
-		}
+		ret = cfg.getValue(section, "reflector", repeater->reflector, 0, LONG_CALLSIGN_LENGTH, "") && ret;
+		ret = cfg.getValue(section, "reflectorAtStartup", repeater->reflectorAtStartup, !repeater->reflector.empty()) && ret;
 
 		std::string reconnect;
-		if (get_value(cfg, key.str() + ".reflectorReconnect", reconnect, 0, 5, "never", true,
-						{"never", "fixed", "5", "10", "15", "20", "25", "30", "60", "90", "120", "180"})) {
-			if(reconnect == "never") repeater->reflectorReconnect = RECONNECT_NEVER;
-			else if(reconnect == "5") repeater->reflectorReconnect = RECONNECT_5MINS;
-			else if(reconnect == "10") repeater->reflectorReconnect = RECONNECT_10MINS;
-			else if(reconnect == "15") repeater->reflectorReconnect = RECONNECT_15MINS;
-			else if(reconnect == "20") repeater->reflectorReconnect = RECONNECT_20MINS;
-			else if(reconnect == "25") repeater->reflectorReconnect = RECONNECT_25MINS;
-			else if(reconnect == "30") repeater->reflectorReconnect = RECONNECT_30MINS;
-			else if(reconnect == "60") repeater->reflectorReconnect = RECONNECT_60MINS;
-			else if(reconnect == "90") repeater->reflectorReconnect = RECONNECT_90MINS;
-			else if(reconnect == "120") repeater->reflectorReconnect = RECONNECT_120MINS;
-			else if(reconnect == "180") repeater->reflectorReconnect = RECONNECT_180MINS;
-			else if(reconnect == "fixed") repeater->reflectorReconnect = RECONNECT_FIXED;
-		}
-		
-		if(get_value(cfg, key.str() + ".frequency", repeater->frequency, 0.0, 1500.0, 434.0)) {
-			// ???
+		ret = cfg.getValue(section, "reflectorReconnect", reconnect, "never", {"never", "fixed", "5", "10", "15", "20", "25", "30", "60", "90", "120", "180"}) && ret;
+		if(ret) {
+			if(reconnect == "never")		repeater->reflectorReconnect = RECONNECT_NEVER;
+			else if(reconnect == "5")		repeater->reflectorReconnect = RECONNECT_5MINS;
+			else if(reconnect == "10")		repeater->reflectorReconnect = RECONNECT_10MINS;
+			else if(reconnect == "15")		repeater->reflectorReconnect = RECONNECT_15MINS;
+			else if(reconnect == "20")		repeater->reflectorReconnect = RECONNECT_20MINS;
+			else if(reconnect == "25")		repeater->reflectorReconnect = RECONNECT_25MINS;
+			else if(reconnect == "30")		repeater->reflectorReconnect = RECONNECT_30MINS;
+			else if(reconnect == "60")		repeater->reflectorReconnect = RECONNECT_60MINS;
+			else if(reconnect == "90")		repeater->reflectorReconnect = RECONNECT_90MINS;
+			else if(reconnect == "120")		repeater->reflectorReconnect = RECONNECT_120MINS;
+			else if(reconnect == "180")		repeater->reflectorReconnect = RECONNECT_180MINS;
+			else if(reconnect == "fixed")	repeater->reflectorReconnect = RECONNECT_FIXED;
 		}
 
-		if(get_value(cfg, key.str() + ".offset", repeater->offset, -50.0, 50.0, 0.0)) {
-			// ???
-		}
+		ret = cfg.getValue(section, "frequency", repeater->frequency, 0.1, 1500.0, 434.0) && ret;	
+		ret = cfg.getValue(section, "offset", repeater->offset, -50.0, 50.0, 0.0) && ret;
+		ret = cfg.getValue(section, "rangeKm", repeater->range, 0.0, 3000.0, 0.0) && ret;
+		ret = cfg.getValue(section, "latitude", repeater->latitude, -90.0, 90.0, m_gateway.latitude) && ret;
+		ret = cfg.getValue(section, "longitude", repeater->longitude, -180.0, 180.0, m_gateway.longitude) && ret;
+		ret = cfg.getValue(section, "agl", repeater->agl, 0, 1000.0, 0.0) && ret;
+		ret = cfg.getValue(section, "description1", m_gateway.description1, 0, 1024, "") && ret;
+		ret = cfg.getValue(section, "description2", m_gateway.description2, 0, 1024, "") && ret;
+		ret = cfg.getValue(section, "url", m_gateway.url, 0, 1024, "") && ret;;
+		ret = cfg.getValue(section, "band1", repeater->band1, 0, 255, 0) && ret;
+		ret = cfg.getValue(section, "band2", repeater->band2, 0, 255, 0) && ret;
+		ret = cfg.getValue(section, "band3", repeater->band3, 0, 255, 0) && ret;
 
-		if(get_value(cfg, key.str() + ".rangeKm", repeater->range, 0.0, 3000.0, 0.0)) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".latitude", repeater->latitude, -90, 90.0, m_gateway.latitude)) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".longitude", repeater->longitude, -180, 180.0, m_gateway.longitude)) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".agl", repeater->agl, 0, 1000.0, 0.0)) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".description1", m_gateway.description1, 0, 1024, "")) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".description2", m_gateway.description2, 0, 1024, "")) {
-			// ???
-		}
-
-		if(get_value(cfg, key.str() + ".url", m_gateway.url, 0, 1024, "")) {
-			// ???
-		}
-
-		int band;
-		if(get_value(cfg, key.str() + ".band1", band, 0, 255, 0)) {
-			repeater->band1 = (unsigned char)band;
-		}
-		if(get_value(cfg, key.str() + ".band2", band, 0, 255, 0)) {
-			repeater->band2 = (unsigned char)band;
-		}
-		if(get_value(cfg, key.str() + ".band3", band, 0, 255, 0)) {
-			repeater->band3 = (unsigned char)band;
-		}
-
-		// We have read a complete repeater record, validate it
-		if(repeater->callsign.length() > 0) {
-			isOk = true;
-		}
-		else {
-			CLog::logError("Repeater %d has an empty callsign", i);
-		}
-		
-		if (isOk && !isalpha(repeater->band[0])) {
-			isOk = false;
-			CLog::logError("Repeater %s band is not a letter", i);
-		}
-
-		if (isOk && repeater->address.length() == 0) {
-			isOk = false;
-		}
-
-		if(!isOk) {
-			delete repeater;
-		} else {
+		if(ret) {
 			m_repeaters.push_back(repeater);
 		}
+		else {
+			delete repeater;
+		}
 	}
 
-	return m_repeaters.size() > 0;
-}
-
-bool CDStarGatewayConfig::loadIrcDDB(const Config & cfg)
-{
-	//ircDDB Networks
-	for(int i = 0; i < cfg.lookup("ircddb").getLength(); i++) {
-		TircDDB * ircddb = new TircDDB();
-		std::stringstream key;
-		key << "ircddb.[" << i << "].hostname";
-		if(! get_value(cfg, key.str(), ircddb->hostname, 5, 30, "") || ircddb->hostname == "") {//do not allow hostname to be empty
-			delete ircddb;
-			continue;
-		}
-
-		key.str("");key.clear();
-		key << "ircddb.[" << i << "].username";
-		if (! get_value(cfg, key.str(), ircddb->username, 3, 8, m_gateway.callsign)) {//default user name to callsign
-			delete ircddb;
-			continue;
-		}
-		CUtils::ToUpper(ircddb->username);
-
-		key.str("");key.clear();
-		key << "ircddb.[" << i << "].password";
-		if(!get_value(cfg, key.str(), ircddb->password, 0, 30, "")) {
-			delete ircddb;
-			continue;
-		}
-
-		ircddb->isQuadNet = ircddb->hostname.find("openquad.net") != std::string::npos;
-		this->m_ircDDB.push_back(ircddb);
-	}
-
-	if(this->m_ircDDB.size() == 0) {//no ircddb network specified? Default to openquad!
-		TircDDB * ircddb  = new TircDDB();
-		ircddb->hostname  = "ircv4.openquad.net";
-		ircddb->password  = "";
-		ircddb->username  = m_gateway.callsign;
-		ircddb->isQuadNet = true;
-		this->m_ircDDB.push_back(ircddb);
-		CLog::logInfo("No ircDDB networks configured, defaulting to IRCDDB: host=%s user=%s", ircddb->hostname.c_str(), ircddb->username.c_str());
+	if(m_repeaters.size() == 0U) {
+		CLog::logError("Configuration error: no repeaters configured !");
+		return false;
 	}
 
 	return true;
 }
 
-bool CDStarGatewayConfig::loadGateway(const Config & cfg)
+bool CDStarGatewayConfig::loadIrcDDB(const CConfig & cfg)
 {
-	bool ret = get_value(cfg, "gateway.callsign", m_gateway.callsign, 3, 8, "");
-	get_value(cfg, "gateway.address", m_gateway.address, 0, 20, "0.0.0.0", true) && ret;
-	get_value(cfg, "gateway.hbAddress", m_gateway.hbAddress, 0, 20, "127.0.0.1", true) && ret;
-	get_value(cfg, "gateway.hbPort", m_gateway.hbPort, 1U, 65535U, 20010U) && ret;
-	get_value(cfg, "gateway.icomAddress", m_gateway.icomAddress, 0, 20, "127.0.0.1", true) && ret;
-	get_value(cfg, "gateway.icomPort", m_gateway.icomPort, 1U, 65535U, 20000U) && ret;
-	get_value(cfg, "gateway.latitude", m_gateway.latitude, -90.0, 90.0, 0.0) && ret;
-	get_value(cfg, "gateway.longitude", m_gateway.longitude, -180.0, 180.0, 0.0) && ret;
-	get_value(cfg, "gateway.description1", m_gateway.description1, 0, 1024, "") && ret;
-	get_value(cfg, "gateway.description2", m_gateway.description2, 0, 1024, "") && ret;
-	get_value(cfg, "gateway.url", m_gateway.url, 0, 1024, "") && ret;
+	bool ret = true;
+	for(unsigned int i = 0; i < 4; i++) {
+		std::string section = ((std::stringstream() << "ircddb_" << (i + 1))).str();
+		bool ircEnabled;
+
+		ret = cfg.getValue(section, "enabled", ircEnabled, false) && ret;
+		if(!ircEnabled)
+			continue;
+		
+		TircDDB * ircddb = new TircDDB;
+		ret = cfg.getValue(section, "hostname", ircddb->hostname, 0, 1024, "ircv4.openquad.net") && ret;
+		ret = cfg.getValue(section, "username", ircddb->username, 0, LONG_CALLSIGN_LENGTH - 1, m_gateway.callsign) && ret;
+		ret = cfg.getValue(section, "password", ircddb->password, 0, 1024, "") && ret;
+
+		if(ret) {
+			m_ircDDB.push_back(ircddb);
+		}
+		else {
+			delete ircddb;
+		}
+	}
+
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadGateway(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("gateway", "callsign", m_gateway.callsign, 3, 8, "");
+	ret = cfg.getValue("gateway", "address", m_gateway.address, 0, 20, "0.0.0.0") && ret;
+	ret = cfg.getValue("gateway", "hbAddress", m_gateway.hbAddress, 0, 20, "127.0.0.1") && ret;
+	ret = cfg.getValue("gateway", "hbPort", m_gateway.hbPort, 1U, 65535U, 20010U) && ret;
+	ret = cfg.getValue("gateway", "icomAddress", m_gateway.icomAddress, 0, 20, "127.0.0.1") && ret;
+	ret = cfg.getValue("gateway", "icomPort", m_gateway.icomPort, 1U, 65535U, 20000U) && ret;
+	ret = cfg.getValue("gateway", "latitude", m_gateway.latitude, -90.0, 90.0, 0.0) && ret;
+	ret = cfg.getValue("gateway", "longitude", m_gateway.longitude, -180.0, 180.0, 0.0) && ret;
+	ret = cfg.getValue("gateway", "description1", m_gateway.description1, 0, 1024, "") && ret;
+	ret = cfg.getValue("gateway", "description2", m_gateway.description2, 0, 1024, "") && ret;
+	ret = cfg.getValue("gateway", "url", m_gateway.url, 0, 1024, "") && ret;
 	
 	std::string type;
-	get_value(cfg, "gateway.type", type, 0, 8, "repeater", true, {"repeater", "hotspot"}) && ret;
-	if(type == "repeater") m_gateway.type = GT_REPEATER;
-	if(type == "hotspot") m_gateway.type = GT_HOTSPOT;
+	ret = cfg.getValue("gateway", "type", type, "repeater", {"repeater", "hotspot"}) && ret;
+	if(type == "repeater")		m_gateway.type = GT_REPEATER;
+	else if(type == "hotspot")	m_gateway.type = GT_HOTSPOT;
 
 	std::string lang;
-	get_value(cfg, "gateway.language", lang, 0, 30, "english_uk", true, {"english_uk", "deutsch", "dansk", "francais", "italiano", "polski", "english_us", "espanol", "svenska", "nederlands_nl", "nederlands_be", "norsk", "portugues"});
-	if(lang == "english_uk") m_gateway.language = TL_ENGLISH_UK;
-	else if(lang == "deutsch") m_gateway.language = TL_DEUTSCH;
-	else if(lang == "dansk") m_gateway.language = TL_DANSK;
-	else if(lang == "francais") m_gateway.language = TL_FRANCAIS;
-	else if(lang == "italiano") m_gateway.language = TL_ITALIANO;
-	else if(lang == "polski") m_gateway.language = TL_POLSKI;
-	else if(lang == "english_us") m_gateway.language = TL_ENGLISH_US;
-	else if(lang == "espanol") m_gateway.language = TL_ESPANOL;
-	else if(lang == "svenska") m_gateway.language = TL_SVENSKA;
-	else if(lang == "nederlands_nl") m_gateway.language = TL_NEDERLANDS_NL;
-	else if(lang == "nederlands_be") m_gateway.language = TL_NEDERLANDS_BE;
-	else if(lang == "norsk") m_gateway.language = TL_NORSK;
-	else if(lang == "portugues") m_gateway.language = TL_PORTUGUES;
+	ret = cfg.getValue("gateway", "language", lang, "english_uk",
+						{"english_uk", "deutsch", "dansk", "francais", "italiano", "polski",
+						"english_us", "espanol", "svenska", "nederlands_nl", "nederlands_be", "norsk", "portugues"}) && ret;;
+	if(lang == "english_uk")		m_gateway.language = TL_ENGLISH_UK;
+	else if(lang == "deutsch")		m_gateway.language = TL_DEUTSCH;
+	else if(lang == "dansk")		m_gateway.language = TL_DANSK;
+	else if(lang == "francais")		m_gateway.language = TL_FRANCAIS;
+	else if(lang == "italiano") 	m_gateway.language = TL_ITALIANO;
+	else if(lang == "polski")		m_gateway.language = TL_POLSKI;
+	else if(lang == "english_us")	m_gateway.language = TL_ENGLISH_US;
+	else if(lang == "espanol")		m_gateway.language = TL_ESPANOL;
+	else if(lang == "svenska")		m_gateway.language = TL_SVENSKA;
+	else if(lang == "nederlands_nl")m_gateway.language = TL_NEDERLANDS_NL;
+	else if(lang == "nederlands_be")m_gateway.language = TL_NEDERLANDS_BE;
+	else if(lang == "norsk")		m_gateway.language = TL_NORSK;
+	else if(lang == "portugues")	m_gateway.language = TL_PORTUGUES;
 
 	CUtils::ToUpper(m_gateway.callsign);
 	CUtils::clean(m_gateway.description1, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 	CUtils::clean(m_gateway.description2, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 	CUtils::clean(m_gateway.url, 		  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,&*()-+=@/?:;");
 
-	return true;
+	return ret;
 }
 
-bool CDStarGatewayConfig::open(Config & cfg)
+bool CDStarGatewayConfig::open(CConfig & cfg)
 {
-	if (m_fileName.size() < 1) {
-		CLog::logError("Configuration filename too short!\n");
-		return false;
-	}
-
 	try {
-		cfg.readFile(m_fileName.c_str());
+		return cfg.load();
 	}
-	catch(const FileIOException &fioex) {
+	catch(...) {
 		CLog::logError("Can't read %s\n", m_fileName.c_str());
 		return false;
 	}
-	catch(const ParseException &pex) {
-		CLog::logError("Parse error at %s:%d - %s\n", pex.getFile(), pex.getLine(), pex.getError());
-		return false;
-	}
-
 	return true;
 }
 
@@ -383,93 +317,6 @@ CDStarGatewayConfig::~CDStarGatewayConfig()
 		delete m_ircDDB.back();
 		m_ircDDB.pop_back();
 	}
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value)
-{
-	value = default_value;
-	int valueTmp;
-	if(get_value(cfg, path, valueTmp, (int)min, (int)max, (int)default_value)
-		&& valueTmp >= 0) {
-			value = valueTmp;
-	}
-
-	return true;
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value)
-{
-	if (cfg.lookupValue(path, value)) {
-		if (value < min || value > max)
-			value = default_value;
-	} else
-		value = default_value;
-	return true;
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value)
-{
-	if (cfg.lookupValue(path, value)) {
-		if (value < min || value > max)
-			value = default_value;
-	} else
-		value = default_value;
-	return true;
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, bool &value, bool default_value)
-{
-	if (! cfg.lookupValue(path, value))
-		value = default_value;
-	return true;
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value)
-{
-	return get_value(cfg, path, value, min, max, default_value, false);
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault)
-{
-	if (cfg.lookupValue(path, value)) {
-		int l = value.length();
-		if (l<min || l>max) {
-			CLog::logWarning("%s has an invalid length, must be between %d and %d, actual %d", path.c_str(), min, max, l);
-			return false;
-		}
-	} else
-		value = default_value;
-
-	if(emptyToDefault && value.length() == 0) {
-		value = default_value;
-	}
-
-	return true;
-}
-
-bool CDStarGatewayConfig::get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault, const std::vector<std::string>& allowedValues)
-{
-	bool ret = get_value(cfg, path, value, min, max, default_value, emptyToDefault);
-
-	if(ret) {
-		for(std::string s : allowedValues) {
-			if(s == value) {
-				ret = true;
-				break;
-			}
-		}
-	}
-
-	if(!ret) {
-		std::stringstream message;
-		message << path << "=" << value << " has an invalid value. Valid values are : ";
-		for(std::string s : allowedValues) {
-			message << s << ", ";
-		}
-		CLog::logWarning(message.str());
-	}
-
-	return ret;
 }
 
 void CDStarGatewayConfig::getGateway(TGateway & gateway) const
@@ -495,6 +342,11 @@ unsigned int CDStarGatewayConfig::getIrcDDBCount() const
 void CDStarGatewayConfig::getRepeater(unsigned int index, TRepeater & repeater) const
 {
 	repeater = *(m_repeaters[index]);
+}
+
+void CDStarGatewayConfig::getLog(TLog & log) const
+{
+	log = m_log;
 }
 
 void CDStarGatewayConfig::getPaths(Tpaths & paths) const
