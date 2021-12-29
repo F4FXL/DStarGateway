@@ -9,6 +9,8 @@
   - [3.2. Building](#32-building)
   - [3.3. Installing](#33-installing)
   - [3.4. Configuring](#34-configuring)
+- [Contributing](#contributing)
+  - [Work Flow](#work-flow)
 - [4. Version History](#4-version-history)
   - [4.1. v0.1](#41-v01)
 
@@ -67,6 +69,10 @@ When done with configuration, the daemon will be started automatically on boot. 
 sudo systemctl start dstargateway.service
 sudo systemctl stop dstargateway.service
 ```
+# Contributing
+## Work Flow
+I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch.
+
 # 4. Version History
 ## 4.1. v0.1
 First working version
