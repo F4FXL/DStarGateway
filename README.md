@@ -12,7 +12,7 @@
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
 - [5. Version History](#5-version-history)
-  - [5.1. v0.x](#51-v0x)
+  - [5.1. v0.2](#51-v02)
   - [5.2. v0.1](#52-v01)
 
 # 1. Introduction
@@ -75,7 +75,8 @@ sudo systemctl stop dstargateway.service
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
 
 # 5. Version History
-## 5.1. v0.x
+## 5.1. v0.2
+- [bugfix] ircDDBFreeze when repeater not found ([#1][i1])
 - Code sanitization
 ## 5.2. v0.1
 First working version
