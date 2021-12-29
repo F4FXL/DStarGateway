@@ -71,7 +71,7 @@ sudo systemctl stop dstargateway.service
 ```
 # 4. Contributing
 ## 4.1. Work Flow
-I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch.
+I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
 
 # 5. Version History
 ## 5.1. v0.1
