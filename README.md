@@ -15,7 +15,10 @@ This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4k
 # 2. Current State
 ## 2.1. Code sanity
 The current code is working, yet ugly IMHO as it is a mix of C and C++ of various ages.
+
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
+
+Quite a few classes are more or less copy/paste from each other some sanitization by using base classes or template classes would greatly improve code maintainibility.
 ## 2.2. Code Credit
 - Jonathan Naylor G4KLX (The original author of [ircddbGateway](https://github.com/g4klx/ircDDBGateway))
 - Thomas A. Early N7TAE (Code taken from his [smart-group](https://github.com/n7tae/smart-group-server) software)
@@ -24,8 +27,7 @@ The code has also been amended to no longer rely on compiler defines for paths l
 All the features found in ircddbGateway are supposed to be working. I have mixed feelings about putting these back in or not.
 
 Features that where left out :
-
-- CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar. Call sign routing is by far more flexible and superior.
+- CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using transmitd.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not.
@@ -49,7 +51,7 @@ sudo make install
 ```
 ## 3.4. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
-The syntax is libconfig syntax, keep in my mind that **configuration keys are keys sensitive**.
+The syntax is libconfig syntax, keep in my mind that **configuration keys are case sensitive**.
 When done with configuration, the daemon will be started automatically on boot. To manual start and stop it use the usual systemd commands
 ```
 sudo systemctl start dstargateway.service
