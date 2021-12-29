@@ -4,15 +4,15 @@
   - [2.2. Code Credit](#22-code-credit)
   - [2.3. Features](#23-features)
 - [3. Building and installing](#3-building-and-installing)
-  - [Get latest stable code](#get-latest-stable-code)
-  - [3.1. Prerequisites and dependencies](#31-prerequisites-and-dependencies)
-  - [3.2. Building](#32-building)
-  - [3.3. Installing](#33-installing)
-  - [3.4. Configuring](#34-configuring)
-- [Contributing](#contributing)
-  - [Work Flow](#work-flow)
-- [4. Version History](#4-version-history)
-  - [4.1. v0.1](#41-v01)
+  - [3.1. Get latest stable code](#31-get-latest-stable-code)
+  - [3.2. Prerequisites and dependencies](#32-prerequisites-and-dependencies)
+  - [3.3. Building](#33-building)
+  - [3.4. Installing](#34-installing)
+  - [3.5. Configuring](#35-configuring)
+- [4. Contributing](#4-contributing)
+  - [4.1. Work Flow](#41-work-flow)
+- [5. Version History](#5-version-history)
+  - [5.1. v0.1](#51-v01)
 
 # 1. Introduction
 This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only), libconfig++ and libcurl
@@ -39,7 +39,7 @@ Features that where left out :
 - Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
 
 # 3. Building and installing
-## Get latest stable code
+## 3.1. Get latest stable code
 From inside the already cloned repository run following commands
 ```
 git fetch --tags
@@ -47,21 +47,21 @@ latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
 git checkout $latestTag
 ```
 
-## 3.1. Prerequisites and dependencies
+## 3.2. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
 apt install build-essential libconfig++-dev libcurl4-openssl-dev libboost-dev
 ```
-## 3.2. Building
+## 3.3. Building
 ```
 make
 ```
-## 3.3. Installing
+## 3.4. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
 sudo make install
 ```
-## 3.4. Configuring
+## 3.5. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
 The syntax is libconfig syntax, keep in my mind that **configuration keys are case sensitive**.
 When done with configuration, the daemon will be started automatically on boot. To manual start and stop it use the usual systemd commands
@@ -69,10 +69,10 @@ When done with configuration, the daemon will be started automatically on boot. 
 sudo systemctl start dstargateway.service
 sudo systemctl stop dstargateway.service
 ```
-# Contributing
-## Work Flow
+# 4. Contributing
+## 4.1. Work Flow
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch.
 
-# 4. Version History
-## 4.1. v0.1
+# 5. Version History
+## 5.1. v0.1
 First working version
