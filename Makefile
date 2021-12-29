@@ -34,7 +34,7 @@ DEPS = $(SRCS:.cpp=.d)
 all: dstargateway
 
 dstargateway : GitVersion.h $(OBJS) 
-	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lconfig++ -lcurl -pthread
+	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lcurl -pthread
 
 %.o : %.cpp
 	g++ $(CPPFLAGS) -MMD -MD -c $< -o $@
