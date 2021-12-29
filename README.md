@@ -8,6 +8,8 @@
   - [3.2. Building](#32-building)
   - [3.3. Installing](#33-installing)
   - [3.4. Configuring](#34-configuring)
+- [4. Version History](#4-version-history)
+  - [4.1. v0.1](#41-v01)
 
 # 1. Introduction
 This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only), libconfig++ and libcurl
@@ -57,3 +59,6 @@ When done with configuration, the daemon will be started automatically on boot. 
 sudo systemctl start dstargateway.service
 sudo systemctl stop dstargateway.service
 ```
+# 4. Version History
+## 4.1. v0.1
+First working version
