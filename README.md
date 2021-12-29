@@ -43,8 +43,14 @@ Features that where left out :
 
 # 3. Building and installing
 ## 3.1. Get latest stable version
-From inside the already cloned repository run following commands to get the latest stable version
+Clone the repository (only required initally)
 ```
+git clone https://github.com/F4FXL/DStarGateway.git
+cd DStarGateway
+```
+From inside the cloned repository run following commands to get the latest stable version
+```
+git pull -p
 git fetch --tags
 latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
 git checkout $latestTag
