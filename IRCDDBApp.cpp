@@ -531,8 +531,7 @@ bool IRCDDBApp::findRepeater(const std::string& rptrCall)
 
 	std::string s("NONE");
 	std::string zonerp_cs;
-	d->rptrMapMutex.lock();
-
+	std::lock_guard lockRptrMap(d->rptrMapMutex);
 
 	if (1 == d->rptrMap.count(arearp_cs)) {
 		IRCDDBAppRptrObject o = d->rptrMap[arearp_cs];
@@ -741,7 +740,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 				return; // no valid key
 
 			if (tableID == 1) {
-				d->rptrMapMutex.lock();
+				std::lock_guard lockRptrMap(d->rptrMapMutex);
 				IRCDDBAppRptrObject newRptr(dt, key, value, m_maxTime);
 				d->rptrMap[key] = newRptr;
 
@@ -759,9 +758,8 @@ void IRCDDBApp::doUpdate(std::string& msg)
 					m2->addParam(getIPAddress(value));
 					d->replyQ.putMessage(m2);
 				}
-				d->rptrMapMutex.unlock();
 			} else if (0==tableID && d->initReady) {
-				d->rptrMapMutex.lock();
+				std::lock_guard lockRptrMap(d->rptrMapMutex);
 				std::string userCallsign(key);
 				std::string arearp_cs(value);
 				std::string zonerp_cs;
@@ -785,7 +783,6 @@ void IRCDDBApp::doUpdate(std::string& msg)
 				m2->addParam(ip_addr);
 				m2->addParam(tk + std::string(" ") + timeToken);
 				d->replyQ.putMessage(m2);
-				d->rptrMapMutex.unlock();
 			}
 		}
 	}
