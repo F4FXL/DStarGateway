@@ -98,10 +98,13 @@ bool CDStarGatewayApp::createThread()
 		return false;
 	}
 
+	TLog log;
+	config.getLog(log);
+	CLog::initialize(log.logDir + "dstargateway.log", LS_INFO, true);
+
 	Tpaths paths;
 	config.getPaths(paths);
-	CLog::initialize(paths.logDir + "dstargateway.log", LS_INFO, true);
-	m_thread = new CDStarGatewayThread(paths.logDir, paths.dataDir, "");
+	m_thread = new CDStarGatewayThread(log.logDir, paths.dataDir, "");
 
 	// Setup the gateway
 	TGateway gatewayConfig;

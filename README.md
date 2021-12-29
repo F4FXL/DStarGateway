@@ -12,8 +12,10 @@
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
 - [5. Version History](#5-version-history)
-  - [5.1. v0.2](#51-v02)
-  - [5.2. v0.1](#52-v01)
+  - [5.1. Version 0.3](#51-version-03)
+  - [5.2. Version 0.2](#52-version-02)
+  - [5.3. Version 0.1](#53-version-01)
+
 
 # 1. Introduction
 This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only), libconfig++ and libcurl
@@ -64,7 +66,12 @@ sudo make install
 ```
 ## 3.5. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
-The syntax is libconfig syntax, keep in my mind that **configuration keys are case sensitive**.
+
+The configuration format is quite straight forward. It is organised in sections and key/value pairs.
+The order of the sections or key/values pairs inside the sections does not matter nor does casing.
+Boolean values can be set using true, false, 1 or 0
+Floating point values must use . (point) as decimal separatorsensitive.
+
 When done with configuration, the daemon will be started automatically on boot. To manual start and stop it use the usual systemd commands
 ```
 sudo systemctl start dstargateway.service
@@ -75,8 +82,10 @@ sudo systemctl stop dstargateway.service
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
 
 # 5. Version History
-## 5.1. v0.2
+## 5.1. Version 0.3
+- [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
+## 5.2. Version 0.2
 - [bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.2. v0.1
+## 5.3. Version 0.1
 First working version

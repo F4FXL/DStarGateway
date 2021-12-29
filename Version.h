@@ -23,4 +23,4 @@
 #include <string>
 
 const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA");
-const std::string VERSION("0.2");
+const std::string VERSION("0.3");

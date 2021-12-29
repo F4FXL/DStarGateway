@@ -20,10 +20,9 @@
 
 #include <string>
 #include <vector>
-#include <libconfig.h++>
-#include "Defs.h"
 
-using namespace libconfig;
+#include "Defs.h"
+#include "Config.h"
 
 typedef struct {
 	GATEWAY_TYPE type;
@@ -62,9 +61,9 @@ typedef struct {
 	std::string description1;
 	std::string description2;
 	std::string url;
-	char band1;
-	char band2;
-	char band3;
+	unsigned char band1;
+	unsigned char band2;
+	unsigned char band3;
 } TRepeater;
 
 typedef struct {
@@ -75,9 +74,12 @@ typedef struct {
 } TircDDB;
 
 typedef struct {
-	std::string logDir;
 	std::string dataDir;
 } Tpaths;
+
+typedef struct {
+	std::string logDir;
+} TLog;
 
 typedef struct {
 	bool enabled;
@@ -113,6 +115,7 @@ typedef struct {
 	std::string password;
 } TRemote;
 
+
 class CDStarGatewayConfig {
 public:
 	CDStarGatewayConfig(const std::string &pathname);
@@ -124,6 +127,7 @@ public:
 	unsigned int getIrcDDBCount() const;
 	void getRepeater(unsigned int repeaterIndex, TRepeater & repeater) const;
 	unsigned int getRepeaterCount() const;
+	void getLog(TLog& log) const;
 	void getPaths(Tpaths & paths) const;
 	void getAPRS(TAPRS & aprs) const;
 	void getDExtra(TDextra & dextra) const;
@@ -133,24 +137,18 @@ public:
 	void getXLX(TXLX & xlx) const;
 
 private:
-	bool open(Config & cfg);
-	bool loadGateway(const Config & cfg);
-	bool loadIrcDDB(const Config & cfg);
-	bool loadRepeaters(const Config & cfg);
-	bool loadPaths(const Config & cfg);
-	bool loadAPRS(const Config & cfg);
-	bool loadDextra(const Config & cfg);
-	bool loadDPlus(const Config & cfg);
-	bool loadDCS(const Config & cfg);
-	bool loadRemote(const Config & cfg);
-	bool loadXLX(const Config & cfg);
-	bool get_value(const Config &cfg, const std::string &path, unsigned int &value, unsigned int min, unsigned int max, unsigned int default_value);
-	bool get_value(const Config &cfg, const std::string &path, int &value, int min, int max, int default_value);
-	bool get_value(const Config &cfg, const std::string &path, double &value, double min, double max, double default_value);
-	bool get_value(const Config &cfg, const std::string &path, bool &value, bool default_value);
-	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value);
-	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault);
-	bool get_value(const Config &cfg, const std::string &path, std::string &value, int min, int max, const std::string &default_value, bool emptyToDefault, const std::vector<std::string>& allowedValues);
+	bool open(CConfig & cfg);
+	bool loadGateway(const CConfig & cfg);
+	bool loadIrcDDB(const CConfig & cfg);
+	bool loadRepeaters(const CConfig & cfg);
+	bool loadLog(const CConfig & cfg);
+	bool loadPaths(const CConfig & cfg);
+	bool loadAPRS(const CConfig & cfg);
+	bool loadDextra(const CConfig & cfg);
+	bool loadDPlus(const CConfig & cfg);
+	bool loadDCS(const CConfig & cfg);
+	bool loadRemote(const CConfig & cfg);
+	bool loadXLX(const CConfig & cfg);
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -161,6 +159,7 @@ private:
 	TDCS m_dcs;
 	TRemote m_remote;
 	TXLX m_xlx;
+	TLog m_log;
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };
