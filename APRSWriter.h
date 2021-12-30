@@ -63,7 +63,6 @@ private:
 	std::string				m_gateway;
 	in_addr					m_address;
 	unsigned int			m_port;
-	CUDPReaderWriter*		m_socket;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 
 #ifdef USE_GPSD

@@ -35,7 +35,6 @@ m_idTimer(1000U),
 m_gateway(),
 m_address(),
 m_port(0U),
-m_socket(NULL),
 m_array()
 #ifdef USE_GPSD
 , m_gpsdEnabled(false),
@@ -94,6 +93,7 @@ void CAPRSWriter::setPortGPSD(const std::string& callsign, const std::string& ba
 
 bool CAPRSWriter::open()
 {
+	m_idTimer.setTimeout(20U * 60U);
 #ifdef USE_GPSD
 	if (m_gpsdEnabled) {
 		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
@@ -105,22 +105,10 @@ bool CAPRSWriter::open()
 		::gps_stream(&m_gpsdData, WATCH_ENABLE | WATCH_JSON, NULL);
 
 		CLog::logError("Connected to GPSD");
+
+		m_idTimer.setTimeout(60U);
 	}
 #endif
-
-	if (m_socket != NULL) {
-		bool ret = m_socket->open();
-		if (!ret) {
-			delete m_socket;
-			m_socket = NULL;
-			return false;
-		}
-
-		// Poll the GPS every minute
-		m_idTimer.setTimeout(60U);
-	} else {
-		m_idTimer.setTimeout(20U * 60U);
-	}
 
 	m_idTimer.start();
 
@@ -256,19 +244,7 @@ void CAPRSWriter::close()
 	}
 #endif
 
-	if (m_socket != NULL) {
-		m_socket->close();
-		delete m_socket;
-	}
-
 	m_thread->stop();
-}
-
-bool CAPRSWriter::pollGPS()
-{
-	assert(m_socket != NULL);
-
-	return m_socket->write((unsigned char*)"ircDDBGateway", 13U, m_address, m_port);
 }
 
 void CAPRSWriter::sendIdFramesFixed()
