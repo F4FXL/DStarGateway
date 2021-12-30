@@ -362,6 +362,9 @@ void CAPRSWriter::sendIdFramesFixed()
 #ifdef USE_GPSD
 void CAPRSWriter::sendIdFramesMobile()
 {
+	if (!m_thread->isConnected())
+		return;
+
 	if (!m_gpsdEnabled)
 		return;
 
