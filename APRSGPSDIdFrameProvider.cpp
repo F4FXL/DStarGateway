@@ -57,8 +57,12 @@ void CAPRSGPSDIdFrameProvider::close()
 
 bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<std::string>& frames)
 {
-	if (!::gps_waiting(&m_gpsdData, 0))
-		return false;
+    if(!m_hasConnection) {
+        this->start();
+    }
+
+	if(!m_hasConnection || !::gps_waiting(&m_gpsdData, 0))
+	    return false;
 
 #if GPSD_API_MAJOR_VERSION >= 7
     char message[1024];
@@ -178,16 +182,6 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
     std::string output3;
     output3 = CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str());
 
-    char ascii[300U];
-    ::memset(ascii, 0x00, 300U);
-    unsigned int n = 0U;
-    for (unsigned int i = 0U; i < output1.length(); i++, n++)
-        ascii[n] = output1[i];
-    for (unsigned int i = 0U; i < output2.length(); i++, n++)
-        ascii[n] = output2[i];
-    for (unsigned int i = 0U; i < output3.length(); i++, n++)
-        ascii[n] = output3[i];
-
     CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
 
     frames.push_back(output1.append(output2).append(output3));
@@ -204,15 +198,6 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
                 entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
                 lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
                 lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E');
-
-        ::memset(ascii, 0x00, 300U);
-        unsigned int n = 0U;
-        for (unsigned int i = 0U; i < output1.length(); i++, n++)
-            ascii[n] = output1[i];
-        for (unsigned int i = 0U; i < output2.length(); i++, n++)
-            ascii[n] = output2[i];
-        for (unsigned int i = 0U; i < output3.length(); i++, n++)
-            ascii[n] = output3[i];
 
         CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
 
