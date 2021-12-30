@@ -745,7 +745,7 @@ void CDStarGatewayThread::processIrcDDB()
 						break;
 
 					if (!address.empty()) {
-						CLog::logInfo("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
+						CLog::logDebug("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateUser(user, repeater, gateway, address, timestamp, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)
 						m_natTraversal->traverseNatG2(address);
@@ -764,7 +764,7 @@ void CDStarGatewayThread::processIrcDDB()
 
 					CRepeaterHandler::resolveRepeater(repeater, gateway, address, DP_DEXTRA);
 					if (!address.empty()) {
-						CLog::logInfo("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
+						CLog::logDebug("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateRepeater(repeater, gateway, address, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)
 						m_natTraversal->traverseNatG2(address);
@@ -784,7 +784,7 @@ void CDStarGatewayThread::processIrcDDB()
 					CDExtraHandler::gatewayUpdate(gateway, address);
 					CDPlusHandler::gatewayUpdate(gateway, address);
 					if (!address.empty()) {
-						CLog::logInfo("GATEWAY: %s %s", gateway.c_str(), address.c_str());
+						CLog::logDebug("GATEWAY: %s %s", gateway.c_str(), address.c_str());
 						m_cache.updateGateway(gateway, address, DP_DEXTRA, false, false);
 #if defined(ENABLE_NAT_TRAVERSAL)						
 						m_natTraversal->traverseNatG2(address);

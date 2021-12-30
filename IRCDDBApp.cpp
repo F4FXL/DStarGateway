@@ -255,7 +255,7 @@ IRCDDB_RESPONSE_TYPE IRCDDBApp::getReplyMessageType()
 	if (0 == msgType.compare("IDRT_GATEWAY"))
 		return IDRT_GATEWAY;
 
-	CLog::logInfo("IRCDDBApp::getMessageType: unknown msg type: %s\n", msgType.c_str());
+	CLog::logWarning("IRCDDBApp::getMessageType: unknown msg type: %s\n", msgType.c_str());
 
 	return IDRT_NONE;
 }
