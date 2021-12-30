@@ -195,7 +195,7 @@ bool CDStarGatewayApp::createThread()
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
 	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
