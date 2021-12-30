@@ -137,5 +137,10 @@ enum GATEWAY_TYPE {
 	GT_SMARTGROUP
 };
 
+enum POSITION_SOURCE {
+	POSSRC_FIXED,
+	POSSRC_GPSD
+};
+
 const unsigned int TIME_PER_TIC_MS = 5U;
 
