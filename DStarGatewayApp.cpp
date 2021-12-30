@@ -36,6 +36,8 @@
 #include "RepeaterProtocolHandlerFactory.h"
 #include "XLXHostsFileDownloader.h"
 #include "Log.h"
+#include "LogFileTarget.h"
+#include "LogConsoleTarget.h"
 
 int main(int argc, char *argv[])
 {
@@ -100,7 +102,8 @@ bool CDStarGatewayApp::createThread()
 
 	TLog log;
 	config.getLog(log);
-	CLog::initialize(log.logDir + "dstargateway.log", LS_INFO, true);
+	CLog::addTarget(new CLogConsoleTarget(LS_INFO));
+	CLog::addTarget(new CLogFileTarget(LS_INFO, log.logDir, true));
 
 	Tpaths paths;
 	config.getPaths(paths);
