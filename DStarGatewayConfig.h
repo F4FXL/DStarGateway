@@ -23,6 +23,7 @@
 
 #include "Defs.h"
 #include "Config.h"
+#include "LogSeverity.h"
 
 typedef struct {
 	GATEWAY_TYPE type;
@@ -79,6 +80,10 @@ typedef struct {
 
 typedef struct {
 	std::string logDir;
+	LOG_SEVERITY m_displayLevel;
+	LOG_SEVERITY m_fileLevel;
+	std::string m_fileRoot;
+	bool m_fileRotate;
 } TLog;
 
 typedef struct {

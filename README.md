@@ -4,17 +4,20 @@
   - [2.2. Code Credit](#22-code-credit)
   - [2.3. Features](#23-features)
 - [3. Building and installing](#3-building-and-installing)
-  - [3.1. Get latest stable version](#31-get-latest-stable-version)
-  - [3.2. Prerequisites and dependencies](#32-prerequisites-and-dependencies)
-  - [3.3. Building](#33-building)
-  - [3.4. Installing](#34-installing)
-  - [3.5. Configuring](#35-configuring)
+  - [3.1. Initial setup](#31-initial-setup)
+  - [3.2. Get latest stable version](#32-get-latest-stable-version)
+  - [3.3. Get latest development version version](#33-get-latest-development-version-version)
+  - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
+  - [3.5. Building](#35-building)
+  - [3.6. Installing](#36-installing)
+  - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
 - [5. Version History](#5-version-history)
-  - [5.1. Version 0.3](#51-version-03)
-  - [5.2. Version 0.2](#52-version-02)
-  - [5.3. Version 0.1](#53-version-01)
+  - [5.1. Version 0.4](#51-version-04)
+  - [5.2. Version 0.3](#52-version-03)
+  - [5.3. Version 0.2](#53-version-02)
+  - [5.4. Version 0.1](#54-version-01)
 
 
 # 1. Introduction
@@ -42,12 +45,13 @@ Features that where left out :
 - Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
 
 # 3. Building and installing
-## 3.1. Get latest stable version
+## 3.1. Initial setup
 Clone the repository (only required initally)
 ```
 git clone https://github.com/F4FXL/DStarGateway.git
 cd DStarGateway
 ```
+## 3.2. Get latest stable version
 From inside the cloned repository run following commands to get the latest stable version
 ```
 git pull -p
@@ -55,22 +59,26 @@ git fetch --tags
 latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
 git checkout $latestTag
 ```
+## 3.3. Get latest development version version
+```
+git checkout develop
+```
 
-## 3.2. Prerequisites and dependencies
+## 3.4. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
 apt install build-essential libconfig++-dev libcurl4-openssl-dev libboost-dev
 ```
-## 3.3. Building
+## 3.5. Building
 ```
 make
 ```
-## 3.4. Installing
+## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
 sudo make install
 ```
-## 3.5. Configuring
+## 3.7. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
 
 The configuration format is quite straight forward. It is organised in sections and key/value pairs.
@@ -88,10 +96,12 @@ sudo systemctl stop dstargateway.service
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
 
 # 5. Version History
-## 5.1. Version 0.3
+## 5.1. Version 0.4
+- [improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
+## 5.2. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.2. Version 0.2
+## 5.3. Version 0.2
 - [bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.3. Version 0.1
+## 5.4. Version 0.1
 First working version
