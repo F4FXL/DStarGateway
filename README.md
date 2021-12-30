@@ -43,6 +43,8 @@ Features that where left out :
 - Announcement: same can be achieved using transmitd.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not.
 - Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
+- DRats : No opinion on this one, I am not using it.
+- CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it.
 
 # 3. Building and installing
 ## 3.1. Initial setup
