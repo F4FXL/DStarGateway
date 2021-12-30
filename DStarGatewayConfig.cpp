@@ -126,13 +126,38 @@ bool CDStarGatewayConfig::loadAPRS(const CConfig & cfg)
 
 bool CDStarGatewayConfig::loadLog(const CConfig & cfg)
 {
-	bool ret =cfg.getValue("log", "path", m_log.logDir, 0, 2048, "/var/log/dstargateway/");
-
+	bool ret = cfg.getValue("log", "path", m_log.logDir, 0, 2048, "/var/log/dstargateway/");
 	if(ret && m_log.logDir[m_log.logDir.length() - 1] != '/') {
 		m_log.logDir.push_back('/');
 	}
 
-	//TODO 20211226 check if directory are accessible
+	ret = cfg.getValue("log", "fileRoot", m_log.m_fileRoot, 0, 64, "dstargateway") && ret;
+	ret = cfg.getValue("log", "fileRotate", m_log.m_fileRotate, true) && ret;
+
+	std::string levelStr;
+	ret = cfg.getValue("log", "fileLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
+	if(ret) {
+		if(levelStr == "trace")			m_log.m_fileLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.m_fileLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.m_fileLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.m_fileLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.m_fileLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.m_fileLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.m_fileLevel = LOG_NONE;
+	}
+
+	ret = cfg.getValue("log", "displayLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
+	if(ret) {
+		if(levelStr == "trace")			m_log.m_displayLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.m_displayLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.m_displayLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.m_displayLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.m_displayLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.m_displayLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.m_displayLevel = LOG_NONE;
+	}
+
+	//TODO 20211226 check if directories are accessible
 
 	return ret;
 }

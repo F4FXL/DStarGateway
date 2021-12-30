@@ -18,21 +18,12 @@
 
 #pragma once
 
-#include <string>
-
-#include "LogSeverity.h"
-
-class CLogTarget
-{
-public:
-    CLogTarget(LOG_SEVERITY logLevel);
-    virtual ~CLogTarget();
-    void printLog(const std::string& msg);
-    LOG_SEVERITY getLevel() { return m_logLevel; }
-
-protected:
-    virtual void printLogInt(const std::string& msg) = 0;
-
-private:
-    LOG_SEVERITY m_logLevel;
+enum LOG_SEVERITY : unsigned int {
+    LOG_TRACE = 1,
+    LOG_DEBUG,
+    LOG_INFO,
+    LOG_WARNING,
+    LOG_ERROR,
+    LOG_FATAL,
+    LOG_NONE = 0xFFFFFFFF
 };

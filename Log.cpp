@@ -24,10 +24,9 @@
 #include "Log.h"
 #include "LogConsoleTarget.h"
 
-LOG_SEVERITY CLog::m_level(LS_DEBUG);
 bool CLog::m_addedTargets(false);
 std::recursive_mutex CLog::m_targetsMutex;
-std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LS_DEBUG) };
+std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LOG_DEBUG) };
 
 void CLog::addTarget(CLogTarget* target)
 {

@@ -86,6 +86,7 @@ void CDStarGatewayApp::run()
 	m_thread->Run();
 	m_thread->Wait();
 	CLog::logInfo("exiting\n");
+	CLog::finalise();
 }
 
 bool CDStarGatewayApp::createThread()
@@ -100,10 +101,12 @@ bool CDStarGatewayApp::createThread()
 		return false;
 	}
 
+	// Setup Log
 	TLog log;
 	config.getLog(log);
-	CLog::addTarget(new CLogConsoleTarget(LS_INFO));
-	CLog::addTarget(new CLogFileTarget(LS_INFO, log.logDir, true));
+	CLog::finalise();
+	if(log.m_displayLevel	!= LOG_NONE) CLog::addTarget(new CLogConsoleTarget(log.m_displayLevel));
+	if(log.m_fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(log.m_fileLevel, log.logDir, log.m_fileRotate));
 
 	Tpaths paths;
 	config.getPaths(paths);
