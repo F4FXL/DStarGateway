@@ -125,14 +125,13 @@ bool CDStarGatewayApp::createThread()
 	CAPRSWriter * aprsWriter = NULL;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
 		aprsWriter = new CAPRSWriter(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
-		if(aprsWriter->open()) {
-			m_thread->setAPRSWriter(aprsWriter);
-		}
-		else {
-			delete aprsWriter;
-			aprsWriter = NULL;
-		}
 	}
+
+#ifdef USE_GPSD
+	// Setup GPSD
+	TGPSD gpsdConfig;
+	config.getGPSD(gpsdConfig);
+#endif
 
 	// Setup the repeaters
 	if(config.getRepeaterCount() == 0U) {
@@ -165,12 +164,33 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
-		
-		if(aprsWriter != NULL) aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+#ifdef USE_GPSD
+		if(aprsWriter != NULL) {
+			if(aprsConfig.m_positionSource == POSSRC_GPSD)
+				aprsWriter->setPortGPSD(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, gpsdConfig.m_address, gpsdConfig.m_port);
+			else
+				aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+
+		}
+#else
+		aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+#endif
+
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
 	m_thread->setDDModeEnabled(ddEnabled);
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
+
+	// open APRS after setting the repeaters because of GPSD
+	if(aprsWriter != nullptr) {
+		if(aprsWriter->open()) {
+				m_thread->setAPRSWriter(aprsWriter);
+		}
+		else {
+			delete aprsWriter;
+			aprsWriter = NULL;
+		}
+	}
 
 	// Setup ircddb
 	std::vector<CIRCDDB *> clients;

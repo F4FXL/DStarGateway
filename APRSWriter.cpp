@@ -20,6 +20,7 @@
 #include <cassert>
 #include <boost/algorithm/string.hpp>
 #include <cmath>
+#include <cassert>
 
 #include "StringUtils.h"
 #include "Log.h"
@@ -27,103 +28,6 @@
 #include "DStarDefines.h"
 #include "Defs.h"
 #include "Log.h"
-
-CAPRSEntry::CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl) :
-m_callsign(callsign),
-m_band(band),
-m_frequency(frequency),
-m_offset(offset),
-m_range(range),
-m_latitude(latitude),
-m_longitude(longitude),
-m_agl(agl),
-m_timer(1000U, 10U),
-m_first(true),
-m_collector(NULL)
-{
-	boost::trim(m_callsign);
-
-	m_collector = new CAPRSCollector;
-}
-
-CAPRSEntry::~CAPRSEntry()
-{
-	delete m_collector;
-}
-
-std::string CAPRSEntry::getCallsign() const
-{
-	return m_callsign;
-}
-
-std::string CAPRSEntry::getBand() const
-{
-	return m_band;
-}
-
-double CAPRSEntry::getFrequency() const
-{
-	return m_frequency;
-}
-
-double CAPRSEntry::getOffset() const
-{
-	return m_offset;
-}
-
-double CAPRSEntry::getRange() const
-{
-	return m_range;
-}
-
-double CAPRSEntry::getLatitude() const
-{
-	return m_latitude;
-}
-
-double CAPRSEntry::getLongitude() const
-{
-	return m_longitude;
-}
-
-double CAPRSEntry::getAGL() const
-{
-	return m_agl;
-}
-
-CAPRSCollector* CAPRSEntry::getCollector() const
-{
-	return m_collector;
-}
-
-void CAPRSEntry::reset()
-{
-	m_first = true;
-	m_timer.stop();
-	m_collector->reset();
-}
-
-void CAPRSEntry::clock(unsigned int ms)
-{
-	m_timer.clock(ms);
-}
-
-bool CAPRSEntry::isOK()
-{
-	if (m_first) {
-		m_first = false;
-		m_timer.start();
-		return true;
-	}
-
-	if (m_timer.hasExpired()) {
-		m_timer.start();
-		return true;
-	} else {
-		m_timer.start();
-		return false;
-	}
-}
 
 CAPRSWriter::CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
 m_thread(NULL),
@@ -133,6 +37,12 @@ m_address(),
 m_port(0U),
 m_socket(NULL),
 m_array()
+#ifdef USE_GPSD
+, m_gpsdEnabled(false),
+m_gpsdAddress(),
+m_gpsdPort(),
+m_gpsdData()
+#endif
 {
 	assert(!hostname.empty());
 	assert(port > 0U);
@@ -164,24 +74,40 @@ void CAPRSWriter::setPortFixed(const std::string& callsign, const std::string& b
 	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, latitude, longitude, agl);
 }
 
-void CAPRSWriter::setPortMobile(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, unsigned int port)
+#ifdef USE_GPSD
+void CAPRSWriter::setPortGPSD(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, const std::string& port)
 {
+	assert(!address.empty());
+	assert(!port.empty());
+
 	std::string temp = callsign;
 	temp.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
-	temp += band;
+	temp.append(band);
 
 	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, 0.0, 0.0, 0.0);
 
-	if (m_socket == NULL) {
-		m_address = CUDPReaderWriter::lookup(address);
-		m_port    = port;
-
-		m_socket = new CUDPReaderWriter();
-	}
+	m_gpsdEnabled = true;
+	m_gpsdAddress = address;
+	m_gpsdPort    = port;
 }
+#endif
 
 bool CAPRSWriter::open()
 {
+#ifdef USE_GPSD
+	if (m_gpsdEnabled) {
+		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
+		if (ret != 0) {
+			CLog::logError("Error when opening access to gpsd - %d - %s", errno, ::gps_errstr(errno));
+			return false;
+		}
+
+		::gps_stream(&m_gpsdData, WATCH_ENABLE | WATCH_JSON, NULL);
+
+		CLog::logError("Connected to GPSD");
+	}
+#endif
+
 	if (m_socket != NULL) {
 		bool ret = m_socket->open();
 		if (!ret) {
@@ -293,19 +219,22 @@ void CAPRSWriter::clock(unsigned int ms)
 
 	m_thread->clock(ms);
 
-	if (m_socket != NULL) {
+#ifdef USE_GPSD
+	if (m_gpsdEnabled) {
 		if (m_idTimer.hasExpired()) {
-			pollGPS();
+			sendIdFramesMobile();
 			m_idTimer.start();
 		}
 
-		sendIdFramesMobile();
 	} else {
+#endif
 		if (m_idTimer.hasExpired()) {
 			sendIdFramesFixed();
 			m_idTimer.start();
 		}
+#ifdef USE_GPSD
 	}
+#endif
 
 	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
 		if(it->second != NULL)
@@ -320,6 +249,13 @@ bool CAPRSWriter::isConnected() const
 
 void CAPRSWriter::close()
 {
+#ifdef USE_GPSD
+	if (m_gpsdEnabled) {
+		::gps_stream(&m_gpsdData, WATCH_DISABLE, NULL);
+		::gps_close(&m_gpsdData);
+	}
+#endif
+
 	if (m_socket != NULL) {
 		m_socket->close();
 		delete m_socket;
@@ -447,34 +383,48 @@ void CAPRSWriter::sendIdFramesFixed()
 	}
 }
 
+#ifdef USE_GPSD
 void CAPRSWriter::sendIdFramesMobile()
 {
-	// Grab GPS data if it's available
-	unsigned char buffer[200U];
-	in_addr address;
-	unsigned int port;
-	int ret = m_socket->read(buffer, 200U, address, port);
-	if (ret <= 0)
+	if (!m_gpsdEnabled)
 		return;
 
-	if (!m_thread->isConnected())
+	if (!::gps_waiting(&m_gpsdData, 0))
 		return;
 
-	buffer[ret] = '\0';
+#if GPSD_API_MAJOR_VERSION >= 7
+	if (::gps_read(&m_gpsdData, NULL, 0) <= 0)
+		return;
+#else
+	if (::gps_read(&m_gpsdData) <= 0)
+		return;
+#endif
 
-	// Parse the GPS data
-	char* pLatitude  = ::strtok((char*)buffer, ",\n");	// Latitude
-	char* pLongitude = ::strtok(NULL, ",\n");		// Longitude
-	char* pAltitude  = ::strtok(NULL, ",\n");		// Altitude (m)
-	char* pVelocity  = ::strtok(NULL, ",\n");		// Velocity (kms/h)
-	char* pBearing   = ::strtok(NULL, "\n");		// Bearing
+#if GPSD_API_MAJOR_VERSION >= 11 // F4FXL 2021-12-31 not sure if 11 is porper version, best guess as i could not find any change log
+	if(m_gpsdData.fix.mode < MODE_3D)
+		return;
+#else
+	if (m_gpsdData.status != STATUS_FIX)
+		return;
+#endif
 
-	if (pLatitude == NULL || pLongitude == NULL || pAltitude == NULL)
+	bool latlonSet   = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
+	bool altitudeSet = (m_gpsdData.set & ALTITUDE_SET) == ALTITUDE_SET;
+	bool velocitySet = (m_gpsdData.set & SPEED_SET) == SPEED_SET;
+	bool bearingSet  = (m_gpsdData.set & TRACK_SET) == TRACK_SET;
+
+	if (!latlonSet)
 		return;
 
-	double rawLatitude  = ::atof(pLatitude);
-	double rawLongitude = ::atof(pLongitude);
-	double rawAltitude  = ::atof(pAltitude);
+	float rawLatitude  = float(m_gpsdData.fix.latitude);
+	float rawLongitude = float(m_gpsdData.fix.longitude);
+#if GPSD_API_MAJOR_VERSION >= 9
+	float rawAltitude  = float(m_gpsdData.fix.altMSL);
+#else
+	float rawAltitude  = float(m_gpsdData.fix.altitude);
+#endif
+	float rawVelocity  = float(m_gpsdData.fix.speed);
+	float rawBearing   = float(m_gpsdData.fix.track);
 
 	time_t now;
 	::time(&now);
@@ -557,15 +507,11 @@ void CAPRSWriter::sendIdFramesMobile()
 			rawAltitude * 3.28);
 
 		std::string output2;
-		if (pBearing != NULL && pVelocity != NULL) {
-			double rawBearing   = ::atof(pBearing);
-			double rawVelocity  = ::atof(pVelocity);
-
+		if (bearingSet && velocitySet)
 			output2 = CStringUtils::string_format("%03.0lf/%03.0lf", rawBearing, rawVelocity * 0.539957F);
-		}
 
 		std::string output3;
-		output3 = CStringUtils::string_format("RNG%04.0lf %s %s", entry->getRange() * 0.6214, band.c_str(), desc.c_str());
+		output3 = CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str());
 
 		char ascii[300U];
 		::memset(ascii, 0x00, 300U);
@@ -577,14 +523,22 @@ void CAPRSWriter::sendIdFramesMobile()
 		for (unsigned int i = 0U; i < output3.length(); i++, n++)
 			ascii[n] = output3[i];
 
+		CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
+
 		m_thread->write(ascii);
 
 		if (entry->getBand().length() == 1U) {
-			output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf",
-				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-				lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
-				lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
-				rawAltitude * 3.28);
+			if (altitudeSet)
+				output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf",
+					entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+					lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
+					lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
+					rawAltitude * 3.28);
+			else
+				output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&",
+					entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+					lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
+					lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E');
 
 			::memset(ascii, 0x00, 300U);
 			unsigned int n = 0U;
@@ -595,8 +549,10 @@ void CAPRSWriter::sendIdFramesMobile()
 			for (unsigned int i = 0U; i < output3.length(); i++, n++)
 				ascii[n] = output3[i];
 
+			CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
+
 			m_thread->write(ascii);
 		}
 	}
 }
-
+#endif

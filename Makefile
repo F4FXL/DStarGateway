@@ -26,6 +26,13 @@ CPPFLAGS=-g -ggdb -W -Wall -std=c++17
 # or, you can choose this for a much smaller executable without debugging help
 #CPPFLAGS=-W -Wall -std=c++17
 
+LDFLAGS:=-lcurl -pthread
+
+ifeq ($(USE_GPSD), 1)
+CPPFLAGS+= -DUSE_GPSD
+LDFLAGS+= -lgps
+endif
+
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
@@ -34,7 +41,7 @@ DEPS = $(SRCS:.cpp=.d)
 all: dstargateway
 
 dstargateway : GitVersion.h $(OBJS) 
-	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lcurl -pthread
+	g++ $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
 
 %.o : %.cpp
 	g++ $(CPPFLAGS) -MMD -MD -c $< -o $@

@@ -22,7 +22,11 @@
 
 #include <unordered_map>
 #include <string>
+#ifdef USE_GPSD
+#include <gps.h>
+#endif
 
+#include "APRSEntry.h"
 #include "APRSWriterThread.h"
 #include "UDPReaderWriter.h"
 #include "APRSCollector.h"
@@ -32,40 +36,6 @@
 #include "Timer.h"
 #include "Defs.h"
 
-class CAPRSEntry {
-public:
-	CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
-	~CAPRSEntry();
-
-	std::string getCallsign() const;
-	std::string getBand() const;
-	double   getFrequency() const;
-	double   getOffset() const;
-	double   getRange() const;
-	double   getLatitude() const;
-	double   getLongitude() const;
-	double   getAGL() const;
-	CAPRSCollector* getCollector() const;
-
-	// Transmission timer
-	void reset();
-	void clock(unsigned int ms);
-	bool isOK();
-
-private:
-	std::string        m_callsign;
-	std::string        m_band;
-	double          m_frequency;
-	double          m_offset;
-	double          m_range;
-	double          m_latitude;
-	double          m_longitude;
-	double          m_agl;
-	CTimer          m_timer;
-	bool            m_first;
-	CAPRSCollector* m_collector;
-};
-
 class CAPRSWriter {
 public:
 	CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address);
@@ -74,9 +44,9 @@ public:
 	bool open();
 
 	void setPortFixed(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
-
-	void setPortMobile(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, unsigned int port);
-
+#ifdef USE_GPSD
+	void setPortGPSD(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, const std::string& port);
+#endif
 	void writeHeader(const std::string& callsign, const CHeaderData& header);
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
@@ -95,6 +65,13 @@ private:
 	unsigned int			m_port;
 	CUDPReaderWriter*		m_socket;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
+
+#ifdef USE_GPSD
+	bool				m_gpsdEnabled;
+	std::string			m_gpsdAddress;
+	std::string			m_gpsdPort;
+	struct gps_data_t	m_gpsdData;
+#endif
 
 	bool pollGPS();
 	void sendIdFramesFixed();

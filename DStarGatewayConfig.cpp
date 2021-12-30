@@ -52,6 +52,9 @@ bool CDStarGatewayConfig::load()
 		ret = loadDPlus(cfg) && ret;
 		ret = loadRemote(cfg) && ret;
 		ret = loadXLX(cfg) && ret;
+#ifdef USE_GPSD
+		ret = loadGPSD(cfg) && ret;
+#endif
 	}
 
 	if(ret) {
@@ -118,6 +121,16 @@ bool CDStarGatewayConfig::loadAPRS(const CConfig & cfg)
 	ret = cfg.getValue("aprs", "port", m_aprs.port, 1U, 65535U, 14580U) && ret;
 	ret = cfg.getValue("aprs", "hostname", m_aprs.hostname, 0, 1024, "rotate.aprs2.net") && ret;
 	ret = cfg.getValue("aprs", "password", m_aprs.password, 0U, 30U, "") && ret;
+#ifdef USE_GPSD
+	std::string positionSource;
+	ret = cfg.getValue("aprs", "positionSource", positionSource, "fixed", {"fixed", "gpsd"}) && ret;
+	if(ret) {
+		if(positionSource == "fixed")	m_aprs.m_positionSource = POSSRC_FIXED;
+		else if(positionSource == "gpsd")	m_aprs.m_positionSource = POSSRC_GPSD;
+	}
+#else
+	m_aprs.m_positionSource = POSSRC_FIXED;
+#endif
 
 	m_aprs.enabled = m_aprs.enabled && !m_aprs.password.empty();
 
@@ -319,6 +332,16 @@ bool CDStarGatewayConfig::loadGateway(const CConfig & cfg)
 	return ret;
 }
 
+#ifdef USE_GPSD
+bool CDStarGatewayConfig::loadGPSD(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("gpsd", "address", m_gpsd.m_address, 0U, 15U, "127.0.0.1");
+	ret = cfg.getValue("gpsd", "port", m_gpsd.m_port, 0U, 5U, "2947") && ret;
+
+	return ret;
+}
+#endif
+
 bool CDStarGatewayConfig::open(CConfig & cfg)
 {
 	try {
@@ -408,3 +431,10 @@ void CDStarGatewayConfig::getXLX(TXLX & xlx) const
 {
 	xlx = m_xlx;
 }
+
+#ifdef USE_GPSD
+void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
+{
+	gpsd = m_gpsd;
+}
+#endif
