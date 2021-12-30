@@ -45,13 +45,13 @@ m_out(0U)
 
 	m_data = new CAMBEData*[NUM_FRAMES];
 
-	char vstr[32];
-	snprintf(vstr, 32, "DStar GW - %s", VERSION.substr(0, 8).c_str());
+	auto vstr = SHORT_PRODUCT_NAME;
+	vstr.resize(NUM_FRAMES, ' ');
 
 	CLog::logInfo("Version text set to \"%s\"\n", vstr);
 
 	CSlowDataEncoder encoder;
-	encoder.setTextData(std::string(vstr));
+	encoder.setTextData(vstr);
 
 	// Seq No and end
 	for (unsigned int i = 0U; i < NUM_FRAMES; i++) {

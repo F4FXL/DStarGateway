@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	}
 
 	if ('-' == argv[1][0]) {
-		printf("\nDStarGateway Version %s (GitID #%.7s) Copyright (C) %s\n", VERSION.c_str(), gitversion, VENDOR_NAME.c_str());
+		printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
 		printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
 		printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
 		return 0;
@@ -91,7 +91,7 @@ void CDStarGatewayApp::run()
 
 bool CDStarGatewayApp::createThread()
 {
-	printf("\nDStarGateway Version %s (GitID #%.7s) Copyright (C) %s\n", VERSION.c_str(), gitversion, VENDOR_NAME.c_str());
+	printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
 	printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
 	printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
 

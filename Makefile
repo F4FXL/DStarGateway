@@ -48,9 +48,13 @@ dstargateway : GitVersion.h $(OBJS)
 
 GitVersion.h : FORCE 
 ifneq ("$(wildcard .git/index)","")
-	@echo "#pragma once\nconst char *gitversion = \"$(shell git rev-parse HEAD)\";" > /tmp/$@
+	@echo "#pragma once" > /tmp/$@
+	@echo "#include <string>" >> /tmp/$@
+	@echo "const std::string gitversion(\"$(shell git rev-parse --short HEAD)\");" >> /tmp/$@
 else
-	@echo "#pragma once\nconst char *gitversion = \"0000000000000000000000000000000000000000\";" > /tmp/$@
+	@echo "#pragma once" > /tmp/$@
+	@echo "#include <string>" >> /tmp/$@
+	@echo "const std::string gitversion(\"0000000\");" >> /tmp/$@
 endif
 	@cmp -s /tmp/$@ $@; \
 	RETVAL=$$?; \

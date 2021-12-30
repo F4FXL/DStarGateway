@@ -26,6 +26,7 @@
 #include "Utils.h"
 #include "Defs.h"
 #include "Log.h"
+#include "Version.h"
 
 // #define	DUMP_TX
 
@@ -44,7 +45,7 @@ m_reconnectTimer(1000U),
 m_tries(0U),
 m_APRSReadCallback(NULL),
 m_filter(""),
-m_clientName("DStarGateway")
+m_clientName(FULL_PRODUCT_NAME)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -249,7 +250,7 @@ bool CAPRSWriterThread::connect()
 	std::stringstream connectString;
 	connectString 	<< "User " << m_username << "-" << m_ssid
 					<< " pass " << m_password
-					<< " vers " << (m_clientName.length() ? m_clientName : "DStarGateway")
+					<< " vers " << (!m_clientName.empty() ? m_clientName : FULL_PRODUCT_NAME)
 					<< filter;
 	//CLog::logInfo("Connect String : ") + connectString);
 	ret = m_socket.writeLine(connectString.str());
