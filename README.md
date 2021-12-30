@@ -5,7 +5,7 @@
   - [2.3. Features](#23-features)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
-  - [3.2. Get latest stable version](#32-get-latest-stable-version)
+  - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
   - [3.3. Get latest development version version](#33-get-latest-development-version-version)
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
@@ -53,7 +53,7 @@ Clone the repository (only required initally)
 git clone https://github.com/F4FXL/DStarGateway.git
 cd DStarGateway
 ```
-## 3.2. Get latest stable version
+## 3.2. Get latest stable version (recommended)
 From inside the cloned repository run following commands to get the latest stable version
 ```
 git pull -p
@@ -108,11 +108,12 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 
 # 5. Version History
 ## 5.1. Version 0.4
-- [improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
+- [Improvement] Bring back GPSD support (https://github.com/F4FXL/DStarGateway/issues/6)
+- [Improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
 ## 5.2. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.3. Version 0.2
-- [bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
+- [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
 ## 5.4. Version 0.1
 First working version
