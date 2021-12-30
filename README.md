@@ -21,7 +21,7 @@
 
 
 # 1. Introduction
-This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only), libconfig++ and libcurl
+This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only) and libcurl
 
 # 2. Current State
 ## 2.1. Code sanity
@@ -69,7 +69,7 @@ git checkout develop
 ## 3.4. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
-apt install build-essential libconfig++-dev libcurl4-openssl-dev libboost-dev
+apt install build-essential libcurl4-openssl-dev libboost-dev
 ```
 ## 3.5. Building
 ```
