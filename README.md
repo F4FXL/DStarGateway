@@ -9,6 +9,7 @@
   - [3.3. Get latest development version version](#33-get-latest-development-version-version)
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
+      - [Build With GPSD Support](#build-with-gpsd-support)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
@@ -71,9 +72,18 @@ Before first time building you need to install dependencies and prerequisites
 ```
 apt install build-essential libcurl4-openssl-dev libboost-dev
 ```
+If you are going to build with gpsd support, also install libgps-dev
+```
+apt install libgps-dev
+```
 ## 3.5. Building
+Regular building
 ```
 make
+```
+#### Build With GPSD Support
+```
+make USE_GPS=1
 ```
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
