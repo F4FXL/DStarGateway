@@ -154,7 +154,7 @@ void* CAPRSWriterThread::Entry()
 					if (length < 0) {
 						m_connected = false;
 						m_socket.close();
-						CLog::logInfo("Error when reading from the APRS server");
+						CLog::logError("Error when reading from the APRS server");
 						startReconnectionTimer();
 					}
 
