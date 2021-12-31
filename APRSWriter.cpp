@@ -158,7 +158,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	collector->reset();
 }
 
-void CAPRSWriter::writeLinkStatus(const std::string& callsign, LINK_STATUS status, const std::string& destination)
+void CAPRSWriter::writeStatus(const std::string& callsign, const std::string status)
 {
 	CAPRSEntry* entry = m_array[callsign];
 	if (entry == NULL) {
@@ -166,7 +166,7 @@ void CAPRSWriter::writeLinkStatus(const std::string& callsign, LINK_STATUS statu
 		return;
 	}
 
-	entry->getLinkStatus().setLink(status, destination);
+	entry->getStatus().setStatus(status);
 }
 
 void CAPRSWriter::clock(unsigned int ms)
@@ -183,7 +183,7 @@ void CAPRSWriter::clock(unsigned int ms)
 	for (auto it : m_array) {
 		if(it.second != NULL) {
 			it.second->clock(ms);
-			if(it.second->getLinkStatus().isOutOfDate())
+			if(it.second->getStatus().isOutOfDate())
 				sendStatusFrame(it.second);
 		}
 	}
@@ -193,36 +193,14 @@ void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
 {
 	assert(entry != nullptr);
 
-	// 20211231 TODO F4FXL support different languages
-
 	if(!m_thread->isConnected())
 		return;
 
-	auto linkStatus = entry->getLinkStatus();
-	std::string body;
+	auto linkStatus = entry->getStatus();
+	std::string body = boost::trim_copy(linkStatus.getStatus());
 
-	switch (linkStatus.getLinkStatus())
-	{
-		case LS_LINKED_DCS:
-		case LS_LINKED_CCS:
-		case LS_LINKED_DEXTRA:
-		case LS_LINKED_DPLUS:
-		case LS_LINKED_LOOPBACK:
-			body = ">Linked to " + linkStatus.getLinkDestination();
-		break;
-		
-		case LS_LINKING_DCS:
-		case LS_LINKING_CCS:
-		case LS_LINKING_DEXTRA:
-		case LS_LINKING_DPLUS:
-		case LS_LINKING_LOOPBACK:
-			body = ">Linking to " + linkStatus.getLinkDestination();; 
-		break;
-	
-		default:
-			body = ">Not linked";
-			break;
-	}
+	if(body[0] != '>')
+		body = '>' + body;
 
 	std::string output = CStringUtils::string_format("%s-%s>APD5T3,TCPIP*,qAC,%s-%sS:%s\r\n",
 														entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
@@ -230,7 +208,6 @@ void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
 
 	m_thread->write(output.c_str());
 
-	linkStatus.reset();
 }
 
 void CAPRSWriter::sendIdFrames()

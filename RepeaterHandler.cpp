@@ -2564,7 +2564,7 @@ void CRepeaterHandler::writeLinkingTo(const std::string &callsign)
 	triggerInfo();
 
 	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
+		m_aprsWriter->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
@@ -2619,7 +2619,7 @@ void CRepeaterHandler::writeLinkedTo(const std::string &callsign)
 	triggerInfo();
 
 	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
+		m_aprsWriter->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector(callsign);
@@ -2674,7 +2674,7 @@ void CRepeaterHandler::writeNotLinked()
 	triggerInfo();
 
 	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, "");
+		m_aprsWriter->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
@@ -2745,7 +2745,7 @@ void CRepeaterHandler::writeIsBusy(const std::string& callsign)
 	triggerInfo();
 
 	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
+		m_aprsWriter->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();

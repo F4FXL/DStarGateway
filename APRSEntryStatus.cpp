@@ -16,49 +16,39 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "APRSEntryLinkStatus.h"
+#include "APRSEntryStatus.h"
 
-CAPRSEntryLinkStatus::CAPRSEntryLinkStatus() :
-m_linkStatus(LS_NONE),
-m_linkDestination(),
-m_linkStatusChanged(false),
+CAPRSEntryStatus::CAPRSEntryStatus() :
+m_status(),
+m_statusChanged(false),
 m_timer(1000U)
 {
     m_timer.setTimeout(20U * 60U); //statuses go out every 20 minutes or every change
 }
 
-bool CAPRSEntryLinkStatus::isOutOfDate()
+bool CAPRSEntryStatus::isOutOfDate()
 {
-    return m_linkStatusChanged || m_timer.hasExpired();
+    bool ouOfDate = m_statusChanged || m_timer.hasExpired();
+    m_statusChanged = false;
+    return ouOfDate;
 }
 
-std::string CAPRSEntryLinkStatus::getLinkDestination() const
+
+std::string CAPRSEntryStatus::getStatus() const
 {
-    return m_linkDestination;
+    return m_status;
 }
 
-LINK_STATUS CAPRSEntryLinkStatus::getLinkStatus() const
+void CAPRSEntryStatus::setStatus(const std::string& linkstatus)
 {
-    return m_linkStatus;
-}
-
-void CAPRSEntryLinkStatus::setLink(LINK_STATUS linkstatus, const std::string& destination)
-{
-    bool changed = m_linkStatus != linkstatus || m_linkDestination != destination;
+    bool changed = m_status != linkstatus;
     if(changed) {
-        m_linkStatus = linkstatus;
-        m_linkDestination = destination;
+        m_status = linkstatus;
     }
-    m_linkStatusChanged = changed;
+    m_statusChanged = changed;
 }
 
-void CAPRSEntryLinkStatus::reset()
-{
-    m_linkStatusChanged = false;
-    m_timer.start();
-}
-
-void CAPRSEntryLinkStatus::clock(unsigned int ms)
+void CAPRSEntryStatus::clock(unsigned int ms)
 {
     m_timer.clock(ms);
 }
