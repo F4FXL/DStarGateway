@@ -18,24 +18,22 @@
 
 #pragma once
 
-#include "Timer.h"
-#include "Defs.h"
+#include <string>
 
-class CAPRSEntryLinkStatus
+#include "Timer.h"
+
+class CAPRSEntryStatus
 {
 public:
-	CAPRSEntryLinkStatus() ;
+	CAPRSEntryStatus() ;
 
-	LINK_STATUS getLinkStatus() const;
-	std::string getLinkDestination() const;
+	std::string getStatus() const;
 	bool isOutOfDate();
-	void setLink(LINK_STATUS linkstatus, const std::string& destination);
-	void reset();
+	void setStatus(const std::string& destination);
 	void clock(unsigned int ms);
 
 private:
-	LINK_STATUS		m_linkStatus;
-	std::string		m_linkDestination;
-	bool 			m_linkStatusChanged;
+	std::string		m_status;
+	bool 			m_statusChanged;
 	CTimer			m_timer;
 };

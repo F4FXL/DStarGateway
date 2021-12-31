@@ -90,7 +90,7 @@ CAPRSCollector* CAPRSEntry::getCollector() const
 	return m_collector;
 }
 
-CAPRSEntryLinkStatus& CAPRSEntry::getLinkStatus()
+CAPRSEntryStatus& CAPRSEntry::getStatus()
 {
 	return m_linkStatus;
 }

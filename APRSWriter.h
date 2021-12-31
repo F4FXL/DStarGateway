@@ -51,7 +51,7 @@ public:
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
 
-	void writeLinkStatus(const std::string& callsign, LINK_STATUS status, const std::string& destination);
+	void  writeStatus(const std::string& callsign, const std::string status);
 
 	bool isConnected() const;
 
