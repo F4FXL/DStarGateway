@@ -1,7 +1,5 @@
 /*
- *   Copyright (C) 2010-2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,10 +20,19 @@
 
 #include <string>
 
-#include "GitVersion.h"
+#include "LogSeverity.h"
 
-const std::string PRODUCT_NAME("DStarGateway");
-const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
-const std::string VERSION("0.4");
-const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
-const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
+class CLogTarget
+{
+public:
+    CLogTarget(LOG_SEVERITY logLevel);
+    virtual ~CLogTarget();
+    void printLog(const std::string& msg);
+    LOG_SEVERITY getLevel() { return m_logLevel; }
+
+protected:
+    virtual void printLogInt(const std::string& msg) = 0;
+
+private:
+    LOG_SEVERITY m_logLevel;
+};

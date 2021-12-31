@@ -52,6 +52,9 @@ bool CDStarGatewayConfig::load()
 		ret = loadDPlus(cfg) && ret;
 		ret = loadRemote(cfg) && ret;
 		ret = loadXLX(cfg) && ret;
+#ifdef USE_GPSD
+		ret = loadGPSD(cfg) && ret;
+#endif
 	}
 
 	if(ret) {
@@ -118,6 +121,16 @@ bool CDStarGatewayConfig::loadAPRS(const CConfig & cfg)
 	ret = cfg.getValue("aprs", "port", m_aprs.port, 1U, 65535U, 14580U) && ret;
 	ret = cfg.getValue("aprs", "hostname", m_aprs.hostname, 0, 1024, "rotate.aprs2.net") && ret;
 	ret = cfg.getValue("aprs", "password", m_aprs.password, 0U, 30U, "") && ret;
+#ifdef USE_GPSD
+	std::string positionSource;
+	ret = cfg.getValue("aprs", "positionSource", positionSource, "fixed", {"fixed", "gpsd"}) && ret;
+	if(ret) {
+		if(positionSource == "fixed")	m_aprs.m_positionSource = POSSRC_FIXED;
+		else if(positionSource == "gpsd")	m_aprs.m_positionSource = POSSRC_GPSD;
+	}
+#else
+	m_aprs.m_positionSource = POSSRC_FIXED;
+#endif
 
 	m_aprs.enabled = m_aprs.enabled && !m_aprs.password.empty();
 
@@ -126,13 +139,38 @@ bool CDStarGatewayConfig::loadAPRS(const CConfig & cfg)
 
 bool CDStarGatewayConfig::loadLog(const CConfig & cfg)
 {
-	bool ret =cfg.getValue("log", "path", m_log.logDir, 0, 2048, "/var/log/dstargateway/");
-
+	bool ret = cfg.getValue("log", "path", m_log.logDir, 0, 2048, "/var/log/dstargateway/");
 	if(ret && m_log.logDir[m_log.logDir.length() - 1] != '/') {
 		m_log.logDir.push_back('/');
 	}
 
-	//TODO 20211226 check if directory are accessible
+	ret = cfg.getValue("log", "fileRoot", m_log.m_fileRoot, 0, 64, "dstargateway") && ret;
+	ret = cfg.getValue("log", "fileRotate", m_log.m_fileRotate, true) && ret;
+
+	std::string levelStr;
+	ret = cfg.getValue("log", "fileLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
+	if(ret) {
+		if(levelStr == "trace")			m_log.m_fileLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.m_fileLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.m_fileLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.m_fileLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.m_fileLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.m_fileLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.m_fileLevel = LOG_NONE;
+	}
+
+	ret = cfg.getValue("log", "displayLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
+	if(ret) {
+		if(levelStr == "trace")			m_log.m_displayLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.m_displayLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.m_displayLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.m_displayLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.m_displayLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.m_displayLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.m_displayLevel = LOG_NONE;
+	}
+
+	//TODO 20211226 check if directories are accessible
 
 	return ret;
 }
@@ -294,6 +332,16 @@ bool CDStarGatewayConfig::loadGateway(const CConfig & cfg)
 	return ret;
 }
 
+#ifdef USE_GPSD
+bool CDStarGatewayConfig::loadGPSD(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("gpsd", "address", m_gpsd.m_address, 0U, 15U, "127.0.0.1");
+	ret = cfg.getValue("gpsd", "port", m_gpsd.m_port, 0U, 5U, "2947") && ret;
+
+	return ret;
+}
+#endif
+
 bool CDStarGatewayConfig::open(CConfig & cfg)
 {
 	try {
@@ -383,3 +431,10 @@ void CDStarGatewayConfig::getXLX(TXLX & xlx) const
 {
 	xlx = m_xlx;
 }
+
+#ifdef USE_GPSD
+void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
+{
+	gpsd = m_gpsd;
+}
+#endif

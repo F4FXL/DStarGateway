@@ -20,9 +20,13 @@
 #ifndef	APRSWriter_H
 #define	APRSWriter_H
 
+#include "Defs.h"
+
 #include <unordered_map>
 #include <string>
 
+
+#include "APRSEntry.h"
 #include "APRSWriterThread.h"
 #include "UDPReaderWriter.h"
 #include "APRSCollector.h"
@@ -30,41 +34,7 @@
 #include "HeaderData.h"
 #include "AMBEData.h"
 #include "Timer.h"
-#include "Defs.h"
-
-class CAPRSEntry {
-public:
-	CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
-	~CAPRSEntry();
-
-	std::string getCallsign() const;
-	std::string getBand() const;
-	double   getFrequency() const;
-	double   getOffset() const;
-	double   getRange() const;
-	double   getLatitude() const;
-	double   getLongitude() const;
-	double   getAGL() const;
-	CAPRSCollector* getCollector() const;
-
-	// Transmission timer
-	void reset();
-	void clock(unsigned int ms);
-	bool isOK();
-
-private:
-	std::string        m_callsign;
-	std::string        m_band;
-	double          m_frequency;
-	double          m_offset;
-	double          m_range;
-	double          m_latitude;
-	double          m_longitude;
-	double          m_agl;
-	CTimer          m_timer;
-	bool            m_first;
-	CAPRSCollector* m_collector;
-};
+#include "APRSIdFrameProvider.h"
 
 class CAPRSWriter {
 public:
@@ -73,13 +43,15 @@ public:
 
 	bool open();
 
-	void setPortFixed(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
+	void setIdFrameProvider(CAPRSIdFrameProvider * idFrameProvider) { m_idFrameProvider = idFrameProvider; }
 
-	void setPortMobile(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, unsigned int port);
+	void setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
 
 	void writeHeader(const std::string& callsign, const CHeaderData& header);
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
+
+	void  writeStatus(const std::string& callsign, const std::string status);
 
 	bool isConnected() const;
 
@@ -89,16 +61,14 @@ public:
 
 private:
 	CAPRSWriterThread*		m_thread;
-	CTimer					m_idTimer;
 	std::string				m_gateway;
 	in_addr					m_address;
 	unsigned int			m_port;
-	CUDPReaderWriter*		m_socket;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
+	CAPRSIdFrameProvider * m_idFrameProvider;
 
-	bool pollGPS();
-	void sendIdFramesFixed();
-	void sendIdFramesMobile();
+	void sendIdFrames();
+	void sendStatusFrame(CAPRSEntry * entrry);
 };
 
 #endif

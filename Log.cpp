@@ -18,18 +18,39 @@
  */
 
 #include <ctime>
+#include <sstream>
+#include <cassert>
 
 #include "Log.h"
+#include "LogConsoleTarget.h"
 
-LOG_SEVERITY CLog::m_level = LS_INFO;
-std::string CLog::m_file = "";
-bool CLog::m_logToConsole = true;
+bool CLog::m_addedTargets(false);
+std::recursive_mutex CLog::m_targetsMutex;
+std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LOG_DEBUG) };
 
-void CLog::initialize(const std::string& logfile, LOG_SEVERITY logLevel, bool logToConsole)
+void CLog::addTarget(CLogTarget* target)
 {
-    m_file = logfile;
-    m_level = logLevel;
-    m_logToConsole = logToConsole;
+    assert(target != nullptr);
+
+    std::lock_guard lockTargets(m_targetsMutex);
+
+    if(!m_addedTargets) {
+        // It is the first time we add an external target, clear the default one(s)
+        m_addedTargets = true;
+        finalise();
+    }
+
+    m_targets.push_back(target);
+}
+
+void CLog::finalise()
+{
+    std::lock_guard lockTargets(m_targetsMutex);
+    for(auto target : m_targets) {
+        delete target;
+    }
+
+    m_targets.clear();
 }
 
 void CLog::getTimeStamp(std::string & s)

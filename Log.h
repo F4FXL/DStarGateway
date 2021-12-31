@@ -20,104 +20,105 @@
 #pragma once
 
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <chrono>
-#include <sstream>
+#include <vector>
 #include <boost/algorithm/string.hpp>
+#include <mutex>
+#include <sstream>
+#include <cassert>
 
 #include "StringUtils.h"
-
-enum LOG_SEVERITY {
-    LS_TRACE = 1,
-    LS_DEBUG,
-    LS_INFO,
-    LS_WARNING,
-    LS_ERROR,
-    LS_FATAL
-};
+#include "LogTarget.h"
 
 class CLog
 {
 private:
-    static LOG_SEVERITY m_level;
-    static std::string m_file;
-    static bool m_logToConsole;
+    static std::vector<CLogTarget *> m_targets;
+    static bool m_addedTargets;
+    static std::recursive_mutex m_targetsMutex;
 
     static void getTimeStamp(std::string & s);
 
+    template<typename... Args> static void formatLogMessage(std::string& output, LOG_SEVERITY severity, const std::string & f, Args... args)
+    {
+        assert(severity != LOG_NONE);
+        
+        std::string severityStr;
+        switch (severity)
+        {
+        case LOG_DEBUG:
+            severityStr = "DEBUG  ";
+            break;
+        case LOG_ERROR:
+            severityStr = "ERROR  ";
+            break;
+        case LOG_FATAL:
+            severityStr = "FATAL  ";
+            break;
+        case LOG_INFO :
+            severityStr = "INFO   ";
+            break;
+        case LOG_WARNING:
+            severityStr = "WARNING";
+            break;
+        case LOG_TRACE:
+            severityStr = "TRACE  ";
+            break;
+        default:
+            break;
+        }
+
+        std::string message = CStringUtils::string_format(f, args...);
+        boost::trim(message);
+        std::string timeUtc;
+        getTimeStamp(timeUtc);
+        std::stringstream s;
+        s << "[" <<  timeUtc << "] [" << severityStr << "] " << message << std::endl;
+
+        output = s.str();
+    }
+
 public:
     
-    static void initialize(const std::string& logfile, LOG_SEVERITY logLevel, bool logToConsole);
+    static void addTarget(CLogTarget * target);
+    static void finalise();
 
     template<typename... Args> static void logDebug(const std::string & f, Args... args)
     {
-        log(LS_DEBUG, f, args...);
+        log(LOG_DEBUG, f, args...);
     }
 
     template<typename... Args> static void logInfo(const std::string & f, Args... args)
     {
-        log(LS_INFO, f, args...);
+        log(LOG_INFO, f, args...);
     }
 
     template<typename... Args> static void logWarning(const std::string & f, Args... args)
     {
-        log(LS_WARNING, f, args...);
+        log(LOG_WARNING, f, args...);
     }
 
     template<typename... Args> static void logError(const std::string & f, Args... args)
     {
-        log(LS_ERROR, f, args...);
+        log(LOG_ERROR, f, args...);
     }
 
     template<typename... Args> static void logFatal(const std::string & f, Args... args)
     {
-        log(LS_FATAL, f, args...);
+        log(LOG_FATAL, f, args...);
     }
 
     template<typename... Args> static void log(LOG_SEVERITY severity, const std::string & f, Args... args)
     {
-        if(severity >= CLog::m_level || CLog::m_file.empty()) {
-            std::string severityStr;
-            switch (severity)
-            {
-            case LS_DEBUG:
-                severityStr = "DEBUG  ";
-                break;
-            case LS_ERROR:
-                severityStr = "ERROR  ";
-                break;
-            case LS_FATAL:
-                severityStr = "FATAL  ";
-                break;
-            case LS_INFO :
-                severityStr = "INFO   ";
-                break;
-            case LS_WARNING:
-                severityStr = "WARNING";
-                break;
-            case LS_TRACE:
-                severityStr = "TRACE  ";
-                break;
-            default:
-                break;
-            }
+        std::lock_guard lockTarget(m_targetsMutex);
 
-            std::string message = CStringUtils::string_format(f, args...);
-            boost::trim(message);
-            std::string timeUtc;
-            getTimeStamp(timeUtc);
-            std::stringstream s;
-            s << "[" <<  timeUtc << "] [" << severityStr << "] " << message << std::endl;
+        std::string msg;
+        for(auto target : m_targets) {
+            if(severity >= target->getLevel()) {
 
-            if(CLog::m_logToConsole || CLog::m_file.empty())
-                std::cout << s.str();
+                if(msg.empty())
+                    formatLogMessage(msg, severity, f, args...);
 
-            std::ofstream file;
-            file.open(CLog::m_file, std::ios::app);
-            if(file.is_open()) {
-                file << s.str();
-                file.close();
+                target->printLog(msg);
             }
         }
     }

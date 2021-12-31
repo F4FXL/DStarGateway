@@ -1,7 +1,5 @@
 /*
- *   Copyright (C) 2010-2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,14 +16,35 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#include <cassert>
 
-#include <string>
+#include "APRSIdFrameProvider.h"
 
-#include "GitVersion.h"
+CAPRSIdFrameProvider::CAPRSIdFrameProvider(unsigned int timeout) :
+m_timer(1000U)
+{
+    m_timer.start(timeout);
+}
 
-const std::string PRODUCT_NAME("DStarGateway");
-const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
-const std::string VERSION("0.4");
-const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
-const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
+CAPRSIdFrameProvider::~CAPRSIdFrameProvider()
+{
+
+}
+
+bool CAPRSIdFrameProvider::buildAPRSFrames(const std::string& gateway, const CAPRSEntry * entry, std::vector<std::string> & frames)
+{
+    assert(entry != nullptr);
+
+    return buildAPRSFramesInt(gateway, entry, frames);
+}
+
+bool CAPRSIdFrameProvider::wantsToSend()
+{
+    if(m_timer.hasExpired())
+    {
+        m_timer.start();
+        return true;
+    }
+
+    return false;
+}

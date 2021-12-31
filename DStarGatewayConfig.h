@@ -23,6 +23,7 @@
 
 #include "Defs.h"
 #include "Config.h"
+#include "LogSeverity.h"
 
 typedef struct {
 	GATEWAY_TYPE type;
@@ -79,6 +80,10 @@ typedef struct {
 
 typedef struct {
 	std::string logDir;
+	LOG_SEVERITY m_displayLevel;
+	LOG_SEVERITY m_fileLevel;
+	std::string m_fileRoot;
+	bool m_fileRotate;
 } TLog;
 
 typedef struct {
@@ -86,6 +91,7 @@ typedef struct {
 	std::string hostname;
 	unsigned int port;
 	std::string password;
+	POSITION_SOURCE m_positionSource;
 } TAPRS;
 
 typedef struct {
@@ -115,6 +121,12 @@ typedef struct {
 	std::string password;
 } TRemote;
 
+#ifdef USE_GPSD
+typedef struct {
+	std::string m_address;
+	std::string m_port;
+} TGPSD;
+#endif
 
 class CDStarGatewayConfig {
 public:
@@ -135,6 +147,9 @@ public:
 	void getDCS(TDCS & dcs) const;
 	void getRemote(TRemote & remote) const;
 	void getXLX(TXLX & xlx) const;
+#ifdef USE_GPSD
+	void getGPSD(TGPSD & gpsd) const;
+#endif
 
 private:
 	bool open(CConfig & cfg);
@@ -149,6 +164,9 @@ private:
 	bool loadDCS(const CConfig & cfg);
 	bool loadRemote(const CConfig & cfg);
 	bool loadXLX(const CConfig & cfg);
+#ifdef USE_GPSD
+	bool loadGPSD(const CConfig & cfg);
+#endif
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -160,6 +178,9 @@ private:
 	TRemote m_remote;
 	TXLX m_xlx;
 	TLog m_log;
+#ifdef USE_GPSD
+	TGPSD m_gpsd;
+#endif
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };
