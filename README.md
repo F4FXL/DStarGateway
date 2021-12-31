@@ -15,10 +15,11 @@
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
 - [5. Version History](#5-version-history)
-  - [5.1. Version 0.4](#51-version-04)
-  - [5.2. Version 0.3](#52-version-03)
-  - [5.3. Version 0.2](#53-version-02)
-  - [5.4. Version 0.1](#54-version-01)
+  - [5.1. Version 0.5](#51-version-05)
+  - [5.2. Version 0.4](#52-version-04)
+  - [5.3. Version 0.3](#53-version-03)
+  - [5.4. Version 0.2](#54-version-02)
+  - [5.5. Version 0.1](#55-version-01)
 - [6. Future](#6-future)
 
 
@@ -110,17 +111,18 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - Compilation produces no warnings
 - Code formating rules are observed (these are very lousy though)
 # 5. Version History
-## 5.1. Version 0.4
+## 5.1. Version 0.5
+## 5.2. Version 0.4
 - [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
-- [Improvement] Bring back GPSD support (https://github.com/F4FXL/DStarGateway/issues/6)
-- [Improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
-## 5.2. Version 0.3
+- [Improvement] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
+- [Improvement] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
+## 5.3. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.3. Version 0.2
+## 5.4. Version 0.2
 - [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.4. Version 0.1
+## 5.5. Version 0.1
 First working version
 # 6. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
