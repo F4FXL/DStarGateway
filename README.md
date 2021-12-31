@@ -89,7 +89,7 @@ make USE_GPS=1
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
-sudo make install
+sudo make install newhostfiles
 ```
 ## 3.7. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
@@ -135,5 +135,5 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
 - &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
-- &#9746; Forward messages RS-MS1A to APRS and vice versa
+- &#9746; Forward messages from RS-MS1A to APRS and vice versa
 - Everything that might come handy to make dstar the most powerful system ever :)
