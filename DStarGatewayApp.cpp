@@ -182,7 +182,7 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band2,
 								rptrConfig.band3);
 
-		aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+		aprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}

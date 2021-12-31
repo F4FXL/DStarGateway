@@ -16,6 +16,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifdef USE_DGPS
 #include <cmath>
 #include <boost/algorithm/string.hpp>
 
@@ -208,3 +209,4 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
 
     return true;
 }
+#endif
