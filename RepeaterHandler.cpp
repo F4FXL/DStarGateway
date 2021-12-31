@@ -1594,7 +1594,6 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 					m_starNet = NULL;
 					break;
 #endif
-
 				case G2_ECHO:
 					m_echo->end();
 					break;
@@ -2564,6 +2563,9 @@ void CRepeaterHandler::writeLinkingTo(const std::string &callsign)
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
 
+	if(m_aprsWriter != nullptr)
+		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
+
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
 #endif
@@ -2616,6 +2618,9 @@ void CRepeaterHandler::writeLinkedTo(const std::string &callsign)
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
 
+	if(m_aprsWriter != nullptr)
+		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
+
 #ifdef USE_CCS
 	m_ccsHandler->setReflector(callsign);
 #endif
@@ -2667,6 +2672,9 @@ void CRepeaterHandler::writeNotLinked()
 
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
+
+	if(m_aprsWriter != nullptr)
+		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, "");
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
@@ -2735,6 +2743,9 @@ void CRepeaterHandler::writeIsBusy(const std::string& callsign)
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	m_infoAudio->setTempStatus(m_linkStatus, m_linkRepeater, tempText);
 	triggerInfo();
+
+	if(m_aprsWriter != nullptr)
+		m_aprsWriter->writeLinkStatus(m_rptCallsign, m_linkStatus, callsign);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();

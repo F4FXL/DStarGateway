@@ -34,7 +34,8 @@ m_thread(NULL),
 m_gateway(),
 m_address(),
 m_port(0U),
-m_array()
+m_array(),
+m_idFrameProvider(nullptr)
 {
 	assert(!hostname.empty());
 	assert(port > 0U);
@@ -157,6 +158,17 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	collector->reset();
 }
 
+void CAPRSWriter::writeLinkStatus(const std::string& callsign, LINK_STATUS status, const std::string& destination)
+{
+	CAPRSEntry* entry = m_array[callsign];
+	if (entry == NULL) {
+		CLog::logError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
+		return;
+	}
+
+	entry->getLinkStatus().setLink(status, destination);
+}
+
 void CAPRSWriter::clock(unsigned int ms)
 {
 	m_thread->clock(ms);
@@ -168,10 +180,57 @@ void CAPRSWriter::clock(unsigned int ms)
 		}
 	}
 
-	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
-		if(it->second != NULL)
-			it->second->clock(ms);
+	for (auto it : m_array) {
+		if(it.second != NULL) {
+			it.second->clock(ms);
+			if(it.second->getLinkStatus().isOutOfDate())
+				sendStatusFrame(it.second);
+		}
 	}
+}
+
+void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
+{
+	assert(entry != nullptr);
+
+	// 20211231 TODO F4FXL support different languages
+
+	if(!m_thread->isConnected())
+		return;
+
+	auto linkStatus = entry->getLinkStatus();
+	std::string body;
+
+	switch (linkStatus.getLinkStatus())
+	{
+		case LS_LINKED_DCS:
+		case LS_LINKED_CCS:
+		case LS_LINKED_DEXTRA:
+		case LS_LINKED_DPLUS:
+		case LS_LINKED_LOOPBACK:
+			body = ">Linked to " + linkStatus.getLinkDestination();
+		break;
+		
+		case LS_LINKING_DCS:
+		case LS_LINKING_CCS:
+		case LS_LINKING_DEXTRA:
+		case LS_LINKING_DPLUS:
+		case LS_LINKING_LOOPBACK:
+			body = ">Linking to " + linkStatus.getLinkDestination();; 
+		break;
+	
+		default:
+			body = ">Not linked";
+			break;
+	}
+
+	std::string output = CStringUtils::string_format("%s-%s>APD5T3,TCPIP*,qAC,%s-%sS:%s\r\n",
+														entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+														body.c_str());
+
+	m_thread->write(output.c_str());
+
+	linkStatus.reset();
 }
 
 void CAPRSWriter::sendIdFrames()

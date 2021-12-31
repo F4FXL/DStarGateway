@@ -22,7 +22,9 @@
 #include <string>
 
 #include "APRSCollector.h"
+#include "APRSEntryLinkStatus.h"
 #include "Timer.h"
+#include "Defs.h"
 
 class CAPRSEntry {
 public:
@@ -38,6 +40,7 @@ public:
 	double   getLongitude() const;
 	double   getAGL() const;
 	CAPRSCollector* getCollector() const;
+	CAPRSEntryLinkStatus& getLinkStatus();
 
 	// Transmission timer
 	void reset();
@@ -56,4 +59,5 @@ private:
 	CTimer          m_timer;
 	bool            m_first;
 	CAPRSCollector* m_collector;
+	CAPRSEntryLinkStatus m_linkStatus;
 };

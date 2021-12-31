@@ -51,6 +51,8 @@ public:
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
 
+	void writeLinkStatus(const std::string& callsign, LINK_STATUS status, const std::string& destination);
+
 	bool isConnected() const;
 
 	void clock(unsigned int ms);
@@ -66,6 +68,7 @@ private:
 	CAPRSIdFrameProvider * m_idFrameProvider;
 
 	void sendIdFrames();
+	void sendStatusFrame(CAPRSEntry * entrry);
 };
 
 #endif
