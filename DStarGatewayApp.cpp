@@ -160,6 +160,9 @@ bool CDStarGatewayApp::createThread()
 	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
 		config.getRepeater(i, rptrConfig);
+		auto  repeaterProtocolHandler = repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port);
+		if(repeaterProtocolHandler == nullptr)
+			continue;
 		m_thread->addRepeater(rptrConfig.callsign,
 								rptrConfig.band,
 								rptrConfig.address,
@@ -177,7 +180,7 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.description1,
 								rptrConfig.description2,
 								rptrConfig.url,
-								repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port),
+								repeaterProtocolHandler,
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
