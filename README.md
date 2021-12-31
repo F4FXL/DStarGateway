@@ -135,4 +135,5 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
 - &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
+- &#9746; Forward messages RS-MS1A to APRS and vice versa
 - Everything that might come handy to make dstar the most powerful system ever :)
