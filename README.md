@@ -128,7 +128,7 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
   - Support for all protocols (G2, DExtra, DCS, REF)
   - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
-- &#9745; Send the connection status as to APRS as a status frame
+- &#9745; Send the connection status to APRS-IS as a status frame
 - &#9746; Reinstantiate DRATS
 - &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
