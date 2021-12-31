@@ -163,22 +163,29 @@ void CAPRSWriter::clock(unsigned int ms)
 
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->clock(ms);
-
-		if(m_idFrameProvider->wantsToSend() && m_thread->isConnected()) {
-			for(auto entry : m_array) {
-				std::vector<std::string> frames;
-				if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
-					for(auto frame : frames) {
-						m_thread->write(frame.c_str());
-					}
-				}
-			}
+		if(m_idFrameProvider->wantsToSend()) {
+			sendIdFrames();
 		}
 	}
 
 	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
 		if(it->second != NULL)
 			it->second->clock(ms);
+	}
+}
+
+void CAPRSWriter::sendIdFrames()
+{
+	if(m_thread->isConnected())
+	{
+		for(auto entry : m_array) {
+			std::vector<std::string> frames;
+			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
+				for(auto frame : frames) {
+					m_thread->write(frame.c_str());
+				}
+			}
+		}
 	}
 }
 

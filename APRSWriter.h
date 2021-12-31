@@ -65,7 +65,7 @@ private:
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 	CAPRSIdFrameProvider * m_idFrameProvider;
 
-	void sendIdFramesMobile();
+	void sendIdFrames();
 };
 
 #endif
