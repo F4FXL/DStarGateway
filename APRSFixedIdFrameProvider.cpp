@@ -127,7 +127,7 @@ bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, c
         frames.push_back(output);
     }
 
-    setTimeout(20U * 60);//20 minutes, plenty enough for fixed
+    setTimeout(20U * 60U);//20 minutes, plenty enough for fixed
 
     return true;
 }

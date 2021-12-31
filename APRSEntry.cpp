@@ -32,7 +32,8 @@ m_longitude(longitude),
 m_agl(agl),
 m_timer(1000U, 10U),
 m_first(true),
-m_collector(NULL)
+m_collector(NULL),
+m_linkStatus()
 {
 	boost::trim(m_callsign);
 
@@ -89,6 +90,11 @@ CAPRSCollector* CAPRSEntry::getCollector() const
 	return m_collector;
 }
 
+CAPRSEntryStatus& CAPRSEntry::getStatus()
+{
+	return m_linkStatus;
+}
+
 void CAPRSEntry::reset()
 {
 	m_first = true;
@@ -98,6 +104,7 @@ void CAPRSEntry::reset()
 
 void CAPRSEntry::clock(unsigned int ms)
 {
+	m_linkStatus.clock(ms);
 	m_timer.clock(ms);
 }
 

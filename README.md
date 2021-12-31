@@ -9,7 +9,7 @@
   - [3.3. Get latest development version version](#33-get-latest-development-version-version)
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
-      - [Build With GPSD Support](#build-with-gpsd-support)
+      - [3.5.0.1. Build With GPSD Support](#3501-build-with-gpsd-support)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
@@ -19,18 +19,19 @@
   - [5.2. Version 0.3](#52-version-03)
   - [5.3. Version 0.2](#53-version-02)
   - [5.4. Version 0.1](#54-version-01)
+- [6. Future](#6-future)
 
 
 # 1. Introduction
-This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only) and libcurl
+This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4klx/ircDDBGateway). It is wxWidgets free and has minimal dependencies to boost (header libs only) and libcurl. I plan to ad some features in the future
 
 # 2. Current State
 ## 2.1. Code sanity
-The current code is working, yet ugly IMHO as it is a mix of C and C++ of various ages.
+The current code is working, yet ugly IMHO as it is a mix of C and C++ of various ages. I realised that G4KLx started programming this over a decade ago, when C++11 was not yet a thing !
 
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
 
-Quite a few classes are more or less copy/paste from each other some sanitization by using base classes or template classes would greatly improve code maintainibility.
+Quite a few classes are more or less copy/paste from each other some sanitization by using base classes or template classes would greatly improve code maintainibility. Maybe one day ;)
 ## 2.2. Code Credit
 - Jonathan Naylor G4KLX (The original author of [ircddbGateway](https://github.com/g4klx/ircDDBGateway))
 - Thomas A. Early N7TAE (Code taken from his [smart-group](https://github.com/n7tae/smart-group-server) software)
@@ -41,10 +42,10 @@ All the features found in ircddbGateway are supposed to be working. I have mixed
 Features that where left out :
 - CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
-- Announcement: same can be achieved using transmitd.
+- Announcement: same can be achieved using VoiceTransmit.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
-- DRats : No opinion on this one, I am not using it.
-- CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it.
+- DRats : Is on the to-do list see [#6](#6)
+- CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it for good.
 
 # 3. Building and installing
 ## 3.1. Initial setup
@@ -80,7 +81,7 @@ Regular building
 ```
 make
 ```
-#### Build With GPSD Support
+#### 3.5.0.1. Build With GPSD Support
 ```
 make USE_GPS=1
 ```
@@ -104,10 +105,13 @@ sudo systemctl stop dstargateway.service
 ```
 # 4. Contributing
 ## 4.1. Work Flow
-I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome and shall be done against the develop branch and follow the Git Flow branch naming rules.
-
+I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome but pleasee observe following rules :
+- You have tested your code thoroughly
+- Compilation produces no warnings
+- Code formating rules are observed (these are very lousy though)
 # 5. Version History
 ## 5.1. Version 0.4
+- [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [Improvement] Bring back GPSD support (https://github.com/F4FXL/DStarGateway/issues/6)
 - [Improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
@@ -118,3 +122,15 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - Code sanitization
 ## 5.4. Version 0.1
 First working version
+# 6. Future
+I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
+- &#9746; Better NatTraversal
+  - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
+  - Support for all protocols (G2, DExtra, DCS, REF)
+  - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
+- &#9745; Send the connection status as to APRS as a status frame
+- &#9746; Reinstantiate DRATS
+- &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
+- &#9746; Automatic refresh of host files
+- &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
+- Everything that might come handy to make dstar the most powerful system ever :)
