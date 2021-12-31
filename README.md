@@ -108,7 +108,7 @@ sudo systemctl stop dstargateway.service
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome but pleasee observe following rules :
 - You have tested your code thoroughly
 - Compilation produces no warnings
-- 
+- Code formating rules are observed (these are very lousy though)
 # 5. Version History
 ## 5.1. Version 0.4
 - [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
@@ -131,5 +131,6 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
 - &#9745; Send the connection status as to APRS as a status frame
 - &#9746; Reinstantiate DRATS
 - &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
+- &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
 - Everything that might come handy to make dstar the most powerful system ever :)
