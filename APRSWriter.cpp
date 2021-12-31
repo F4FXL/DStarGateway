@@ -20,6 +20,7 @@
 #include <cassert>
 #include <boost/algorithm/string.hpp>
 #include <cmath>
+#include <cassert>
 
 #include "StringUtils.h"
 #include "Log.h"
@@ -28,110 +29,11 @@
 #include "Defs.h"
 #include "Log.h"
 
-CAPRSEntry::CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl) :
-m_callsign(callsign),
-m_band(band),
-m_frequency(frequency),
-m_offset(offset),
-m_range(range),
-m_latitude(latitude),
-m_longitude(longitude),
-m_agl(agl),
-m_timer(1000U, 10U),
-m_first(true),
-m_collector(NULL)
-{
-	boost::trim(m_callsign);
-
-	m_collector = new CAPRSCollector;
-}
-
-CAPRSEntry::~CAPRSEntry()
-{
-	delete m_collector;
-}
-
-std::string CAPRSEntry::getCallsign() const
-{
-	return m_callsign;
-}
-
-std::string CAPRSEntry::getBand() const
-{
-	return m_band;
-}
-
-double CAPRSEntry::getFrequency() const
-{
-	return m_frequency;
-}
-
-double CAPRSEntry::getOffset() const
-{
-	return m_offset;
-}
-
-double CAPRSEntry::getRange() const
-{
-	return m_range;
-}
-
-double CAPRSEntry::getLatitude() const
-{
-	return m_latitude;
-}
-
-double CAPRSEntry::getLongitude() const
-{
-	return m_longitude;
-}
-
-double CAPRSEntry::getAGL() const
-{
-	return m_agl;
-}
-
-CAPRSCollector* CAPRSEntry::getCollector() const
-{
-	return m_collector;
-}
-
-void CAPRSEntry::reset()
-{
-	m_first = true;
-	m_timer.stop();
-	m_collector->reset();
-}
-
-void CAPRSEntry::clock(unsigned int ms)
-{
-	m_timer.clock(ms);
-}
-
-bool CAPRSEntry::isOK()
-{
-	if (m_first) {
-		m_first = false;
-		m_timer.start();
-		return true;
-	}
-
-	if (m_timer.hasExpired()) {
-		m_timer.start();
-		return true;
-	} else {
-		m_timer.start();
-		return false;
-	}
-}
-
 CAPRSWriter::CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
 m_thread(NULL),
-m_idTimer(1000U),
 m_gateway(),
 m_address(),
 m_port(0U),
-m_socket(NULL),
 m_array()
 {
 	assert(!hostname.empty());
@@ -155,7 +57,7 @@ CAPRSWriter::~CAPRSWriter()
 	m_array.clear();
 }
 
-void CAPRSWriter::setPortFixed(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
+void CAPRSWriter::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
 {
 	std::string temp = callsign;
 	temp.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
@@ -164,40 +66,8 @@ void CAPRSWriter::setPortFixed(const std::string& callsign, const std::string& b
 	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, latitude, longitude, agl);
 }
 
-void CAPRSWriter::setPortMobile(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, unsigned int port)
-{
-	std::string temp = callsign;
-	temp.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
-	temp += band;
-
-	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, 0.0, 0.0, 0.0);
-
-	if (m_socket == NULL) {
-		m_address = CUDPReaderWriter::lookup(address);
-		m_port    = port;
-
-		m_socket = new CUDPReaderWriter();
-	}
-}
-
 bool CAPRSWriter::open()
 {
-	if (m_socket != NULL) {
-		bool ret = m_socket->open();
-		if (!ret) {
-			delete m_socket;
-			m_socket = NULL;
-			return false;
-		}
-
-		// Poll the GPS every minute
-		m_idTimer.setTimeout(60U);
-	} else {
-		m_idTimer.setTimeout(20U * 60U);
-	}
-
-	m_idTimer.start();
-
 	return m_thread->start();
 }
 
@@ -289,21 +159,20 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 
 void CAPRSWriter::clock(unsigned int ms)
 {
-	m_idTimer.clock(ms);
-
 	m_thread->clock(ms);
 
-	if (m_socket != NULL) {
-		if (m_idTimer.hasExpired()) {
-			pollGPS();
-			m_idTimer.start();
-		}
+	if(m_idFrameProvider != nullptr) {
+		m_idFrameProvider->clock(ms);
 
-		sendIdFramesMobile();
-	} else {
-		if (m_idTimer.hasExpired()) {
-			sendIdFramesFixed();
-			m_idTimer.start();
+		if(m_idFrameProvider->wantsToSend() && m_thread->isConnected()) {
+			for(auto entry : m_array) {
+				std::vector<std::string> frames;
+				if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
+					for(auto frame : frames) {
+						m_thread->write(frame.c_str());
+					}
+				}
+			}
 		}
 	}
 
@@ -320,283 +189,11 @@ bool CAPRSWriter::isConnected() const
 
 void CAPRSWriter::close()
 {
-	if (m_socket != NULL) {
-		m_socket->close();
-		delete m_socket;
+	if(m_idFrameProvider != nullptr) {
+		m_idFrameProvider->close();
+		delete m_idFrameProvider;
+		m_idFrameProvider = nullptr;
 	}
 
 	m_thread->stop();
 }
-
-bool CAPRSWriter::pollGPS()
-{
-	assert(m_socket != NULL);
-
-	return m_socket->write((unsigned char*)"ircDDBGateway", 13U, m_address, m_port);
-}
-
-void CAPRSWriter::sendIdFramesFixed()
-{
-	if (!m_thread->isConnected())
-		return;
-
-	time_t now;
-	::time(&now);
-	struct tm* tm = ::gmtime(&now);
-
-	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
-		CAPRSEntry* entry = it->second;
-		if (entry == NULL)
-			continue;
-
-		// Default values aren't passed on
-		if (entry->getLatitude() == 0.0 && entry->getLongitude() == 0.0)
-			continue;
-
-		std::string desc;
-		if (entry->getBand().length() > 1U) {
-			if (entry->getFrequency() != 0.0)
-				desc = CStringUtils::string_format("Data %.5lfMHz", entry->getFrequency());
-			else
-				desc = "Data";
-		} else {
-			if (entry->getFrequency() != 0.0)
-				desc = CStringUtils::string_format("Voice %.5lfMHz %c%.4lfMHz",
-						entry->getFrequency(),
-						entry->getOffset() < 0.0 ? '-' : '+',
-						::fabs(entry->getOffset()));
-			else
-				desc = "Voice";
-		}
-
-		std::string band;
-		if (entry->getFrequency() >= 1200.0)
-			band = "1.2";
-		else if (entry->getFrequency() >= 420.0)
-			band = "440";
-		else if (entry->getFrequency() >= 144.0)
-			band = "2m";
-		else if (entry->getFrequency() >= 50.0)
-			band = "6m";
-		else if (entry->getFrequency() >= 28.0)
-			band = "10m";
-
-		double tempLat  = ::fabs(entry->getLatitude());
-		double tempLong = ::fabs(entry->getLongitude());
-
-		double latitude  = ::floor(tempLat);
-		double longitude = ::floor(tempLong);
-
-		latitude  = (tempLat  - latitude)  * 60.0 + latitude  * 100.0;
-		longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
-
-		std::string lat;
-		if (latitude >= 1000.0F)
-			lat = CStringUtils::string_format("%.2lf", latitude);
-		else if (latitude >= 100.0F)
-			lat = CStringUtils::string_format("0%.2lf", latitude);
-		else if (latitude >= 10.0F)
-			lat = CStringUtils::string_format("00%.2lf", latitude);
-		else
-			lat = CStringUtils::string_format("000%.2lf", latitude);
-
-		std::string lon;
-		if (longitude >= 10000.0F)
-			lon = CStringUtils::string_format("%.2lf", longitude);
-		else if (longitude >= 1000.0F)
-			lon = CStringUtils::string_format("0%.2lf", longitude);
-		else if (longitude >= 100.0F)
-			lon = CStringUtils::string_format("00%.2lf", longitude);
-		else if (longitude >= 10.0F)
-			lon = CStringUtils::string_format("000%.2lf", longitude);
-		else
-			lon = CStringUtils::string_format("0000%.2lf", longitude);
-
-		// Convert commas to periods in the latitude and longitude
-		boost::replace_all(lat, ",", ".");
-		boost::replace_all(lon, ",", ".");
-
-		std::string output;
-		output = CStringUtils::string_format("%s-S>APD5T1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s",
-			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-			tm->tm_mday, tm->tm_hour, tm->tm_min,
-			lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
-			lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
-			entry->getRange() * 0.6214, entry->getAGL() * 3.28, band.c_str(), desc.c_str());
-
-		char ascii[300U];
-		::memset(ascii, 0x00, 300U);
-		for (unsigned int i = 0U; i < output.length(); i++)
-			ascii[i] = output[i];
-
-		m_thread->write(ascii);
-
-		if (entry->getBand().length() == 1U) {
-			output = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s",
-				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-				lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
-				lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
-				entry->getRange() * 0.6214, entry->getAGL() * 3.28, band.c_str(), desc.c_str());
-
-			::memset(ascii, 0x00, 300U);
-			for (unsigned int i = 0U; i < output.length(); i++)
-				ascii[i] = output[i];
-
-			m_thread->write(ascii);
-		}
-	}
-}
-
-void CAPRSWriter::sendIdFramesMobile()
-{
-	// Grab GPS data if it's available
-	unsigned char buffer[200U];
-	in_addr address;
-	unsigned int port;
-	int ret = m_socket->read(buffer, 200U, address, port);
-	if (ret <= 0)
-		return;
-
-	if (!m_thread->isConnected())
-		return;
-
-	buffer[ret] = '\0';
-
-	// Parse the GPS data
-	char* pLatitude  = ::strtok((char*)buffer, ",\n");	// Latitude
-	char* pLongitude = ::strtok(NULL, ",\n");		// Longitude
-	char* pAltitude  = ::strtok(NULL, ",\n");		// Altitude (m)
-	char* pVelocity  = ::strtok(NULL, ",\n");		// Velocity (kms/h)
-	char* pBearing   = ::strtok(NULL, "\n");		// Bearing
-
-	if (pLatitude == NULL || pLongitude == NULL || pAltitude == NULL)
-		return;
-
-	double rawLatitude  = ::atof(pLatitude);
-	double rawLongitude = ::atof(pLongitude);
-	double rawAltitude  = ::atof(pAltitude);
-
-	time_t now;
-	::time(&now);
-	struct tm* tm = ::gmtime(&now);
-
-	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
-		CAPRSEntry* entry = it->second;
-		if (entry == NULL)
-			continue;
-
-		std::string desc;
-		if (entry->getBand().length() > 1U) {
-			if (entry->getFrequency() != 0.0)
-				desc = CStringUtils::string_format("Data %.5lfMHz", entry->getFrequency());
-			else
-				desc = "Data";
-		} else {
-			if (entry->getFrequency() != 0.0)
-				desc = CStringUtils::string_format("Voice %.5lfMHz %c%.4lfMHz",
-						entry->getFrequency(),
-						entry->getOffset() < 0.0 ? '-' : '+',
-						::fabs(entry->getOffset()));
-			else
-				desc = "Voice";
-		}
-
-		std::string band;
-		if (entry->getFrequency() >= 1200.0)
-			band = "1.2";
-		else if (entry->getFrequency() >= 420.0)
-			band = "440";
-		else if (entry->getFrequency() >= 144.0)
-			band = "2m";
-		else if (entry->getFrequency() >= 50.0)
-			band = "6m";
-		else if (entry->getFrequency() >= 28.0)
-			band = "10m";
-
-		double tempLat  = ::fabs(rawLatitude);
-		double tempLong = ::fabs(rawLongitude);
-
-		double latitude  = ::floor(tempLat);
-		double longitude = ::floor(tempLong);
-
-		latitude  = (tempLat  - latitude)  * 60.0 + latitude  * 100.0;
-		longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
-
-		std::string lat;
-		if (latitude >= 1000.0F)
-			lat = CStringUtils::string_format("%.2lf", latitude);
-		else if (latitude >= 100.0F)
-			lat = CStringUtils::string_format("0%.2lf", latitude);
-		else if (latitude >= 10.0F)
-			lat = CStringUtils::string_format("00%.2lf", latitude);
-		else
-			lat = CStringUtils::string_format("000%.2lf", latitude);
-
-		std::string lon;
-		if (longitude >= 10000.0F)
-			lon = CStringUtils::string_format("%.2lf", longitude);
-		else if (longitude >= 1000.0F)
-			lon = CStringUtils::string_format("0%.2lf", longitude);
-		else if (longitude >= 100.0F)
-			lon = CStringUtils::string_format("00%.2lf", longitude);
-		else if (longitude >= 10.0F)
-			lon = CStringUtils::string_format("000%.2lf", longitude);
-		else
-			lon = CStringUtils::string_format("0000%.2lf", longitude);
-
-		// Convert commas to periods in the latitude and longitude
-		boost::replace_all(lat, ",", ".");
-		boost::replace_all(lon, ",", ".");
-
-		std::string output1;
-		output1 = CStringUtils::string_format("%s-S>APD5T1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf",
-			m_gateway.c_str(), m_gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-			tm->tm_mday, tm->tm_hour, tm->tm_min,
-			lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
-			lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
-			rawAltitude * 3.28);
-
-		std::string output2;
-		if (pBearing != NULL && pVelocity != NULL) {
-			double rawBearing   = ::atof(pBearing);
-			double rawVelocity  = ::atof(pVelocity);
-
-			output2 = CStringUtils::string_format("%03.0lf/%03.0lf", rawBearing, rawVelocity * 0.539957F);
-		}
-
-		std::string output3;
-		output3 = CStringUtils::string_format("RNG%04.0lf %s %s", entry->getRange() * 0.6214, band.c_str(), desc.c_str());
-
-		char ascii[300U];
-		::memset(ascii, 0x00, 300U);
-		unsigned int n = 0U;
-		for (unsigned int i = 0U; i < output1.length(); i++, n++)
-			ascii[n] = output1[i];
-		for (unsigned int i = 0U; i < output2.length(); i++, n++)
-			ascii[n] = output2[i];
-		for (unsigned int i = 0U; i < output3.length(); i++, n++)
-			ascii[n] = output3[i];
-
-		m_thread->write(ascii);
-
-		if (entry->getBand().length() == 1U) {
-			output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf",
-				entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-				lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
-				lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
-				rawAltitude * 3.28);
-
-			::memset(ascii, 0x00, 300U);
-			unsigned int n = 0U;
-			for (unsigned int i = 0U; i < output1.length(); i++, n++)
-				ascii[n] = output1[i];
-			for (unsigned int i = 0U; i < output2.length(); i++, n++)
-				ascii[n] = output2[i];
-			for (unsigned int i = 0U; i < output3.length(); i++, n++)
-				ascii[n] = output3[i];
-
-			m_thread->write(ascii);
-		}
-	}
-}
-

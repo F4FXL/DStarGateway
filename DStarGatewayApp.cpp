@@ -38,6 +38,8 @@
 #include "Log.h"
 #include "LogFileTarget.h"
 #include "LogConsoleTarget.h"
+#include "APRSGPSDIdFrameProvider.h"
+#include "APRSFixedIdFrameProvider.h"
 
 int main(int argc, char *argv[])
 {
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
 	}
 
 	if ('-' == argv[1][0]) {
-		printf("\nDStarGateway Version %s (GitID #%.7s) Copyright (C) %s\n", VERSION.c_str(), gitversion, VENDOR_NAME.c_str());
+		printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
 		printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
 		printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
 		return 0;
@@ -91,7 +93,7 @@ void CDStarGatewayApp::run()
 
 bool CDStarGatewayApp::createThread()
 {
-	printf("\nDStarGateway Version %s (GitID #%.7s) Copyright (C) %s\n", VERSION.c_str(), gitversion, VENDOR_NAME.c_str());
+	printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
 	printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
 	printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
 
@@ -119,6 +121,12 @@ bool CDStarGatewayApp::createThread()
 	m_thread->setLanguage(gatewayConfig.language);
 	m_thread->setLocation(gatewayConfig.latitude, gatewayConfig.longitude);
 
+#ifdef USE_GPSD
+	// Setup GPSD
+	TGPSD gpsdConfig;
+	config.getGPSD(gpsdConfig);
+#endif
+
 	// Setup APRS
 	TAPRS aprsConfig;
 	config.getAPRS(aprsConfig);
@@ -126,6 +134,14 @@ bool CDStarGatewayApp::createThread()
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
 		aprsWriter = new CAPRSWriter(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
 		if(aprsWriter->open()) {
+#ifdef USE_GPSD
+			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gpsdConfig.m_address, gpsdConfig.m_port)
+																									: new CAPRSFixedIdFrameProvider();
+#else
+			CAPRSIdFrameProvider * idFrameProvider = new CAPRSFixedIdFrameProvider();
+#endif
+			idFrameProvider->start();
+			aprsWriter->setIdFrameProvider(idFrameProvider);
 			m_thread->setAPRSWriter(aprsWriter);
 		}
 		else {
@@ -165,8 +181,9 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
-		
-		if(aprsWriter != NULL) aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+
+		aprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
 	m_thread->setDDModeEnabled(ddEnabled);
@@ -178,7 +195,7 @@ bool CDStarGatewayApp::createThread()
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
 	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);

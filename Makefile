@@ -26,6 +26,13 @@ CPPFLAGS=-g -ggdb -W -Wall -std=c++17
 # or, you can choose this for a much smaller executable without debugging help
 #CPPFLAGS=-W -Wall -std=c++17
 
+LDFLAGS:=-lcurl -pthread
+
+ifeq ($(USE_GPSD), 1)
+CPPFLAGS+= -DUSE_GPSD
+LDFLAGS+= -lgps
+endif
+
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
@@ -34,16 +41,20 @@ DEPS = $(SRCS:.cpp=.d)
 all: dstargateway
 
 dstargateway : GitVersion.h $(OBJS) 
-	g++ $(CPPFLAGS) -o dstargateway $(OBJS) -lcurl -pthread
+	g++ $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
 
 %.o : %.cpp
 	g++ $(CPPFLAGS) -MMD -MD -c $< -o $@
 
 GitVersion.h : FORCE 
 ifneq ("$(wildcard .git/index)","")
-	@echo "#pragma once\nconst char *gitversion = \"$(shell git rev-parse HEAD)\";" > /tmp/$@
+	@echo "#pragma once" > /tmp/$@
+	@echo "#include <string>" >> /tmp/$@
+	@echo "const std::string gitversion(\"$(shell git rev-parse --short HEAD)\");" >> /tmp/$@
 else
-	@echo "#pragma once\nconst char *gitversion = \"0000000000000000000000000000000000000000\";" > /tmp/$@
+	@echo "#pragma once" > /tmp/$@
+	@echo "#include <string>" >> /tmp/$@
+	@echo "const std::string gitversion(\"0000000\");" >> /tmp/$@
 endif
 	@cmp -s /tmp/$@ $@; \
 	RETVAL=$$?; \

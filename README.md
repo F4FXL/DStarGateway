@@ -5,10 +5,11 @@
   - [2.3. Features](#23-features)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
-  - [3.2. Get latest stable version](#32-get-latest-stable-version)
+  - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
   - [3.3. Get latest development version version](#33-get-latest-development-version-version)
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
+      - [Build With GPSD Support](#build-with-gpsd-support)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
@@ -41,8 +42,7 @@ Features that where left out :
 - CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using transmitd.
-- APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not.
-- Mobile APRS: Code has been ported, yet I am targeting repeaters so low priority.
+- APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
 - DRats : No opinion on this one, I am not using it.
 - CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it.
 
@@ -53,7 +53,7 @@ Clone the repository (only required initally)
 git clone https://github.com/F4FXL/DStarGateway.git
 cd DStarGateway
 ```
-## 3.2. Get latest stable version
+## 3.2. Get latest stable version (recommended)
 From inside the cloned repository run following commands to get the latest stable version
 ```
 git pull -p
@@ -71,9 +71,18 @@ Before first time building you need to install dependencies and prerequisites
 ```
 apt install build-essential libcurl4-openssl-dev libboost-dev
 ```
+If you are going to build with gpsd support, also install libgps-dev
+```
+apt install libgps-dev
+```
 ## 3.5. Building
+Regular building
 ```
 make
+```
+#### Build With GPSD Support
+```
+make USE_GPS=1
 ```
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
@@ -99,11 +108,12 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 
 # 5. Version History
 ## 5.1. Version 0.4
-- [improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
+- [Improvement] Bring back GPSD support (https://github.com/F4FXL/DStarGateway/issues/6)
+- [Improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
 ## 5.2. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.3. Version 0.2
-- [bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
+- [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
 ## 5.4. Version 0.1
 First working version

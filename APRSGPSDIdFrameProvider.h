@@ -1,7 +1,5 @@
 /*
- *   Copyright (C) 2010-2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,12 +18,29 @@
 
 #pragma once
 
+#include "Defs.h"
+
+#ifdef USE_GPSD
+#include <gps.h>
 #include <string>
 
-#include "GitVersion.h"
+#include "APRSIdFrameProvider.h"
 
-const std::string PRODUCT_NAME("DStarGateway");
-const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
-const std::string VERSION("0.4");
-const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
-const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
+class CAPRSGPSDIdFrameProvider : public CAPRSIdFrameProvider
+{
+public:
+    CAPRSGPSDIdFrameProvider(std::string address, std::string port);
+
+    virtual void start();
+    virtual void close();
+
+protected:
+    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<std::string>& frames);
+
+private:
+	std::string			m_gpsdAddress;
+	std::string			m_gpsdPort;
+	struct gps_data_t	m_gpsdData;
+    bool                m_hasConnection;
+};
+#endif
