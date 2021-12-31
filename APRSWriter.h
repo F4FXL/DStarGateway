@@ -20,11 +20,11 @@
 #ifndef	APRSWriter_H
 #define	APRSWriter_H
 
+#include "Defs.h"
+
 #include <unordered_map>
 #include <string>
-#ifdef USE_GPSD
-#include <gps.h>
-#endif
+
 
 #include "APRSEntry.h"
 #include "APRSWriterThread.h"
@@ -34,7 +34,7 @@
 #include "HeaderData.h"
 #include "AMBEData.h"
 #include "Timer.h"
-#include "Defs.h"
+#include "APRSIdFrameProvider.h"
 
 class CAPRSWriter {
 public:
@@ -43,10 +43,10 @@ public:
 
 	bool open();
 
-	void setPortFixed(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
-#ifdef USE_GPSD
-	void setPortGPSD(const std::string& callsign, const std::string& band, double frequency, double offset, double range, const std::string& address, const std::string& port);
-#endif
+	void setIdFrameProvider(CAPRSIdFrameProvider * idFrameProvider) { m_idFrameProvider = idFrameProvider; }
+
+	void setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
+
 	void writeHeader(const std::string& callsign, const CHeaderData& header);
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
@@ -59,21 +59,12 @@ public:
 
 private:
 	CAPRSWriterThread*		m_thread;
-	CTimer					m_idTimer;
 	std::string				m_gateway;
 	in_addr					m_address;
 	unsigned int			m_port;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
+	CAPRSIdFrameProvider * m_idFrameProvider;
 
-#ifdef USE_GPSD
-	bool				m_gpsdEnabled;
-	std::string			m_gpsdAddress;
-	std::string			m_gpsdPort;
-	struct gps_data_t	m_gpsdData;
-#endif
-
-	bool pollGPS();
-	void sendIdFramesFixed();
 	void sendIdFramesMobile();
 };
 

@@ -38,6 +38,8 @@
 #include "Log.h"
 #include "LogFileTarget.h"
 #include "LogConsoleTarget.h"
+#include "APRSGPSDIdFrameProvider.h"
+#include "APRSFixedIdFrameProvider.h"
 
 int main(int argc, char *argv[])
 {
@@ -119,19 +121,34 @@ bool CDStarGatewayApp::createThread()
 	m_thread->setLanguage(gatewayConfig.language);
 	m_thread->setLocation(gatewayConfig.latitude, gatewayConfig.longitude);
 
+#ifdef USE_GPSD
+	// Setup GPSD
+	TGPSD gpsdConfig;
+	config.getGPSD(gpsdConfig);
+#endif
+
 	// Setup APRS
 	TAPRS aprsConfig;
 	config.getAPRS(aprsConfig);
 	CAPRSWriter * aprsWriter = NULL;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
 		aprsWriter = new CAPRSWriter(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
-	}
-
+		if(aprsWriter->open()) {
 #ifdef USE_GPSD
-	// Setup GPSD
-	TGPSD gpsdConfig;
-	config.getGPSD(gpsdConfig);
+			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gpsdConfig.m_address, gpsdConfig.m_port)
+																									: new CAPRSFixedIdFrameProvider();
+#else
+			CAPRSIdFrameProvider * idFrameProvider = new CAPRSFixedIdFrameProvider();
 #endif
+			idFrameProvider->start();
+			aprsWriter->setIdFrameProvider(idFrameProvider);
+			m_thread->setAPRSWriter(aprsWriter);
+		}
+		else {
+			delete aprsWriter;
+			aprsWriter = NULL;
+		}
+	}
 
 	// Setup the repeaters
 	if(config.getRepeaterCount() == 0U) {
@@ -164,33 +181,13 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
-#ifdef USE_GPSD
-		if(aprsWriter != NULL) {
-			if(aprsConfig.m_positionSource == POSSRC_GPSD)
-				aprsWriter->setPortGPSD(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, gpsdConfig.m_address, gpsdConfig.m_port);
-			else
-				aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
 
-		}
-#else
-		aprsWriter->setPortFixed(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
-#endif
+		aprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
 	m_thread->setDDModeEnabled(ddEnabled);
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
-
-	// open APRS after setting the repeaters because of GPSD
-	if(aprsWriter != nullptr) {
-		if(aprsWriter->open()) {
-				m_thread->setAPRSWriter(aprsWriter);
-		}
-		else {
-			delete aprsWriter;
-			aprsWriter = NULL;
-		}
-	}
 
 	// Setup ircddb
 	std::vector<CIRCDDB *> clients;
@@ -198,7 +195,7 @@ bool CDStarGatewayApp::createThread()
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, std::string("DStarGateway") + std::string("-") + VERSION, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
 	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);

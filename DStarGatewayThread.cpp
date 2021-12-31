@@ -751,7 +751,7 @@ void CDStarGatewayThread::processIrcDDB()
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						CLog::logInfo("USER: %s NOT FOUND", user.c_str());
+						CLog::logDebug("USER: %s NOT FOUND", user.c_str());
 					}
 				}
 				break;
@@ -770,7 +770,7 @@ void CDStarGatewayThread::processIrcDDB()
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						CLog::logInfo("REPEATER: %s NOT FOUND", repeater.c_str());
+						CLog::logDebug("REPEATER: %s NOT FOUND", repeater.c_str());
 					}
 				}
 				break;
@@ -790,7 +790,7 @@ void CDStarGatewayThread::processIrcDDB()
 						m_natTraversal->traverseNatG2(address);
 #endif
 					} else {
-						CLog::logInfo("GATEWAY: %s NOT FOUND", gateway.c_str());
+						CLog::logDebug("GATEWAY: %s NOT FOUND", gateway.c_str());
 					}
 				}
 				break;
