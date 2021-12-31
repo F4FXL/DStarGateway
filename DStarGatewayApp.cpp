@@ -81,6 +81,7 @@ CDStarGatewayApp::~CDStarGatewayApp()
 bool CDStarGatewayApp::init()
 {
 	return createThread();
+	//2021-12-31 F4FXL This is ugly, if we failed to create the thread we do not clean up ... :(
 }
 
 void CDStarGatewayApp::run()
@@ -151,11 +152,8 @@ bool CDStarGatewayApp::createThread()
 	}
 
 	// Setup the repeaters
-	if(config.getRepeaterCount() == 0U) {
-		CLog::logInfo("No repeater configured\n");
-		return false;
-	}
 	bool ddEnabled = false;
+	bool atLeastOneRepeater = false;
 	CRepeaterProtocolHandlerFactory repeaterProtocolFactory;
 	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
@@ -163,6 +161,7 @@ bool CDStarGatewayApp::createThread()
 		auto  repeaterProtocolHandler = repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port);
 		if(repeaterProtocolHandler == nullptr)
 			continue;
+		atLeastOneRepeater = true;
 		m_thread->addRepeater(rptrConfig.callsign,
 								rptrConfig.band,
 								rptrConfig.address,
@@ -189,6 +188,12 @@ bool CDStarGatewayApp::createThread()
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
+
+	if(!atLeastOneRepeater) {
+		CLog::logError("Error: no repeaters are enabled or opening network communication to repeater failed");
+		return false;
+	}
+
 	m_thread->setDDModeEnabled(ddEnabled);
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
 
