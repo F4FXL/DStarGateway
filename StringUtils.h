@@ -37,5 +37,5 @@ public:
         return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
     }
 
-    static size_t find_nth(const std::string& haystack, size_t pos, char needle, size_t nth);
+    static size_t find_nth(const std::string& haystack, char needle, size_t nth);
 };

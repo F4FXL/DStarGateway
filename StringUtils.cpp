@@ -18,7 +18,7 @@
 
 #include "StringUtils.h"
 
-size_t CStringUtils::find_nth(const std::string& haystack, size_t pos, char needle, size_t nth) 
+size_t CStringUtils::find_nth(const std::string& haystack, char needle, size_t nth) 
 {
     size_t matches = 0U;
     auto haystackLength = haystack.length();
