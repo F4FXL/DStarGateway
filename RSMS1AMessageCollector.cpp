@@ -50,13 +50,13 @@ bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
     if(msg.empty() || !boost::starts_with(msg, "$$Msg"))
         return false;
 
+    // CUtils::dump("RS-MS1A:", (unsigned char *)msg.c_str(), msg.length());
     std::vector<std::string> splits;
     boost::split(splits, msg, boost::is_any_of(","));
 
-    bool ret = splits.size() == 4
+    bool ret = splits.size() >= 4
                 && !splits[1].empty()
-                && !splits[2].empty()
-                && splits[3].length() > 6U;
+                && !splits[2].empty();
     return ret;
 
     //TODO 2022-01-01 figure out what the heck it is about thic strange CRCs
@@ -110,26 +110,35 @@ unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned 
     std::vector<std::string> splits;
     boost::split(splits, sentence, boost::is_any_of(","));
 
-    bool ret = splits.size() == 4
+    bool ret = splits.size() >= 4
                 && !splits[1].empty()
-                && !splits[2].empty()
-                && splits[3].length() > 6U;
+                && !splits[2].empty();
     if(!ret) {
         return 0U;
     }
 
     auto sender = splits[1];
     auto recipient = CUtils::ToUpper(splits[2]);
-    auto message = splits[3].substr(6, splits[3].length() - 2);
+
+    for(unsigned int i = 0;i < 3; i++) {
+        splits.erase(splits.begin());
+    }
+
+    auto message = boost::join(splits, ",");
+    if(message.length() > 6)
+        message = message.substr(6);
+
+    auto seqNum = rand() % 0xFFFFFU;
 
     CAPRSUtils::dstarCallsignToAPRS(sender);
     CAPRSUtils::dstarCallsignToAPRS(recipient);
     recipient.resize(9, ' ');
+    message.resize(std::max<int>(0 , ((int)message.length()) - 2));
 
     //unescape commas in message body
     boost::replace_all(message, "o,", ",");
 
-    auto aprsFrame = CStringUtils::string_format("%s-5>APDPRS,DSTAR*::%s:%s\r\n", sender.c_str(), recipient.c_str(), message.c_str());
+    auto aprsFrame = CStringUtils::string_format("%s-5>APDPRS,DSTAR*::%s:%s{%05X\r\n", sender.c_str(), recipient.c_str(), message.c_str(), seqNum);
     
     auto aprsFrameLen = aprsFrame.length();
 
