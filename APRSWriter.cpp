@@ -34,7 +34,8 @@ m_thread(NULL),
 m_gateway(),
 m_address(),
 m_port(0U),
-m_array()
+m_array(),
+m_idFrameProvider(nullptr)
 {
 	assert(!hostname.empty());
 	assert(port > 0U);
@@ -157,28 +158,70 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	collector->reset();
 }
 
+void CAPRSWriter::writeStatus(const std::string& callsign, const std::string status)
+{
+	CAPRSEntry* entry = m_array[callsign];
+	if (entry == NULL) {
+		CLog::logError("Cannot find the callsign \"%s\" in the APRS array", callsign.c_str());
+		return;
+	}
+
+	entry->getStatus().setStatus(status);
+}
+
 void CAPRSWriter::clock(unsigned int ms)
 {
 	m_thread->clock(ms);
 
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->clock(ms);
-
-		if(m_idFrameProvider->wantsToSend() && m_thread->isConnected()) {
-			for(auto entry : m_array) {
-				std::vector<std::string> frames;
-				if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
-					for(auto frame : frames) {
-						m_thread->write(frame.c_str());
-					}
-				}
-			}
+		if(m_idFrameProvider->wantsToSend()) {
+			sendIdFrames();
 		}
 	}
 
-	for (auto it = m_array.begin(); it != m_array.end(); ++it) {
-		if(it->second != NULL)
-			it->second->clock(ms);
+	for (auto it : m_array) {
+		if(it.second != NULL) {
+			it.second->clock(ms);
+			if(it.second->getStatus().isOutOfDate())
+				sendStatusFrame(it.second);
+		}
+	}
+}
+
+void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
+{
+	assert(entry != nullptr);
+
+	if(!m_thread->isConnected())
+		return;
+
+	auto linkStatus = entry->getStatus();
+	std::string body = boost::trim_copy(linkStatus.getStatus());
+
+	if(body[0] != '>')
+		body = '>' + body;
+
+	std::string output = CStringUtils::string_format("%s-%s>APD5T3,TCPIP*,qAC,%s-%sS:%s\r\n",
+														entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+														body.c_str());
+
+	m_thread->write(output.c_str());
+
+}
+
+void CAPRSWriter::sendIdFrames()
+{
+	if(m_thread->isConnected())
+	{
+		for(auto entry : m_array) {
+			std::vector<std::string> frames;
+			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
+				for(auto frame : frames) {
+					m_thread->write(frame.c_str());
+				}
+			}
+		}
 	}
 }
 

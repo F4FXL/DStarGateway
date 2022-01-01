@@ -120,6 +120,7 @@ TConfigValue * CConfig::readKeyAndValue(const std::string s) const
 
 bool CConfig::getValue(const std::string &section, const std::string& key, bool &value, bool defaultValue) const
 {
+    value = defaultValue;
     std::string valueTemp;
     std::string dafaultValueStr = defaultValue ? "true" : "false";
     bool ret = getValue(section, key, valueTemp, dafaultValueStr, {"true", "1", "false", "0"});

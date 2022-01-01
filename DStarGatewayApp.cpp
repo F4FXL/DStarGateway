@@ -81,6 +81,7 @@ CDStarGatewayApp::~CDStarGatewayApp()
 bool CDStarGatewayApp::init()
 {
 	return createThread();
+	//2021-12-31 F4FXL This is ugly, if we failed to create the thread we do not clean up ... :(
 }
 
 void CDStarGatewayApp::run()
@@ -151,15 +152,16 @@ bool CDStarGatewayApp::createThread()
 	}
 
 	// Setup the repeaters
-	if(config.getRepeaterCount() == 0U) {
-		CLog::logInfo("No repeater configured\n");
-		return false;
-	}
 	bool ddEnabled = false;
+	bool atLeastOneRepeater = false;
 	CRepeaterProtocolHandlerFactory repeaterProtocolFactory;
 	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
 		config.getRepeater(i, rptrConfig);
+		auto  repeaterProtocolHandler = repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port);
+		if(repeaterProtocolHandler == nullptr)
+			continue;
+		atLeastOneRepeater = true;
 		m_thread->addRepeater(rptrConfig.callsign,
 								rptrConfig.band,
 								rptrConfig.address,
@@ -177,7 +179,7 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.description1,
 								rptrConfig.description2,
 								rptrConfig.url,
-								repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port),
+								repeaterProtocolHandler,
 								rptrConfig.band1,
 								rptrConfig.band2,
 								rptrConfig.band3);
@@ -186,6 +188,12 @@ bool CDStarGatewayApp::createThread()
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}
+
+	if(!atLeastOneRepeater) {
+		CLog::logError("Error: no repeaters are enabled or opening network communication to repeater failed");
+		return false;
+	}
+
 	m_thread->setDDModeEnabled(ddEnabled);
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
 
@@ -198,13 +206,15 @@ bool CDStarGatewayApp::createThread()
 		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
-	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
-	bool res = multiClient->open();
-	if (!res) {
-		CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
-		return false;
+	if(clients.size() > 0U) {
+		CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
+		bool res = multiClient->open();
+		if (!res) {
+			CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
+			return false;
+		}
+		m_thread->setIRC(multiClient);
 	}
-	m_thread->setIRC(multiClient);
 
 	// Setup Dextra
 	TDextra dextraConfig;

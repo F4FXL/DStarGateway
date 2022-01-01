@@ -48,7 +48,7 @@ m_out(0U)
 	auto vstr = SHORT_PRODUCT_NAME;
 	vstr.resize(NUM_FRAMES, ' ');
 
-	CLog::logInfo("Version text set to \"%s\"\n", vstr);
+	CLog::logInfo("Version text set to \"%s\"\n", vstr.c_str());
 
 	CSlowDataEncoder encoder;
 	encoder.setTextData(vstr);

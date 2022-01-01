@@ -51,6 +51,8 @@ public:
 
 	void writeData(const std::string& callsign, const CAMBEData& data);
 
+	void  writeStatus(const std::string& callsign, const std::string status);
+
 	bool isConnected() const;
 
 	void clock(unsigned int ms);
@@ -65,7 +67,8 @@ private:
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 	CAPRSIdFrameProvider * m_idFrameProvider;
 
-	void sendIdFramesMobile();
+	void sendIdFrames();
+	void sendStatusFrame(CAPRSEntry * entrry);
 };
 
 #endif
