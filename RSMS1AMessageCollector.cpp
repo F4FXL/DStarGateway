@@ -22,12 +22,15 @@
 #include <cassert>
 #include <boost/algorithm/string.hpp>
 #include <vector>
+#include <algorithm>
+#include <cstdlib>
 
 #include "RSMS1AMessageCollector.h"
 #include "StringUtils.h"
 #include "Log.h"
 #include "Utils.h"
 #include "APRSUtils.h"
+
 
 const unsigned int APRS_CSUM_LENGTH = 4U;
 
@@ -39,10 +42,10 @@ CSentenceCollector(SLOW_DATA_TYPE_GPS, "$$Msg", '\x0D')
 
 bool CRSMS1AMessageCollector::isValidSentence(const std::string& sentence)
 {
-    return isValidGPSA(sentence);
+    return isValidMsg(sentence);
 }
 
-bool CRSMS1AMessageCollector::isValidGPSA(const std::string& msg)
+bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
 {
     if(msg.empty() || !boost::starts_with(msg, "$$Msg"))
         return false;
@@ -55,6 +58,8 @@ bool CRSMS1AMessageCollector::isValidGPSA(const std::string& msg)
                 && !splits[2].empty()
                 && splits[3].length() > 6U;
     return ret;
+
+    //TODO 2022-01-01 figure out what the heck it is about thic strange CRCs
 
     // CUtils::dump("RS-MS1A:", (unsigned char *)gpsa.c_str(), gpsa.length() + 1U);
     // CLog::logDebug("RS-MS1A: %s", gpsa.c_str());

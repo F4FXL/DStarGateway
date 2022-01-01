@@ -34,9 +34,8 @@ protected:
     
 private:
     static unsigned int calcCRC(const std::string& gpsa, unsigned int start, unsigned int length);
-    static bool isValidGPSA(const std::string& gpsa);
+    static bool isValidMsg(const std::string& gpsa);
 
     std::string m_sentence;
     std::string m_collector;
-
 };
