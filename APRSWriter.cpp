@@ -124,7 +124,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 		return;
 	}
 
-	unsigned int length = collector->getData(buffer, 400U);
+	unsigned int length = collector->getData(SLOW_DATA_TYPE_GPS, buffer, 400U);
 	std::string text((char*)buffer, length);
 
 	auto n = text.find(':');

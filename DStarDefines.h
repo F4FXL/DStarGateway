@@ -85,6 +85,7 @@ const unsigned char SLOW_DATA_TYPE_MASK   = 0xF0U;
 const unsigned char SLOW_DATA_TYPE_GPS    = 0x30U;
 const unsigned char SLOW_DATA_TYPE_TEXT   = 0x40U;
 const unsigned char SLOW_DATA_TYPE_HEADER = 0x50U;
+const unsigned char SLOW_DATA_TYPE_MESSAGE = 0x40U;
 const unsigned char SLOW_DATA_TYPE_FAST_DATA1 = 0x80U;
 const unsigned char SLOW_DATA_TYPE_FAST_DATA2 = 0x90U;
 const unsigned char SLOW_DATA_TYPE_SQUELCH    = 0xC0U;
