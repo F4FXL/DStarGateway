@@ -5,5 +5,8 @@
             "binaryPath": "/home/geoffrey/Documents/Dev/DStarGateway/dstargateway",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "new": "cpp"
+    }
 }
