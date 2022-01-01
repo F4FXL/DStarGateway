@@ -206,13 +206,15 @@ bool CDStarGatewayApp::createThread()
 		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
-	CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
-	bool res = multiClient->open();
-	if (!res) {
-		CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
-		return false;
+	if(clients.size() > 0U) {
+		CIRCDDBMultiClient* multiClient = new CIRCDDBMultiClient(clients);
+		bool res = multiClient->open();
+		if (!res) {
+			CLog::logInfo("Cannot initialise the ircDDB protocol handler\n");
+			return false;
+		}
+		m_thread->setIRC(multiClient);
 	}
-	m_thread->setIRC(multiClient);
 
 	// Setup Dextra
 	TDextra dextraConfig;
