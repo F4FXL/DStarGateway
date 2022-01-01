@@ -159,10 +159,12 @@ void* CAPRSWriterThread::Entry()
 						startReconnectionTimer();
 					}
 
+					if(line.length() > 0 && line[0] != '#')
+						CLog::logDebug("Received APRS Frame : %s", line.c_str());
+
 					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
 					    && m_APRSReadCallback != NULL)//do we have someone wanting an APRS Frame?
 					{	
-						//CLog::logInfo("Received APRS Frame : ") + line);
 						m_APRSReadCallback(std::string(line));
 					}
 				}
