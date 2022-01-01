@@ -24,6 +24,7 @@
 #include "NMEASentenceCollector.h"
 #include "StringUtils.h"
 #include "Log.h"
+#include "APRSUtils.h"
 
 CNMEASentenceCollector::CNMEASentenceCollector(const std::string& sentence) :
 CSentenceCollector(SLOW_DATA_TYPE_GPS, sentence, '\x0A')
@@ -82,7 +83,7 @@ unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned i
     fixUpNMEATimeStamp(nmea);
 
     std::string fromCall = getMyCall();
-    dstarCallsignToAPRS(fromCall);
+    CAPRSUtils::dstarCallsignToAPRS(fromCall);
     std::string aprsFrame(fromCall);
     aprsFrame.append("-5>GPS30,DSTAR*:")
              .append(nmea)
@@ -99,20 +100,6 @@ unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned i
     }
 
     return aprsFrameLen;
-}
-
-
-void CNMEASentenceCollector::dstarCallsignToAPRS(std::string& dstarCallsign)
-{
-	if(dstarCallsign[dstarCallsign.length() - 1] == ' ') {
-		boost::trim(dstarCallsign);
-	} else {
-		//loop until got rid of all double blanks
-		while(dstarCallsign.find("  ") != std::string::npos) {
-			boost::replace_all(dstarCallsign, "  ", " ");
-		}
-		boost::replace_all(dstarCallsign, " ", "-");//replace remaining blank with a -
-	}
 }
 
 // When set on manual position Icom radios send 000000.00 as NMEA timestamps

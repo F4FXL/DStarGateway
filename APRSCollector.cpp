@@ -27,6 +27,7 @@
 #include "Utils.h"
 #include "NMEASentenceCollector.h"
 #include "GPSACollector.h"
+#include "RSMS1AMessageCollector.h"
 
 const unsigned int APRS_CSUM_LENGTH = 4U;
 const unsigned int APRS_DATA_LENGTH = 300U;
@@ -38,6 +39,7 @@ const char APRS_SYMBOL  = 'K';
 CAPRSCollector::CAPRSCollector() :
 m_collectors()
 {
+	m_collectors.push_back(new CRSMS1AMessageCollector());
 	m_collectors.push_back(new CGPSACollector());
 	m_collectors.push_back(new CNMEASentenceCollector("$GPRMC"));
 	m_collectors.push_back(new CNMEASentenceCollector("$GPGGA"));
