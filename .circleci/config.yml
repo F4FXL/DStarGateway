@@ -16,7 +16,9 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: sudo apt-get install libcurl4-openssl-dev libboost-dev
+          command: |
+            sudo apt-get update
+            sudo apt-get install libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build"
           command: "make"
