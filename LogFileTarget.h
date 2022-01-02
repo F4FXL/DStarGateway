@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <fstream>
 
 #include "LogTarget.h"
 
@@ -26,11 +27,17 @@ class CLogFileTarget : public CLogTarget
 {
 public:
     CLogFileTarget(LOG_SEVERITY logLevel, const std::string& directory, bool rotate);
+    ~CLogFileTarget();
 
 protected:
     virtual void printLogInt(const std::string& msg);
 
 private:
+    void printLogIntRotate(const std::string& msg);
+    void printLogIntFixed(const std::string& msg);
+    std::string buildFileName();
     std::string m_dir;
     bool m_rotate;
+    std::fstream m_file;
+    int m_day;
 };
