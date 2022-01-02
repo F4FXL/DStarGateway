@@ -112,6 +112,7 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - Code formating rules are observed (these are very lousy though)
 # 5. Version History
 ## 5.1. Version 0.5
+- [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.2. Version 0.4
 - [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
