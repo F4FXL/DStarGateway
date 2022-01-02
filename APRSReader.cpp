@@ -28,5 +28,5 @@ CAPRSReader::CAPRSReader()
 
 bool CAPRSReader::readAprsFrame(const std::string& aprsFrame)
 {
- 
+    return false;
 }
