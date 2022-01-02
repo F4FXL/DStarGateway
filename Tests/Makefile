@@ -4,7 +4,7 @@ OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
 .PHONY tests:
-tests: rmdstargatewayapp $(OBJS)
+tests: $(OBJS)
 	$(CC) $(CPPFLAGS) -o dstargateway_tests $(OBJS) $(LDFLAGS) -lgtest -lgtest_main
 
 %.o : %.cpp
@@ -16,10 +16,3 @@ tests: rmdstargatewayapp $(OBJS)
 clean :
 	@$(RM) $(OBJS) $(DEPS) dstargateway_tests
 
-# Again ugly trick to force rebuild of DStarGatewayApp
-.PHONY rmdstargatewayapp :
-rmdstargatewayapp: FORCE
-	@$(RM) ../DStarGatewayApp.o
-	@$(RM) ../DStarGatewayApp.d
-
-FORCE:

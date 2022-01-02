@@ -131,7 +131,9 @@ removehostfiles :
 	@rm -f $(DATA_DIR)/DPlus_Hosts.txt
 
 .PHONY tests:
-tests : GitVersion.h $(OBJS) 
-	$(MAKE) -C Tests tests
+tests : GitVersion.h
+	@$(RM) -f DStarGatewayApp.o
+	@$(RM) -f DStarGatewayApp.d
+	@$(MAKE) -C Tests tests
 
 FORCE:
