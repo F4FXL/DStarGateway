@@ -24,34 +24,79 @@
 
 #include "LogFileTarget.h"
 
+#define LOG_FILE_ROOT "dstargateway"
+
 CLogFileTarget::CLogFileTarget(LOG_SEVERITY logLevel, const std::string & dir, bool rotate) : 
 CLogTarget(logLevel),
 m_dir(dir),
-m_rotate(rotate)
+m_rotate(rotate),
+m_file(),
+m_day(0)
 {
 
 }
 
-void CLogFileTarget::printLogInt(const std::string& msg)
+CLogFileTarget::~CLogFileTarget()
 {
-    // construct filename
-    std::string fileName(m_dir);
-    if(fileName[fileName.length() - 1U] != '/') fileName.push_back('/');
-    fileName.append("dstargateway");
+    if(m_file.is_open()) {
+        m_file.close();
+    }
+}
 
-    if(m_rotate) {
-        std::time_t now = std::time(0);
-        std::tm* now_tm = std::gmtime(&now);
+void CLogFileTarget::printLogIntFixed(const std::string& msg)
+{
+    if(m_file.is_open()) {
+        m_file << msg;
+        m_file.flush();
+        return;
+    }
+
+    std::string filename(m_dir);
+    if(filename[filename.length() - 1U] != '/') filename.push_back('/');
+    filename.append(LOG_FILE_ROOT).append(".log");
+    m_file.open(filename, std::ios::app);
+
+    if(m_file.is_open()) {
+        printLogIntFixed(msg);
+    }
+    else {
+        std::cerr << "FAILED TO OPEN LOG FILE :" << filename;
+    }
+}
+
+void CLogFileTarget::printLogIntRotate(const std::string& msg)
+{
+    std::time_t now = std::time(0);
+    std::tm* now_tm = std::gmtime(&now);
+    if(now_tm->tm_yday != m_day) {
+        m_day = now_tm->tm_yday;
+        if(m_file.is_open()) {
+            m_file.close();
+        }
+    }
+
+    if(!m_file.is_open()) {
+        std::string filename(m_dir);
+        if(filename[filename.length() - 1U] != '/') filename.push_back('/');
         char buf[64];
         std::strftime(buf, 42, "-%Y-%m-%d", now_tm);
-        fileName.append(std::string(buf));
+        filename.append(LOG_FILE_ROOT).append(buf).append(".log");
+        m_file.open(filename, std::ios::app);
+        if(!m_file.is_open()) {
+            std::cerr << "FAILED TO OPEN LOG FILE :" << filename;
+        }
     }
-    fileName.append(".log");
 
-    std::ofstream file;
-    file.open(fileName, std::ios::app);
-    if(file.is_open()) {
-        file << msg;
-        file.close();
+    if(m_file.is_open()) {
+        m_file << msg;
+        m_file.flush();
+        return;
     }
+}
+void CLogFileTarget::printLogInt(const std::string& msg)
+{
+    if(m_rotate)
+        printLogIntRotate(msg);
+    else
+        printLogIntFixed(msg);
 }
