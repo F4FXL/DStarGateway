@@ -27,7 +27,7 @@ jobs:
           name: "Build App"
           command: "make -j 3 dstargateway"
   build-tests:
-     docker:
+      docker:
         - image: cimg/base:stable
       steps:
       - checkout
@@ -35,7 +35,7 @@ jobs:
           name: "Build Tests"
           command: "make -j 3 tests"
   run-tests:
-     docker:
+      docker:
         - image: cimg/base:stable
       steps:
       - checkout
