@@ -28,5 +28,6 @@ CAPRSReader::CAPRSReader()
 
 bool CAPRSReader::readAprsFrame(const std::string& aprsFrame)
 {
+    auto bla = aprsFrame;
     return false;
 }
