@@ -15,7 +15,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "make"
+          name: Install dependencies
+          command: sudo apt-get install libcurl4-openssl-dev libboost-dev
+      - run:
+          name: "Build"
           command: "make"
 
 # Invoke jobs via workflows
