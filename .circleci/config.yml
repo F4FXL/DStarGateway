@@ -5,15 +5,6 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  install-deps:
-      docker:
-        - image: cimg/base:stable
-      steps:
-        - run:
-            name: Install dependencies
-            command: |
-              sudo apt-get update
-              sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
   build-dstargateway:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
@@ -24,31 +15,23 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
+      - run:
           name: "Build App"
           command: "make -j 3 dstargateway"
-  build-tests:
-      docker:
-        - image: cimg/base:stable
-      steps:
-      - checkout
       - run:
           name: "Build Tests"
           command: "make -j 3 tests"
-  run-tests:
-      docker:
-        - image: cimg/base:stable
-      steps:
-      - checkout
       - run:
           name: "Run Tests"
           command: "make run-tests"
-
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   dstar-gateway-workflow:
     jobs:
-      - build-tests
-      - run-tests
       - build-dstargateway
