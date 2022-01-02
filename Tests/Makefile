@@ -16,7 +16,7 @@ tests: rmdstargatewayapp $(OBJS)
 clean :
 	@$(RM) $(OBJS) $(DEPS) dstargateway_tests
 
-
+# Again ugly trick to force rebuild of DStarGatewayApp
 .PHONY rmdstargatewayapp :
 rmdstargatewayapp: FORCE
 	@$(RM) ../DStarGatewayApp.o

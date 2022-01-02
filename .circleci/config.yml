@@ -21,7 +21,7 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build"
-          command: "make -j 3"
+          command: "make -j 3 dstargateway tests"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

@@ -38,7 +38,7 @@ OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
 .PHONY: all
-all: dstargateway tests
+all: dstargateway
 
 dstargateway : GitVersion.h $(OBJS) 
 	$(CC) $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
