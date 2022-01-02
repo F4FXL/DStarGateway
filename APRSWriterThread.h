@@ -19,12 +19,14 @@
 #ifndef	APRSWriterThread_H
 #define	APRSWriterThread_H
 
+#include <vector>
+
 #include "TCPReaderWriterClient.h"
 #include "RingBuffer.h"
 #include "Timer.h"
 #include "Thread.h"
+#include "ReadAPRSFrameCallback.h"
 
-typedef void (*ReadAPRSFrameCallback)(const std::string&);
 
 class CAPRSWriterThread : public CThread {
 public:
@@ -44,7 +46,7 @@ public:
 
 	void clock(unsigned int ms);
 
-	void setReadAPRSCallback(ReadAPRSFrameCallback cb);
+	void addReadAPRSCallback(CReadAPRSFrameCallback* cb);
 
 private:
 	std::string               m_username;
@@ -56,7 +58,7 @@ private:
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
 	unsigned int           m_tries;
-	ReadAPRSFrameCallback  m_APRSReadCallback;
+	std::vector<CReadAPRSFrameCallback *>  m_APRSReadCallback;
 	std::string               m_filter;
 	std::string               m_clientName;
 
