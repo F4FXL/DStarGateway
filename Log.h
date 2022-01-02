@@ -19,11 +19,11 @@
 
 #pragma once
 
+#include <ctime>
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <mutex>
-#include <sstream>
 #include <cassert>
 
 #include "StringUtils.h"
@@ -36,46 +36,46 @@ private:
     static bool m_addedTargets;
     static std::recursive_mutex m_targetsMutex;
 
-    static void getTimeStamp(std::string & s);
+    static void getTimeStamp(std::string& s);
 
     template<typename... Args>
     static void formatLogMessage(std::string& output, LOG_SEVERITY severity, const std::string & f, Args... args)
     {
         assert(severity != LOG_NONE);
         
-        std::string severityStr;
+        std::string severityStr("       ");
         switch (severity)
         {
         case LOG_DEBUG:
-            severityStr = "DEBUG  ";
+            severityStr.assign("DEBUG  ");
             break;
         case LOG_ERROR:
-            severityStr = "ERROR  ";
+            severityStr.assign("ERROR  ");
             break;
         case LOG_FATAL:
-            severityStr = "FATAL  ";
+            severityStr.assign("FATAL  ");
             break;
         case LOG_INFO :
-            severityStr = "INFO   ";
+            severityStr.assign("INFO   ");
             break;
         case LOG_WARNING:
-            severityStr = "WARNING";
+            severityStr.assign("WARNING");
             break;
         case LOG_TRACE:
-            severityStr = "TRACE  ";
+            severityStr.assign("TRACE  ");
             break;
         default:
             break;
         }
 
-        std::string message = CStringUtils::string_format(f, args...);
-        boost::trim(message);
-        std::string timeUtc;
-        getTimeStamp(timeUtc);
-        std::stringstream s;
-        s << "[" <<  timeUtc << "] [" << severityStr << "] " << message << std::endl;
+        std::string timestamp;
+        getTimeStamp(timestamp);
 
-        output = s.str();
+        std::string f2("[%s] [%s] ");
+        f2.append(f);
+        CStringUtils::string_format_in_place(output, f2, timestamp.c_str(), severityStr.c_str(), args...);
+        boost::trim_if(output, [](char c){ return c == '\n' || c == '\r' || c == ' ' || c == '\t'; });
+        output.push_back('\n');
     }
 
 public:

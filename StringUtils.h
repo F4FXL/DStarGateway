@@ -29,12 +29,23 @@ public:
     template<typename ... Args>
     static std::string string_format( const std::string& format, Args ... args )
     {
+        std::string ret;
+        string_format_in_place(ret, format, args...);
+        return ret;
+    }
+
+    template<typename ... Args>
+    static void string_format_in_place(std::string& output, const std::string& format, Args ... args )
+    {
         int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
         if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
+
         auto size = static_cast<size_t>( size_s );
         auto buf = std::make_unique<char[]>( size );
         std::snprintf( buf.get(), size, format.c_str(), args ... );
-        return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+
+        output.reserve(size);
+        output.assign(buf.get(), size - 1); // -1 because we do not need trailing '\0'
     }
 
     static size_t find_nth(const std::string& haystack, char needle, size_t nth);
