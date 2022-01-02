@@ -7,11 +7,25 @@
             "label": "Build",
             "type": "shell",
             "command": "make",
-            "args": ["-j3"],
+            "args": [
+                "-j3"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Tests",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "tests"
+            ],
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }
