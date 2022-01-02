@@ -132,6 +132,7 @@ removehostfiles :
 
 .PHONY tests:
 tests : GitVersion.h
+# remove these to force tests makefile to rebuild them with -DUNIT_TESTS, otherwise we end up with 2 mains
 	@$(RM) -f DStarGatewayApp.o
 	@$(RM) -f DStarGatewayApp.d
 	@$(MAKE) -C Tests tests
