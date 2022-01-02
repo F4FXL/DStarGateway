@@ -22,9 +22,9 @@ export DATA_DIR=/usr/local/share/dstargateway.d/
 export LOG_DIR=/var/log/dstargateway/
 
 # choose this if you want debugging help
-CPPFLAGS=-g -ggdb -W -Wall -std=c++17
+CPPFLAGS=-g -ggdb -W -Wall -Werror -std=c++17
 # or, you can choose this for a much smaller executable without debugging help
-#CPPFLAGS=-W -Wall -std=c++17
+#CPPFLAGS=-W -Wall -Werror -std=c++17
 
 LDFLAGS:=-lcurl -pthread
 
