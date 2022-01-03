@@ -83,6 +83,11 @@ public:
     static void addTarget(CLogTarget * target);
     static void finalise();
 
+    template<typename... Args> static void logTrace(const std::string & f, Args... args)
+    {
+        log(LOG_TRACE, f, args...);
+    }
+
     template<typename... Args> static void logDebug(const std::string & f, Args... args)
     {
         log(LOG_DEBUG, f, args...);

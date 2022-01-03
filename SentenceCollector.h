@@ -1,6 +1,6 @@
 /*
  *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
- *   Copyright (C) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,39 +17,30 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef APRSCollector_H
-#define APRSCollector_H
+#pragma once
 
-#include <vector>
+#include <string>
 
 #include "SlowDataCollector.h"
-#include "Defs.h"
 
-enum APRS_STATE {
-	AS_NONE,
-	AS_GGA,
-	AS_RMC,
-	AS_MSG,
-	AS_CRC
-};
-
-class CAPRSCollector {
+class CSentenceCollector : public CSlowDataCollector
+{
 public:
-	CAPRSCollector();
-	~CAPRSCollector();
+    CSentenceCollector(unsigned char slowDataType, const std::string& sentenceIdentifier, unsigned char endMarker);
 
-	void writeHeader(const std::string& callsign);
+protected:
+    bool addData(const unsigned char * data);
 
-	bool writeData(const unsigned char* data);
-
-	void reset();
-
-	void sync();
-
-	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
+    virtual unsigned int getDataInt(unsigned char * data, unsigned int length) = 0;
+    static void dstarCallsignToAPRS(std::string& call);
+    std::string getSentence();
 
 private:
-	std::vector<CSlowDataCollector *> m_collectors;
-};
+    virtual bool isValidSentence(const std::string& sentence) = 0;
+    virtual void resetInt();
 
-#endif
+    std::string m_collector;
+    std::string m_sentenceIdentifier;
+    std::string m_sentence;
+    unsigned char m_endMarker;
+};

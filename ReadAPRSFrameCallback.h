@@ -1,5 +1,4 @@
 /*
- *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
  *   Copyright (C) 2021 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -17,39 +16,13 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef APRSCollector_H
-#define APRSCollector_H
+#pragma once
 
-#include <vector>
+#include <string>
 
-#include "SlowDataCollector.h"
-#include "Defs.h"
-
-enum APRS_STATE {
-	AS_NONE,
-	AS_GGA,
-	AS_RMC,
-	AS_MSG,
-	AS_CRC
-};
-
-class CAPRSCollector {
+class CReadAPRSFrameCallback
+{
 public:
-	CAPRSCollector();
-	~CAPRSCollector();
-
-	void writeHeader(const std::string& callsign);
-
-	bool writeData(const unsigned char* data);
-
-	void reset();
-
-	void sync();
-
-	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
-
-private:
-	std::vector<CSlowDataCollector *> m_collectors;
+	virtual ~CReadAPRSFrameCallback(){ }
+	virtual bool readAprsFrame(const std::string& aprsFrame) = 0;
 };
-
-#endif

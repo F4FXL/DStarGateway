@@ -1,6 +1,6 @@
 /*
  *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
- *   Copyright (C) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,39 +17,35 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef APRSCollector_H
-#define APRSCollector_H
+#pragma once
 
-#include <vector>
+#include <string>
 
-#include "SlowDataCollector.h"
+#include "DStarDefines.h"
 #include "Defs.h"
 
-enum APRS_STATE {
-	AS_NONE,
-	AS_GGA,
-	AS_RMC,
-	AS_MSG,
-	AS_CRC
-};
-
-class CAPRSCollector {
+class CSlowDataCollector
+{
 public:
-	CAPRSCollector();
-	~CAPRSCollector();
+    CSlowDataCollector(unsigned char slowDataType);
+    virtual ~CSlowDataCollector();
 
-	void writeHeader(const std::string& callsign);
+    std::string getMyCall() const;
+    void setMyCall(const std::string& mycall);
+    bool writeData(const unsigned char* data);
+    void sync();
+    unsigned int getData(unsigned char* data, unsigned int length);
+    void reset();
+    unsigned char getDataType();
 
-	bool writeData(const unsigned char* data);
-
-	void reset();
-
-	void sync();
-
-	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
-
+protected:
+    virtual bool addData(const unsigned char* data) = 0;
+    virtual unsigned int getDataInt(unsigned char* data, unsigned int length) = 0;
+    virtual void resetInt() { }
+    
 private:
-	std::vector<CSlowDataCollector *> m_collectors;
+    unsigned char m_slowDataType;
+    std::string m_myCall;
+    SLOWDATA_STATE m_state;
+    unsigned char * m_buffer;
 };
-
-#endif

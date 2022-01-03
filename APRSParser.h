@@ -1,6 +1,5 @@
 /*
- *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
- *   Copyright (C) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,39 +16,18 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef APRSCollector_H
-#define APRSCollector_H
+#pragma once
 
-#include <vector>
+#include <string>
+#include <boost/algorithm/string.hpp>
 
-#include "SlowDataCollector.h"
-#include "Defs.h"
+#include "APRSFrame.h"
 
-enum APRS_STATE {
-	AS_NONE,
-	AS_GGA,
-	AS_RMC,
-	AS_MSG,
-	AS_CRC
-};
-
-class CAPRSCollector {
+class CAPRSParser
+{
 public:
-	CAPRSCollector();
-	~CAPRSCollector();
-
-	void writeHeader(const std::string& callsign);
-
-	bool writeData(const unsigned char* data);
-
-	void reset();
-
-	void sync();
-
-	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
+    static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame);
 
 private:
-	std::vector<CSlowDataCollector *> m_collectors;
+    static void setFrameType(CAPRSFrame& frame);
 };
-
-#endif

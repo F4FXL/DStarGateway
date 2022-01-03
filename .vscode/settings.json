@@ -5,5 +5,34 @@
             "binaryPath": "/home/geoffrey/Documents/Dev/DStarGateway/dstargateway",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "new": "cpp"
+    },
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "googletest.failed",
+                "settings": {
+                    "foreground": "#f00"
+                }
+            },
+            {
+                "scope": "googletest.passed",
+                "settings": {
+                    "foreground": "#0f0"
+                }
+            },
+            {
+                "scope": "googletest.run",
+                "settings": {
+                    "foreground": "#0f0"
+                }
+            }
+        ]
+    },
+    "gtest-adapter.debugConfig": [
+        "Tests"
+    ],
+    "gtest-adapter.supportLocation": true
 }

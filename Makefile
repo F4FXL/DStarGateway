@@ -22,15 +22,15 @@ export DATA_DIR=/usr/local/share/dstargateway.d/
 export LOG_DIR=/var/log/dstargateway/
 
 # choose this if you want debugging help
-CPPFLAGS=-g -ggdb -W -Wall -std=c++17
+export CPPFLAGS=-g -ggdb -W -Wall -Werror -std=c++17
 # or, you can choose this for a much smaller executable without debugging help
-#CPPFLAGS=-W -Wall -std=c++17
-
-LDFLAGS:=-lcurl -pthread
+#CPPFLAGS=-W -Wall -Werror -std=c++17
+export CC=g++
+export LDFLAGS:=-lcurl -pthread
 
 ifeq ($(USE_GPSD), 1)
-CPPFLAGS+= -DUSE_GPSD
-LDFLAGS+= -lgps
+export CPPFLAGS+= -DUSE_GPSD
+export LDFLAGS+= -lgps
 endif
 
 SRCS = $(wildcard *.cpp)
@@ -41,10 +41,10 @@ DEPS = $(SRCS:.cpp=.d)
 all: dstargateway
 
 dstargateway : GitVersion.h $(OBJS) 
-	g++ $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
+	$(CC) $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
 
 %.o : %.cpp
-	g++ $(CPPFLAGS) -MMD -MD -c $< -o $@
+	$(CC) $(CPPFLAGS) -MMD -MD -c $< -o $@
 
 GitVersion.h : FORCE 
 ifneq ("$(wildcard .git/index)","")
@@ -66,7 +66,8 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) GitVersion.h $(OBJS) $(DEPS) dstargateway
+	@$(RM) GitVersion.h $(OBJS) $(DEPS) dstargateway
+	@$(MAKE) -C Tests clean
 
 -include $(DEPS)
 
@@ -129,6 +130,14 @@ removehostfiles :
 	@rm -f $(DATA_DIR)/DCS_Hosts.txt
 	@rm -f $(DATA_DIR)/DPlus_Hosts.txt
 
+.PHONY tests:
+tests : GitVersion.h
+# remove these to force tests makefile to rebuild them with -DUNIT_TESTS, otherwise we end up with 2 mains
+	@$(RM) -f DStarGatewayApp.o
+	@$(RM) -f DStarGatewayApp.d
+	@$(MAKE) -C Tests dstargateway_tests
 
+.PHONY run-tests:
+	@$(MAKE) -C Tests run-tests
 
 FORCE:

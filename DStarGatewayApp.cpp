@@ -41,6 +41,7 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 
+#ifndef UNIT_TESTS
 int main(int argc, char *argv[])
 {
 	setbuf(stdout, NULL);
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+#endif
 
 CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
 {

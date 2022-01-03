@@ -1,6 +1,5 @@
 /*
- *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
- *   Copyright (C) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,39 +16,20 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef APRSCollector_H
-#define APRSCollector_H
+#include "StringUtils.h"
 
-#include <vector>
+size_t CStringUtils::find_nth(const std::string& haystack, char needle, size_t nth) 
+{
+    size_t matches = 0U;
+    auto haystackLength = haystack.length();
 
-#include "SlowDataCollector.h"
-#include "Defs.h"
+    for(size_t i = 0; i < haystackLength; i++) {
+        if(haystack[i] == needle) {
+            matches++;
+            if(matches == nth)
+                return i;
+        }
+    }
 
-enum APRS_STATE {
-	AS_NONE,
-	AS_GGA,
-	AS_RMC,
-	AS_MSG,
-	AS_CRC
-};
-
-class CAPRSCollector {
-public:
-	CAPRSCollector();
-	~CAPRSCollector();
-
-	void writeHeader(const std::string& callsign);
-
-	bool writeData(const unsigned char* data);
-
-	void reset();
-
-	void sync();
-
-	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
-
-private:
-	std::vector<CSlowDataCollector *> m_collectors;
-};
-
-#endif
+    return std::string::npos;
+}
