@@ -1,5 +1,5 @@
 
-SRCS = $(wildcard *.cpp) $(wildcard ../*.cpp)
+SRCS = $(wildcard *.cpp) $(wildcard ../*.cpp) $(wildcard */*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 

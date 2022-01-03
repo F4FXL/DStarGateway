@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../APRSParser.h"
+#include "../../APRSParser.h"
 
 class APRSParser_parseAPRSFrame_Tests : public ::testing::Test {
  
