@@ -14,6 +14,7 @@
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
+  - [4.2. Continuous Integration](#42-continuous-integration)
 - [5. Version History](#5-version-history)
   - [5.1. Version 0.5](#51-version-05)
   - [5.2. Version 0.4](#52-version-04)
@@ -110,6 +111,10 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - You have tested your code thoroughly
 - Compilation produces no warnings
 - Code formating rules are observed (these are very lousy though)
+## 4.2. Continuous Integration
+I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all) I am trying to rewrite the code so that it can be put into some Behavior Driven Development scheme. This is a long haul task and I'll try do do it on the go while changing/adding stuff.
+the testing framwrok used is Google Test.
+
 # 5. Version History
 ## 5.1. Version 0.5
 - [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
