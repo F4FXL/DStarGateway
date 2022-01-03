@@ -124,10 +124,10 @@ TEST_F(APRSParser_parseAPRSFrame, ValidFrameDoNotEnforceType) {
 TEST_F(APRSParser_parseAPRSFrame, ID51) {
 
     CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("F4FXL-8>API51,DSTAR:!1234.51N/12345.42E[/A=000886QRV DStar\r\r\n", aprsFrame, true);
+    bool retVal = CAPRSParser::parseFrame("F4FXL-8>API51,DSTAR:!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n", aprsFrame, true);
 
     EXPECT_TRUE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "!4849.51N/00736.42E[/A=000886QRV DStar\r\r\n");
+    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n");
     EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "API51");
     EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F4FXL-8");
     EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
