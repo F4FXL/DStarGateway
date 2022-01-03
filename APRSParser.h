@@ -26,6 +26,8 @@
 class CAPRSParser
 {
 public:
-        //TODO 2022-01-02 move these to own class ?
-    static bool parseFrame(const std::string& frameStr, TAPRSFrame& frame);
+    static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame);
+
+private:
+    static void setFrameType(CAPRSFrame& frame);
 };

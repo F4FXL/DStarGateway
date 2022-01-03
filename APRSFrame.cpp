@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,23 +16,30 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtest/gtest.h>
+#include "APRSFrame.h"
 
-#include "../../APRSParser.h"
+CAPRSFrame::CAPRSFrame() :
+m_source(),
+m_destination(),
+m_path(),
+m_type(APFT_UNKNOWN)
+{
 
-class APRSParser_parseAPRSFrame_Tests : public ::testing::Test {
- 
-};
+}
 
-TEST_F(APRSParser_parseAPRSFrame_Tests, EmpyString) {
+CAPRSFrame::CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, APRS_FRAME_TYPE type) :
+m_source(source),
+m_destination(destination),
+m_path(),
+m_type(type)
+{
+    m_path.assign(path.begin(), path.end());
+}
 
-    TAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("", aprsFrame);
-
-    EXPECT_FALSE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.m_body.c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.m_dest.c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.m_source.c_str(), "");
-    EXPECT_EQ(aprsFrame.m_type, APFT_UNKNOWN);
-    EXPECT_EQ(aprsFrame.m_path.size(), 0U);
+void CAPRSFrame::clear()
+{
+    m_source.clear();
+    m_destination.clear();
+    m_path.clear();
+    m_type = APFT_UNKNOWN;
 }

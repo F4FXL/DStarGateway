@@ -27,10 +27,22 @@ enum APRS_FRAME_TYPE {
     APFT_MESSAGE,
 };
 
-typedef struct {
+class CAPRSFrame {
+public:
+    CAPRSFrame();
+    CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, APRS_FRAME_TYPE type);
+
+    void clear();
+    std::string& getSource() { return m_source; }
+    std::string& getDestination() { return m_destination; }
+    std::vector<std::string>& getPath() { return m_path; }
+    std::string& getBody() { return m_body; }
+    APRS_FRAME_TYPE& getType() { return m_type; }
+
+private:
     std::string m_source;
-    std::string m_dest;
+    std::string m_destination;
     std::vector<std::string> m_path;
     std::string m_body;
     APRS_FRAME_TYPE m_type;
-} TAPRSFrame;
+};

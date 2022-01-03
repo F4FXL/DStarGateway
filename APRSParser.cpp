@@ -17,42 +17,66 @@
  */
 
 #include "APRSParser.h"
+#include "Log.h"
 
-bool CAPRSParser::parseFrame(const std::string& frameStr, TAPRSFrame& frame)
+bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
 {
-    frame.m_body.clear();
-    frame.m_dest.clear();
-    frame.m_path.clear();
-    frame.m_source.clear();
-    frame.m_type = APFT_UNKNOWN;
+    frame.clear();
+    bool ret = false;
 
-    if(!frameStr.empty())
-        return false;
+    if(!frameStr.empty()) {
+        auto pos = frameStr.find_first_of(':');
+        if(pos != std::string::npos && pos != frameStr.length() - 1) {
+            auto header = frameStr.substr(0, pos); // contains source, dest and path
+            auto body = frameStr.substr(pos +1);
 
-    auto pos = frameStr.find_first_of(':');
-    if(pos == std::string::npos || pos == frameStr.length() - 1)
-        return false;
+            std::vector<std::string> headerSplits;
+            boost::split(headerSplits, header, [](char c) { return c == ',' || c == '>';});
 
-    auto header = frameStr.substr(0, pos); // contains sours, dest and path
-    auto body = frameStr.substr(pos +1);
+             //we need at least source and dest to form a valid frame, also headers shall not contain empty strings
+            if(headerSplits.size() >= 2 && std::none_of(headerSplits.begin(), headerSplits.end(), [](std::string s){ return s.empty(); })) {
+                frame.getSource().assign(headerSplits[0]);
+                frame.getDestination().assign(headerSplits[1]);
 
-    std::vector<std::string> headerSplits;
-    boost::split(headerSplits, header, [](char c) { return c == ',' || c == '>';});
+                for(unsigned int i = 2; i < headerSplits.size(); i++) {
+                    frame.getPath().push_back(headerSplits[i]);
+                }
 
-    if(headerSplits.size() < 2) //we need at least source and dest to form a valid frame
-        return false;
+                frame.getBody().assign(body);
 
-    frame.m_source.assign(headerSplits[0]);
-    frame.m_dest.assign(headerSplits[1]);
-
-    for(unsigned int i = 2; i < headerSplits.size(); i++) {
-        frame.m_path.push_back(headerSplits[i]);
+                setFrameType(frame);
+                if(frame.getType() == APFT_UNKNOWN) {
+                    CLog::logInfo("Invalid or unsupported APRS frame : %s", frameStr);
+                }
+                else {
+                    ret = true;
+                }
+            }
+        }
     }
 
-    frame.m_body.assign(body);
-
-    frame.m_type = body[0] == ':' ? APFT_MESSAGE : APFT_UNKNOWN;
-
-    return true;
+    return ret;
 }
 
+void CAPRSParser::setFrameType(CAPRSFrame& frame)
+{
+    APRS_FRAME_TYPE type = APFT_UNKNOWN;
+    std::string body(frame.getBody());
+
+    if(!body.empty()) {
+        switch (body[0])
+        {
+            case ':':
+                if(body[10] == ':')
+                    type = APFT_MESSAGE;
+                break;
+            
+            default:
+                break;
+        }
+    }
+
+    frame.getType() = type;
+    if(type == APFT_UNKNOWN)
+        frame.clear();
+}
