@@ -21,8 +21,11 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
 #define string_right(s,l) (s.substr(s.length() - l, l))
+#define string_is_blank(s) (std::all_of(s.begin(), s.end(), [](char c) { return c == ' '; }))
+#define string_is_blank_or_empty(s) (s.empty() || std::all_of(s.begin(), s.end(), [](char c) { return c == ' '; }))
 
 class CStringUtils {
 public:

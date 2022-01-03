@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 
 #include "StringUtils.h"
 #include "Log.h"
@@ -28,6 +29,9 @@
 #include "DStarDefines.h"
 #include "Defs.h"
 #include "Log.h"
+#include "APRSFrame.h"
+#include "APRSParser.h"
+#include "APRSFormater.h"
 
 CAPRSWriter::CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
 m_thread(NULL),
@@ -127,26 +131,24 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	unsigned int length = collector->getData(SLOW_DATA_TYPE_GPS, buffer, 400U);
 	std::string text((char*)buffer, length);
 
-	auto n = text.find(':');
-	if (n == std::string::npos) {
+	CAPRSFrame frame;
+	if(!CAPRSParser::parseFrame(text, frame, true)) {
 		collector->reset();
+		CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
 		return;
 	}
 
-	std::string header = text.substr(0, n);
-	std::string body   = text.substr(n + 1U);
-
 	// If we already have a q-construct, don't send it on
-	n = header.find('q');
-	if (n != std::string::npos)
+	if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
+		CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
 		return;
+	}
 
-	// Remove the trailing \r
-	n = body.find('\r');
-	if (n != std::string::npos)
-		body = body.substr(0, n);
-
-	std::string output = CStringUtils::string_format("%s,qAR,%s-%s:%s", header.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(), body.c_str());
+	frame.getPath().push_back("qAR");
+	frame.getPath().push_back(CStringUtils::string_format("%s-%s", entry->getCallsign().c_str(), entry->getBand().c_str()));
+	
+	std::string output ;
+	CAPRSFormater::frameToString(output, frame);
 
 	char ascii[500U];
 	::memset(ascii, 0x00, 500U);

@@ -20,9 +20,13 @@
 #include "Log.h"
 
 bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
+{   
+    return parseFrame(frameStr, frame, false);
+}
+bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame, bool doNotEnforceFrameType)
 {
     frame.clear();
-    bool ret = false;
+    bool ret = doNotEnforceFrameType;
 
     if(!frameStr.empty()) {
         auto pos = frameStr.find_first_of(':');
@@ -44,12 +48,14 @@ bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
 
                 frame.getBody().assign(body);
 
-                setFrameType(frame);
-                if(frame.getType() == APFT_UNKNOWN) {
-                    CLog::logInfo("Invalid or unsupported APRS frame : %s", frameStr);
-                }
-                else {
-                    ret = true;
+                if(!doNotEnforceFrameType) {
+                    setFrameType(frame);
+                    if(frame.getType() == APFT_UNKNOWN) {
+                        CLog::logInfo("Invalid or unsupported APRS frame : %s", frameStr);
+                    }
+                    else {
+                        ret = true;
+                    }
                 }
             }
         }
@@ -71,7 +77,18 @@ void CAPRSParser::setFrameType(CAPRSFrame& frame)
                                                 [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); }))
                     type = APFT_MESSAGE;
                 break;
-            
+            // case '!':
+            //     if(body.length() >= 2U && body[1] == '!') {
+            //         // This is ultimeter 200 weather station
+            //         type = APFT_UNKNOWN;
+            //         break;
+            //     } else {
+            //         type = APFT_POSITION;
+            //     }
+            // case '=':
+            // case '/':
+            // case '@':
+            //     break;
             default:
                 break;
         }

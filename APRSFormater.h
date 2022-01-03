@@ -16,33 +16,12 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#pragma once
+
 #include "APRSFrame.h"
 
-CAPRSFrame::CAPRSFrame() :
-m_source(),
-m_destination(),
-m_path(),
-m_body(),
-m_type(APFT_UNKNOWN)
+class CAPRSFormater
 {
-
-}
-
-CAPRSFrame::CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, const std::string& body, APRS_FRAME_TYPE type) :
-m_source(source),
-m_destination(destination),
-m_path(),
-m_body(body),
-m_type(type)
-{
-    m_path.assign(path.begin(), path.end());
-}
-
-void CAPRSFrame::clear()
-{
-    m_source.clear();
-    m_destination.clear();
-    m_path.clear();
-    m_body.clear();
-    m_type = APFT_UNKNOWN;
-}
+public:
+    static bool frameToString(std::string& output, CAPRSFrame& frame);
+};

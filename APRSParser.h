@@ -27,6 +27,7 @@ class CAPRSParser
 {
 public:
     static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame);
+    static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame, bool doNotEnforceFrameType);
 
 private:
     static void setFrameType(CAPRSFrame& frame);
