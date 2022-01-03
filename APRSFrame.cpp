@@ -41,5 +41,6 @@ void CAPRSFrame::clear()
     m_source.clear();
     m_destination.clear();
     m_path.clear();
+    m_body.clear();
     m_type = APFT_UNKNOWN;
 }

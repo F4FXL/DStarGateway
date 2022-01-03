@@ -90,3 +90,16 @@ TEST_F(APRSParser_parseAPRSFrame, CorrectMessageFrameWithoutDigipeater) {
     EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
     EXPECT_EQ(aprsFrame.getPath().size(), 0);
 }
+
+TEST_F(APRSParser_parseAPRSFrame, InvalideMessageFrame) {
+
+    CAPRSFrame aprsFrame;
+    bool retVal = CAPRSParser::parseFrame("N0CALL>APRS::F4ABC&@#$:Test Message", aprsFrame);
+
+    EXPECT_FALSE(retVal);
+    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
+    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
+    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
+    EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
+    EXPECT_EQ(aprsFrame.getPath().size(), 0U);
+}

@@ -67,7 +67,8 @@ void CAPRSParser::setFrameType(CAPRSFrame& frame)
         switch (body[0])
         {
             case ':':
-                if(body[10] == ':')
+                if(body[10] == ':' && std::all_of(body.begin() + 1, body.begin() + 10,
+                                                [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); }))
                     type = APFT_MESSAGE;
                 break;
             
