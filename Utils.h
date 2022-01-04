@@ -66,4 +66,25 @@ public:
 
 		return dest.u;
 	}
+
+	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program
+	static bool is_big_endian()
+	{
+		union {
+			uint32_t i;
+			char c[4];
+		} bint = {0x01020304};
+
+		return bint.c[0] == 1; 
+	}
+
+	// Ersatz for macro wxINT32_SWAP_ON_BE
+	template <typename T>
+	static T swap_endian_be(T u)
+	{
+		if(is_big_endian())
+			return swap_endian(u);
+
+		return u;
+	}
 };
