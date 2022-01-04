@@ -69,24 +69,6 @@ bool CSlowDataCollector::writeData(const unsigned char* data)
         break;
 	}
 
-    // unsigned char rxDataType = (m_buffer[0] & SLOW_DATA_TYPE_MASK);
-
-    // switch (rxDataType)
-    // {
-    //     case SLOW_DATA_TYPE_MASK:			CLog::logDebug("SLOW_DATA_TYPE_MASK			"); break;
-    //     case SLOW_DATA_TYPE_GPS:			CLog::logDebug("SLOW_DATA_TYPE_GPS			"); break;
-    //     case SLOW_DATA_TYPE_TEXT:			CLog::logDebug("SLOW_DATA_TYPE_TEXT			"); break;
-    //     case SLOW_DATA_TYPE_HEADER:		CLog::logDebug("SLOW_DATA_TYPE_HEADER		"); break;
-    //     case SLOW_DATA_TYPE_MESSAGE:		CLog::logDebug("SLOW_DATA_TYPE_MESSAGE		"); break;
-    //     case SLOW_DATA_TYPE_FAST_DATA1:	CLog::logDebug("SLOW_DATA_TYPE_FAST_DATA1	"); break;
-    //     case SLOW_DATA_TYPE_FAST_DATA2:	CLog::logDebug("SLOW_DATA_TYPE_FAST_DATA2	"); break;
-    //     case SLOW_DATA_TYPE_SQUELCH:		CLog::logDebug("SLOW_DATA_TYPE_SQUELCH		"); break;
-    //     case SLOW_DATA_LENGTH_MASK:		CLog::logDebug("SLOW_DATA_LENGTH_MASK		"); break;
-    //     default:
-    //         CLog::logDebug("!!!!!!!!!!!!!!! %X", rxDataType);
-    //     break;
-    // };
-
     if((m_buffer[0] & SLOW_DATA_TYPE_MASK) == m_slowDataType)
         return addData(m_buffer + 1U);
     
