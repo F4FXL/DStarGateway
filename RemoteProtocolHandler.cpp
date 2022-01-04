@@ -25,6 +25,7 @@
 #include "SHA256.h"
 #include "Utils.h"
 #include "StringUtils.h"
+#include "Log.h"
 
 const unsigned int BUFFER_LENGTH = 2000U;
 
@@ -226,7 +227,7 @@ bool CRemoteProtocolHandler::readLink(std::string& callsign, RECONNECT& reconnec
 
 	int32_t temp;
 	::memcpy(&temp, m_inBuffer + 3U + LONG_CALLSIGN_LENGTH, sizeof(int32_t));
-	reconnect = RECONNECT(CUtils::swap_endian(temp));
+	reconnect = RECONNECT(CUtils::swap_endian_be(temp));
 
 	reflector = std::string((char*)(m_inBuffer + 3U + LONG_CALLSIGN_LENGTH + sizeof(int32_t)),LONG_CALLSIGN_LENGTH);
 
@@ -245,7 +246,7 @@ bool CRemoteProtocolHandler::readUnlink(std::string& callsign, PROTOCOL& protoco
 
 	int32_t temp;
 	::memcpy(&temp, m_inBuffer + 3U + LONG_CALLSIGN_LENGTH, sizeof(int32_t));
-	protocol = PROTOCOL(CUtils::swap_endian(temp));
+	protocol = PROTOCOL(CUtils::swap_endian_be(temp));
 
 	reflector = std::string((char*)(m_inBuffer + 3U + LONG_CALLSIGN_LENGTH + sizeof(int32_t)),LONG_CALLSIGN_LENGTH);
 
@@ -315,7 +316,7 @@ bool CRemoteProtocolHandler::sendRepeater(const CRemoteRepeaterData& data)
 		p[i] = data.getCallsign()[i];
 	p += LONG_CALLSIGN_LENGTH;
 
-	int32_t reconnect = CUtils::swap_endian(data.getReconnect());
+	int32_t reconnect = CUtils::swap_endian_be(data.getReconnect());
 	::memcpy(p, &reconnect, sizeof(int32_t));
 	p += sizeof(int32_t);
 
@@ -332,19 +333,19 @@ bool CRemoteProtocolHandler::sendRepeater(const CRemoteRepeaterData& data)
 			p[i] = link->getCallsign()[i];
 		p += LONG_CALLSIGN_LENGTH;
 
-		int32_t protocol = CUtils::swap_endian(link->getProtocol());
+		int32_t protocol = CUtils::swap_endian_be(link->getProtocol());
 		::memcpy(p, &protocol, sizeof(int32_t));
 		p += sizeof(int32_t);
 
-		int32_t linked = CUtils::swap_endian(link->isLinked());
+		int32_t linked = CUtils::swap_endian_be(link->isLinked());
 		::memcpy(p, &linked, sizeof(int32_t));
 		p += sizeof(int32_t);
 
-		int32_t direction = CUtils::swap_endian(link->getDirection());
+		int32_t direction = CUtils::swap_endian_be(link->getDirection());
 		::memcpy(p, &direction, sizeof(int32_t));
 		p += sizeof(int32_t);
 
-		int32_t dongle = CUtils::swap_endian(link->isDongle());
+		int32_t dongle = CUtils::swap_endian_be(link->isDongle());
 		::memcpy(p, &dongle, sizeof(int32_t));
 		p += sizeof(int32_t);
 	}
@@ -440,7 +441,8 @@ bool CRemoteProtocolHandler::sendRandom(uint32_t random)
 {
 	::memcpy(m_outBuffer + 0U, "RND", 3U);
 
-	uint32_t temp = CUtils::swap_endian(random);
+	CLog::logTrace("Send Random %X", random);
+	uint32_t temp = CUtils::swap_endian_be(random);
 	::memcpy(m_outBuffer + 3U, &temp, sizeof(uint32_t));
 
 	// CUtils::dump("Outgoing", m_outBuffer, 3U + sizeof(uint32_t));
