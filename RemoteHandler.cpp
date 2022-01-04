@@ -62,6 +62,7 @@ void CRemoteHandler::process()
 			m_handler.sendRandom(m_random);
 			break;
 		case RPHT_HASH: {
+				CLog::logTrace("Read Hash %X", m_random);
 				bool valid = m_handler.readHash(m_password, m_random);
 				if (valid) {
 					CLog::logInfo("Remote control user has logged in");
