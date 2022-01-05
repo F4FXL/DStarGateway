@@ -206,7 +206,7 @@ void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
 	CAPRSFrame frame(sourCall,
 					 "APD5T3",
 					 { "TCPIP*", "qAC", sourCall + "S" },
-					 linkStatus.getStatus(),
+					 body,
 					 APFT_STATUS);
 
 	m_thread->write(frame);
