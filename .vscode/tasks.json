@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3"
+                "-j3", "USE_GPSD=1"
             ],
             "group": {
                 "kind": "build",
