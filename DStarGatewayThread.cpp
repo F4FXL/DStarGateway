@@ -638,7 +638,7 @@ void CDStarGatewayThread::setLog(bool enabled)
 	m_logEnabled = enabled;
 }
 
-void CDStarGatewayThread::setAPRSWriter(CAPRSWriter* writer)
+void CDStarGatewayThread::setAPRSWriter(CAPRSHandler* writer)
 {
 	m_aprsWriter = writer;
 }

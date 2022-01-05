@@ -59,7 +59,7 @@ bool                      CRepeaterHandler::m_dtmfEnabled = true;
 
 CHeaderLogger*            CRepeaterHandler::m_headerLogger = NULL;
 
-CAPRSWriter*              CRepeaterHandler::m_aprsWriter  = NULL;
+CAPRSHandler*              CRepeaterHandler::m_aprsWriter  = NULL;
 
 CCallsignList*            CRepeaterHandler::m_restrictList = NULL;
 
@@ -366,7 +366,7 @@ void CRepeaterHandler::setHeaderLogger(CHeaderLogger* logger)
 	m_headerLogger = logger;
 }
 
-void CRepeaterHandler::setAPRSWriter(CAPRSWriter* writer)
+void CRepeaterHandler::setAPRSWriter(CAPRSHandler* writer)
 {
 	m_aprsWriter = writer;
 }

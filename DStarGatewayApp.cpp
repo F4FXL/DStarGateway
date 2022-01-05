@@ -133,9 +133,9 @@ bool CDStarGatewayApp::createThread()
 	// Setup APRS
 	TAPRS aprsConfig;
 	config.getAPRS(aprsConfig);
-	CAPRSWriter * aprsWriter = NULL;
+	CAPRSHandler * aprsWriter = NULL;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
-		aprsWriter = new CAPRSWriter(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
+		aprsWriter = new CAPRSHandler(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
 		if(aprsWriter->open()) {
 #ifdef USE_GPSD
 			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gpsdConfig.m_address, gpsdConfig.m_port)
