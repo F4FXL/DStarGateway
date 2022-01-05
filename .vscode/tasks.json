@@ -8,7 +8,8 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3", "USE_GPSD=1"
+                "-j3",
+                "USE_GPSD=1"
             ],
             "group": {
                 "kind": "build",
@@ -22,7 +23,8 @@
             "command": "make",
             "args": [
                 "-j3",
-                "tests"
+                "tests",
+                "USE_GPSD=1"
             ],
             "group": "build",
             "problemMatcher": []

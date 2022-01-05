@@ -133,7 +133,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	std::string text((char*)buffer, length);
 
 	CAPRSFrame frame;
-	if(!CAPRSParser::parseFrame(text, frame, true)) {
+	if(!CAPRSParser::parseFrame(text, frame)) {
 		collector->reset();
 		CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
 		return;

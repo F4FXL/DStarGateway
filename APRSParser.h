@@ -27,8 +27,9 @@ class CAPRSParser
 {
 public:
     static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame);
-    static bool parseFrame(const std::string& frameStr, CAPRSFrame& frame, bool doNotEnforceFrameType);
 
 private:
-    static void setFrameType(CAPRSFrame& frame);
+    static bool parseInt(CAPRSFrame& frame);
+    static bool valid_sym_table_compressed(unsigned char c);
+    static bool valid_sym_table_uncompressed(unsigned char c);
 };
