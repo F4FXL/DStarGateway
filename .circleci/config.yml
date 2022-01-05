@@ -18,7 +18,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update
-            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
+            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
           name: "Build App"
           command: "make -j 3 dstargateway USE_GPSD=1"
