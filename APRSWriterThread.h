@@ -59,7 +59,7 @@ private:
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
 	unsigned int           m_tries;
-	std::vector<CReadAPRSFrameCallback *>  m_APRSReadCallback;
+	std::vector<CReadAPRSFrameCallback *>  m_APRSReadCallbacks;
 	std::string               m_filter;
 	std::string               m_clientName;
 

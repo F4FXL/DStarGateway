@@ -45,7 +45,7 @@ m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
 m_tries(0U),
-m_APRSReadCallback(),
+m_APRSReadCallbacks(),
 m_filter(""),
 m_clientName(FULL_PRODUCT_NAME)
 {
@@ -72,7 +72,7 @@ m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
 m_tries(0U),
-m_APRSReadCallback(),
+m_APRSReadCallbacks(),
 m_filter(filter),
 m_clientName(clientName)
 {
@@ -91,9 +91,9 @@ m_clientName(clientName)
 CAPRSWriterThread::~CAPRSWriterThread()
 {
 	std::vector<CReadAPRSFrameCallback *> callBacksCopy;
-	callBacksCopy.assign(m_APRSReadCallback.begin(), m_APRSReadCallback.end());
+	callBacksCopy.assign(m_APRSReadCallbacks.begin(), m_APRSReadCallbacks.end());
 
-	m_APRSReadCallback.clear();
+	m_APRSReadCallbacks.clear();
 
 	for(auto cb : callBacksCopy) {
 		delete cb;
@@ -171,11 +171,11 @@ void* CAPRSWriterThread::Entry()
 						CLog::logDebug("Received APRS Frame : %s", line.c_str());
 
 					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
-					    && m_APRSReadCallback.size() > 0U)//do we have someone wanting an APRS Frame?
+					    && m_APRSReadCallbacks.size() > 0U)//do we have someone wanting an APRS Frame?
 					{	
 						CAPRSFrame readFrame;
 						if(CAPRSParser::parseFrame(line, readFrame)) {
-							for(auto cb : m_APRSReadCallback) {
+							for(auto cb : m_APRSReadCallbacks) {
 								CAPRSFrame f(readFrame);
 								cb->readAprsFrame(f);
 							}
@@ -210,7 +210,7 @@ void* CAPRSWriterThread::Entry()
 void CAPRSWriterThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
 {
 	assert(cb != nullptr);
-	m_APRSReadCallback.push_back(cb);
+	m_APRSReadCallbacks.push_back(cb);
 }
 
 void CAPRSWriterThread::write(CAPRSFrame& frame)
