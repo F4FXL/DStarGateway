@@ -21,10 +21,10 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build App"
-          command: "make -j 3 dstargateway"
+          command: "make -j 3 dstargateway USE_GPSD=1"
       - run:
           name: "Build Tests"
-          command: "make -j 3 tests"
+          command: "make -j 3 tests USE_GPSD=1"
       - run:
           name: "Run Tests"
           command: "make run-tests"
