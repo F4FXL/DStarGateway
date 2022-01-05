@@ -29,7 +29,7 @@ CAPRSIdFrameProvider(20U) // Initial timeout of 20 seconds
 
 }
 
-bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<std::string>& frames)
+bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
 {
     if (entry == nullptr)
         return false;
@@ -107,24 +107,33 @@ bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, c
     boost::replace_all(lat, ",", ".");
     boost::replace_all(lon, ",", ".");
 
-    std::string output = CStringUtils::string_format("%s-S>APD5T1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s\r\n",
-                                                        gateway.c_str(), gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+    std::string body = CStringUtils::string_format(";%-7s%-2s*%02d%02d%02dz%s%cD%s%caRNG%04.0lf/A=%06.0lf %s %s\r\n",
+                                                        entry->getCallsign().c_str(), entry->getBand().c_str(),
                                                         tm->tm_mday, tm->tm_hour, tm->tm_min,
                                                         lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
                                                         lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
                                                         entry->getRange() * 0.6214, entry->getAGL() * 3.28, band.c_str(), desc.c_str());
 
+    CAPRSFrame * frame = new CAPRSFrame(gateway + "-S",
+                                        "APD5T1",
+                                        { "TCPIP*", "qAC" , gateway + "-GS" },
+                                        body, APFT_OBJECT);
 
-    frames.push_back(output);
+    frames.push_back(frame);
 
     if (entry->getBand().length() == 1U) {
-        output = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s\r\n",
-            entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+        body = CStringUtils::string_format("!%s%cD%s%c&RNG%04.0lf/A=%06.0lf %s %s\r\n",
             lat.c_str(), (entry->getLatitude() < 0.0F)  ? 'S' : 'N',
             lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
             entry->getRange() * 0.6214, entry->getAGL() * 3.28, band.c_str(), desc.c_str());
 
-        frames.push_back(output);
+        frame = new CAPRSFrame(entry->getCallsign() + "-" + entry->getBand(),
+                                "APD5T2",
+                                { "TCPIP*", "qAC", entry->getCallsign() + "-" + entry->getBand() + "S"},
+                                body, APFT_POSITION);
+
+
+        frames.push_back(frame);
     }
 
     setTimeout(20U * 60U);//20 minutes, plenty enough for fixed

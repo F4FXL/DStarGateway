@@ -20,9 +20,11 @@
 
 #include <string>
 
+#include "APRSFrame.h"
+
 class CReadAPRSFrameCallback
 {
 public:
 	virtual ~CReadAPRSFrameCallback(){ }
-	virtual bool readAprsFrame(const std::string& aprsFrame) = 0;
+	virtual bool readAprsFrame(CAPRSFrame& aprsFrame) = 0;
 };

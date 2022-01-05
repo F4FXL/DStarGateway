@@ -27,6 +27,8 @@
 #include "Defs.h"
 #include "Log.h"
 #include "Version.h"
+#include "APRSFormater.h"
+#include "APRSParser.h"
 
 // #define	DUMP_TX
 
@@ -139,22 +141,17 @@ void* CAPRSWriterThread::Entry()
 				m_tries = 0U;
 
 				if(!m_queue.empty()){
-					char* p = m_queue.getData();
+					auto frameStr = m_queue.getData();
 
-					std::string text(p);
-					CLog::logInfo("APRS ==> %s", text.c_str());
+					CLog::logInfo("APRS ==> %s", frameStr.c_str());
 
-					::strcat(p, "\r\n");
-
-					bool ret = m_socket.write((unsigned char*)p, ::strlen(p));
+					bool ret = m_socket.writeLine(frameStr);
 					if (!ret) {
 						m_connected = false;
 						m_socket.close();
 						CLog::logInfo("Connection to the APRS thread has failed");
 						startReconnectionTimer();
 					}
-
-					delete[] p;
 				}
 				{
 					std::string line;
@@ -176,8 +173,12 @@ void* CAPRSWriterThread::Entry()
 					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
 					    && m_APRSReadCallback.size() > 0U)//do we have someone wanting an APRS Frame?
 					{	
-						for(auto cb : m_APRSReadCallback) {
-							cb->readAprsFrame(line);
+						CAPRSFrame readFrame;
+						if(CAPRSParser::parseFrame(line, readFrame)) {
+							for(auto cb : m_APRSReadCallback) {
+								CAPRSFrame f(readFrame);
+								cb->readAprsFrame(f);
+							}
 						}
 					}
 				}
@@ -189,8 +190,8 @@ void* CAPRSWriterThread::Entry()
 			m_socket.close();
 
 		while (!m_queue.empty()) {
-			char* p = m_queue.getData();
-			delete[] p;
+			auto s = m_queue.getData();
+			s.clear();
 		}
 	}
 	catch (std::exception& e) {
@@ -212,19 +213,19 @@ void CAPRSWriterThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
 	m_APRSReadCallback.push_back(cb);
 }
 
-void CAPRSWriterThread::write(const char* data)
+void CAPRSWriterThread::write(CAPRSFrame& frame)
 {
-	assert(data != NULL);
-
 	if (!m_connected)
 		return;
 
-	unsigned int len = ::strlen(data);
+	std::string frameString;
+	if(CAPRSFormater::frameToString(frameString, frame)) {
 
-	char* p = new char[len + 5U];
-	::strcpy(p, data);
+		boost::trim_if(frameString, [] (char c) { return c == '\r' || c == '\n'; }); // trim all CRLF, we will add our own, just to make sure we get rid of any garbage that might come from slow data
+		frameString.append("\r\n");
 
-	m_queue.addData(p);
+		m_queue.addData(frameString);
+	}
 }
 
 bool CAPRSWriterThread::isConnected() const

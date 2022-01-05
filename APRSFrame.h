@@ -27,6 +27,8 @@ enum APRS_FRAME_TYPE {
     APFT_MESSAGE,
     APFT_POSITION,
     APFT_NMEA,
+    APFT_STATUS,
+    APFT_OBJECT
 };
 
 class CAPRSFrame {

@@ -32,6 +32,7 @@
 #include "APRSFrame.h"
 #include "APRSParser.h"
 #include "APRSFormater.h"
+#include "APRSUtils.h"
 
 CAPRSWriter::CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
 m_thread(NULL),
@@ -150,12 +151,7 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 	std::string output ;
 	CAPRSFormater::frameToString(output, frame);
 
-	char ascii[500U];
-	::memset(ascii, 0x00, 500U);
-	for (unsigned int i = 0U; i < output.length(); i++)
-		ascii[i] = output[i];
-
-	m_thread->write(ascii);
+	m_thread->write(frame);
 
 	collector->reset();
 }
@@ -198,17 +194,22 @@ void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
 	if(!m_thread->isConnected())
 		return;
 
+
 	auto linkStatus = entry->getStatus();
 	std::string body = boost::trim_copy(linkStatus.getStatus());
 
 	if(body[0] != '>')
-		body = '>' + body;
+		body.insert(0, ">");
 
-	std::string output = CStringUtils::string_format("%s-%s>APD5T3,TCPIP*,qAC,%s-%sS:%s\r\n",
-														entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-														body.c_str());
+	std::string sourCall = entry->getCallsign() + '-' + entry->getBand();
+	
+	CAPRSFrame frame(sourCall,
+					 "APD5T3",
+					 { "TCPIP*", "qAC", sourCall + "S" },
+					 linkStatus.getStatus(),
+					 APFT_STATUS);
 
-	m_thread->write(output.c_str());
+	m_thread->write(frame);
 
 }
 
@@ -217,10 +218,11 @@ void CAPRSWriter::sendIdFrames()
 	if(m_thread->isConnected())
 	{
 		for(auto entry : m_array) {
-			std::vector<std::string> frames;
+			std::vector<CAPRSFrame *> frames;
 			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
 				for(auto frame : frames) {
-					m_thread->write(frame.c_str());
+					m_thread->write(*frame);
+					delete frame;
 				}
 			}
 		}

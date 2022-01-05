@@ -26,6 +26,7 @@
 #include "Timer.h"
 #include "Thread.h"
 #include "ReadAPRSFrameCallback.h"
+#include "APRSFrame.h"
 
 
 class CAPRSWriterThread : public CThread {
@@ -38,7 +39,7 @@ public:
 
 	bool isConnected() const;
 
-	void write(const char* data);
+	void write(CAPRSFrame& data);
 
 	void* Entry();
 
@@ -53,7 +54,7 @@ private:
 	std::string               m_password;
 	std::string	           m_ssid;
 	CTCPReaderWriterClient m_socket;
-	CRingBuffer<char*>     m_queue;
+	CRingBuffer<std::string>     m_queue;
 	bool                   m_exit;
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
