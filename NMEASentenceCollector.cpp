@@ -86,8 +86,7 @@ unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned i
     CAPRSUtils::dstarCallsignToAPRS(fromCall);
     std::string aprsFrame(fromCall);
     aprsFrame.append("-5>GPS30,DSTAR*:")
-             .append(nmea)
-             .append("\r\n");
+             .append(nmea);
 
     auto aprsFrameLen = aprsFrame.length();
     if(length < aprsFrameLen) {
