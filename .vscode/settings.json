@@ -7,7 +7,16 @@
         }
     ],
     "files.associations": {
-        "new": "cpp"
+        "new": "cpp",
+        "type_traits": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "optional": "cpp",
+        "stop_token": "cpp"
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [
