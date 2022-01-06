@@ -38,6 +38,11 @@ m_type(type)
     m_path.assign(path.begin(), path.end());
 }
 
+CAPRSFrame::~CAPRSFrame()
+{
+    m_path.clear();
+}
+
 void CAPRSFrame::clear()
 {
     m_source.clear();

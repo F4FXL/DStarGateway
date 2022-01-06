@@ -36,6 +36,7 @@ class CAPRSFrame {
 public:
     CAPRSFrame();
     CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, const std::string& body, APRS_FRAME_TYPE type);
+    ~CAPRSFrame();
 
     void clear();
     std::string& getSource() { return m_source; }
