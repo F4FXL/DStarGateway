@@ -21,7 +21,7 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
-#include "APRSWriterThread.h"
+#include "APRSHandlerThread.h"
 #include "DStarDefines.h"
 #include "Utils.h"
 #include "Defs.h"
@@ -34,7 +34,7 @@
 
 const unsigned int APRS_TIMEOUT = 10U;
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
+CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
 CThread(),
 m_username(callsign),
 m_password(password),
@@ -61,7 +61,7 @@ m_clientName(FULL_PRODUCT_NAME)
 	m_ssid = m_ssid.substr(LONG_CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
 CThread(),
 m_username(callsign),
 m_password(password),
@@ -88,7 +88,7 @@ m_clientName(clientName)
 	m_ssid = m_ssid.substr(LONG_CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::~CAPRSWriterThread()
+CAPRSHandlerThread::~CAPRSHandlerThread()
 {
 	std::vector<CReadAPRSFrameCallback *> callBacksCopy;
 	callBacksCopy.assign(m_APRSReadCallbacks.begin(), m_APRSReadCallbacks.end());
@@ -105,7 +105,7 @@ CAPRSWriterThread::~CAPRSWriterThread()
 	m_password.clear();
 }
 
-bool CAPRSWriterThread::start()
+bool CAPRSHandlerThread::start()
 {
 	Create();
 	Run();
@@ -113,7 +113,7 @@ bool CAPRSWriterThread::start()
 	return true;
 }
 
-void* CAPRSWriterThread::Entry()
+void* CAPRSHandlerThread::Entry()
 {
 	CLog::logInfo("Starting the APRS Writer thread");
 
@@ -207,13 +207,13 @@ void* CAPRSWriterThread::Entry()
 	return NULL;
 }
 
-void CAPRSWriterThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
+void CAPRSHandlerThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
 {
 	assert(cb != nullptr);
 	m_APRSReadCallbacks.push_back(cb);
 }
 
-void CAPRSWriterThread::write(CAPRSFrame& frame)
+void CAPRSHandlerThread::write(CAPRSFrame& frame)
 {
 	if (!m_connected)
 		return;
@@ -228,24 +228,24 @@ void CAPRSWriterThread::write(CAPRSFrame& frame)
 	}
 }
 
-bool CAPRSWriterThread::isConnected() const
+bool CAPRSHandlerThread::isConnected() const
 {
 	return m_connected;
 }
 
-void CAPRSWriterThread::stop()
+void CAPRSHandlerThread::stop()
 {
 	m_exit = true;
 
 	Wait();
 }
 
-void CAPRSWriterThread::clock(unsigned int ms)
+void CAPRSHandlerThread::clock(unsigned int ms)
 {
 	m_reconnectTimer.clock(ms);
 }
 
-bool CAPRSWriterThread::connect()
+bool CAPRSHandlerThread::connect()
 {
 	bool ret = m_socket.open();
 	if (!ret)
@@ -295,7 +295,7 @@ bool CAPRSWriterThread::connect()
 	return true;
 }
 
-void CAPRSWriterThread::startReconnectionTimer()
+void CAPRSHandlerThread::startReconnectionTimer()
 {
 	// Clamp at a ten minutes reconnect time
 	m_tries++;

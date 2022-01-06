@@ -26,7 +26,7 @@
 
 
 #include "APRSEntry.h"
-#include "APRSWriterThread.h"
+#include "APRSHandlerThread.h"
 #include "UDPReaderWriter.h"
 #include "APRSCollector.h"
 #include "DStarDefines.h"
@@ -59,7 +59,7 @@ public:
 	void close();
 
 private:
-	CAPRSWriterThread*		m_thread;
+	CAPRSHandlerThread*		m_thread;
 	std::string				m_gateway;
 	in_addr					m_address;
 	unsigned int			m_port;
