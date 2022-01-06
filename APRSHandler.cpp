@@ -47,7 +47,7 @@ m_idFrameProvider(nullptr)
 	assert(!gateway.empty());
 	assert(!password.empty());
 
-	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port);
+	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port, "m/20");
 
 	m_gateway = gateway;
 	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
@@ -243,4 +243,9 @@ void CAPRSHandler::close()
 	}
 
 	m_thread->stop();
+}
+
+void CAPRSHandler::addReadAPRSCallback(IReadAPRSFrameCallback* cb)
+{
+	m_thread->addReadAPRSCallback(cb);
 }

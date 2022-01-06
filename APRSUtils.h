@@ -24,5 +24,5 @@ class CAPRSUtils
 {
 public:
     static void dstarCallsignToAPRS(std::string& dstarCallsign);
-    static unsigned int calcIcomCRC(const std::string& gpsa);
+    static unsigned int calcGPSAIcomCRC(const std::string& gpsa);
 };

@@ -32,7 +32,7 @@
 class CAPRSHandlerThread : public CThread {
 public:
 	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
-	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName);
+	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter);
 	virtual ~CAPRSHandlerThread();
 
 	bool start();
@@ -47,7 +47,7 @@ public:
 
 	void clock(unsigned int ms);
 
-	void addReadAPRSCallback(CReadAPRSFrameCallback* cb);
+	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 
 private:
 	std::string               m_username;
@@ -59,7 +59,7 @@ private:
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
 	unsigned int           m_tries;
-	std::vector<CReadAPRSFrameCallback *>  m_APRSReadCallbacks;
+	std::vector<IReadAPRSFrameCallback *>  m_APRSReadCallbacks;
 	std::string               m_filter;
 	std::string               m_clientName;
 

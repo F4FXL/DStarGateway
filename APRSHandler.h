@@ -58,6 +58,8 @@ public:
 
 	void close();
 
+	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
+
 private:
 	CAPRSHandlerThread*		m_thread;
 	std::string				m_gateway;

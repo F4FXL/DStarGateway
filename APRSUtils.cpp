@@ -33,7 +33,7 @@ void CAPRSUtils::dstarCallsignToAPRS(std::string& dstarCallsign)
 	}
 }
 
-unsigned int CAPRSUtils::calcIcomCRC(const std::string& gpsa)
+unsigned int CAPRSUtils::calcGPSAIcomCRC(const std::string& gpsa)
 {
 	unsigned int icomcrc = 0xFFFFU;
 

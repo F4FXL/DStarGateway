@@ -46,7 +46,7 @@ m_connected(false),
 m_reconnectTimer(1000U),
 m_tries(0U),
 m_APRSReadCallbacks(),
-m_filter(""),
+m_filter(),
 m_clientName(FULL_PRODUCT_NAME)
 {
 	assert(!callsign.empty());
@@ -61,7 +61,7 @@ m_clientName(FULL_PRODUCT_NAME)
 	m_ssid = m_ssid.substr(LONG_CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter) :
 CThread(),
 m_username(callsign),
 m_password(password),
@@ -74,7 +74,7 @@ m_reconnectTimer(1000U),
 m_tries(0U),
 m_APRSReadCallbacks(),
 m_filter(filter),
-m_clientName(clientName)
+m_clientName(FULL_PRODUCT_NAME)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -90,14 +90,10 @@ m_clientName(clientName)
 
 CAPRSHandlerThread::~CAPRSHandlerThread()
 {
-	std::vector<CReadAPRSFrameCallback *> callBacksCopy;
+	std::vector<IReadAPRSFrameCallback *> callBacksCopy;
 	callBacksCopy.assign(m_APRSReadCallbacks.begin(), m_APRSReadCallbacks.end());
 
 	m_APRSReadCallbacks.clear();
-
-	for(auto cb : callBacksCopy) {
-		delete cb;
-	}
 
 	callBacksCopy.clear();
 
@@ -177,7 +173,7 @@ void* CAPRSHandlerThread::Entry()
 						if(CAPRSParser::parseFrame(line, readFrame)) {
 							for(auto cb : m_APRSReadCallbacks) {
 								CAPRSFrame f(readFrame);
-								cb->readAprsFrame(f);
+								cb->readAPRSFrame(f);
 							}
 						}
 					}
@@ -207,7 +203,7 @@ void* CAPRSHandlerThread::Entry()
 	return NULL;
 }
 
-void CAPRSHandlerThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
+void CAPRSHandlerThread::addReadAPRSCallback(IReadAPRSFrameCallback * cb)
 {
 	assert(cb != nullptr);
 	m_APRSReadCallbacks.push_back(cb);

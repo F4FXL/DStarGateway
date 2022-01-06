@@ -19,12 +19,13 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 #include "APRSFrame.h"
 
-class CReadAPRSFrameCallback
+class IReadAPRSFrameCallback
 {
 public:
-	virtual ~CReadAPRSFrameCallback(){ }
-	virtual bool readAprsFrame(CAPRSFrame& aprsFrame) = 0;
+	virtual void readAPRSFrame(CAPRSFrame& aprsFrame) = 0;
 };
+

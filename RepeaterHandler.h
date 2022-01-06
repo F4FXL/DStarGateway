@@ -58,11 +58,13 @@
 #include "Timer.h"
 #include "DTMF.h"
 #include "Defs.h"
+#include "ReadAPRSFrameCallback.h"
+#include "APRSUnit.h"
 
 #include <netinet/in.h>
 
 
-class CRepeaterHandler : public IRepeaterCallback, public IReflectorCallback, public ICCSCallback {
+class CRepeaterHandler : public IRepeaterCallback, public IReflectorCallback, public ICCSCallback, public IReadAPRSFrameCallback {
 public:
 	static void initialise(unsigned int maxRepeaters);
 
@@ -141,6 +143,8 @@ public:
 	virtual void ccsLinkMade(const std::string& callsign, DIRECTION direction);
 	virtual void ccsLinkFailed(const std::string& dtmf, DIRECTION direction);
 	virtual void ccsLinkEnded(const std::string& callsign, DIRECTION direction);
+
+	virtual void readAPRSFrame(CAPRSFrame& frame);
 
 protected:
 #ifdef USE_DRATS
@@ -274,6 +278,9 @@ private:
 
 	// Version information
 	CVersionUnit*             m_version;
+
+	// APRS to DPRS
+	CAPRSUnit*				  m_aprsUnit;
 
 #ifdef USE_DRATS
 	// D-RATS handler

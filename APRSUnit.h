@@ -18,16 +18,34 @@
 
 #pragma once
 
-#include "ReadAPRSFrameCallback.h"
+#include <string>
+#include <boost/circular_buffer.hpp>
 
-class CAPRSUnit : public CReadAPRSFrameCallback
+#include "APRSFrame.h"
+#include "RepeaterCallback.h"
+#include "Timer.h"
+
+enum APRSUNIT_STATUS {
+    APS_IDLE,
+    APS_WAIT,
+    APS_TRANSMIT
+};
+
+class CAPRSUnit
 {
 public:
-    CAPRSUnit();
-    bool readAprsFrame(const std::string& aprsFrame);
+    CAPRSUnit(IRepeaterCallback * repeaterHandler);
+    void writeFrame(CAPRSFrame& aprsFrame);
+    void clock(unsigned ms);
 
 private:
-
+    // CRingBuffer<CAPRSFrame *> m_frameBuffer;
+    boost::circular_buffer<CAPRSFrame *> m_frameBuffer;
+    APRSUNIT_STATUS m_status;
+    IRepeaterCallback * m_repeaterHandler;
+    unsigned int m_id;
+    CHeaderData * m_headerData;
+    CTimer m_timer;
 };
 
 
