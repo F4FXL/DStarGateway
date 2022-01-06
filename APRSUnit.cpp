@@ -17,16 +17,16 @@
  */
 
 
-#include "APRSReader.h"
+#include "APRSUnit.h"
 #include "APRSFrame.h"
 #include "APRSParser.h"
 
-CAPRSReader::CAPRSReader()
+CAPRSUnit::CAPRSUnit()
 {
 
 }
 
-bool CAPRSReader::readAprsFrame(const std::string& aprsFrame)
+bool CAPRSUnit::readAprsFrame(const std::string& aprsFrame)
 {
     auto bla = aprsFrame;
     return false;

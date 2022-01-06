@@ -20,10 +20,10 @@
 
 #include "ReadAPRSFrameCallback.h"
 
-class CAPRSReader : public CReadAPRSFrameCallback
+class CAPRSUnit : public CReadAPRSFrameCallback
 {
 public:
-    CAPRSReader();
+    CAPRSUnit();
     bool readAprsFrame(const std::string& aprsFrame);
 
 private:
