@@ -57,6 +57,10 @@ bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
     bool ret = splits.size() >= 4
                 && !splits[1].empty()
                 && !splits[2].empty();
+
+    CUtils::dump("RS-MS1A:", (unsigned char *)msg.c_str(), msg.length() + 1U);
+    CLog::logDebug("RS-MS1A: %s", msg.c_str());
+
     return ret;
 
     //TODO 2022-01-01 figure out what the heck it is about thic strange CRCs

@@ -45,7 +45,7 @@ bool CGPSACollector::isValidGPSA(const std::string& gpsa)
     if(gpsa.length() < 10U || !boost::starts_with(gpsa, "$$CRC"))
         return false;
 
-    auto csum = CAPRSUtils::calcIcomCRC(gpsa);
+    auto csum = CAPRSUtils::calcGPSAIcomCRC(gpsa);
     auto csumStr = CStringUtils::string_format("%04X", csum);
     auto expectedCsum = gpsa.substr(5U, APRS_CSUM_LENGTH);
     bool res = ::strcasecmp(csumStr.c_str(), expectedCsum.c_str()) == 0;
