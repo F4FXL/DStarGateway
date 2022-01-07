@@ -117,6 +117,7 @@ the testing framwrok used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
+- [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.2. Version 0.4
