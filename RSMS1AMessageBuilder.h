@@ -34,12 +34,12 @@ public:
     static RSMS1A_PARSE_STATUS parseMessage(std::string& sender, std::string& recipient, std::string& body, const std::string& message);
 
 private:
-    static void calcMsgIcomCRC(const std::string& msg, char& c1, char& c2);
+    static void calcMsgIcomCRC(const std::string& msg, signed char& c1, signed char& c2);
     static void escapeBody(std::string& output, const std::string& body);
     static void unescapeBody(std::string& output, const std::string& body);
     static void escapeBytes(std::vector<char> output, const std::vector<char> input);
-    static char calculateBodyCRC(const std::string& body);
-    static char doWhatever(char b2);
+    static signed char calculateBodyCRC(const std::string& body);
+    static signed char doWhatever(signed char b2);
 
-    static std::vector<char> m_charsToEscape;
+    static std::vector<signed char> m_charsToEscape;
 };

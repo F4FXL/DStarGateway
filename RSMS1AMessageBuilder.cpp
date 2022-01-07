@@ -21,7 +21,7 @@
 #include "RSMS1AMessageBuilder.h"
 #include "StringUtils.h"
 
-std::vector<char> CRSMS1AMessageBuilder::m_charsToEscape = {-17, 0, 17, 19, -2, -25, 26, -3, -1, 36, 13, 44};
+std::vector<signed char> CRSMS1AMessageBuilder::m_charsToEscape = {-17, 0, 17, 19, -2, -25, 26, -3, -1, 36, 13, 44};
 
 void CRSMS1AMessageBuilder::buildMessage(std::string& message, const std::string& sender, const std::string& recipient, const std::string body)
 {
@@ -30,28 +30,28 @@ void CRSMS1AMessageBuilder::buildMessage(std::string& message, const std::string
     escapeBody(bodyTmp, body + (char)bodyCrc);
     
     std::string header = CStringUtils::string_format("%s,%s,0011", sender.c_str(), recipient.c_str());
-    char c1, c2;
+    signed char c1, c2;
     calcMsgIcomCRC(header, c1, c2);
     header.push_back(c1);
     header.push_back(c2);
     message = "$$Msg," + header + bodyTmp + '\r';
 }   
 
-char CRSMS1AMessageBuilder::calculateBodyCRC(const std::string& body)
+signed char CRSMS1AMessageBuilder::calculateBodyCRC(const std::string& body)
 {
     if(body.length() == 1)
         return body[0];
 
-    unsigned int num = 0;
-    for(auto c : body) {
+    signed int num = 0;
+    for(signed char c : body) {
         num += c;
     }
 
-    auto res = (num & 255);
+    signed int res = (num & 255);
     if(res >= 128)
         res -= 128;
     
-    return (char)res;
+    return (signed char)res;
 }
 
 void CRSMS1AMessageBuilder::escapeBody(std::string& output, const std::string& body)
@@ -65,18 +65,18 @@ void CRSMS1AMessageBuilder::escapeBody(std::string& output, const std::string& b
     }
 }
 
-void CRSMS1AMessageBuilder::calcMsgIcomCRC(const std::string& msg, char& c1, char& c2)
+void CRSMS1AMessageBuilder::calcMsgIcomCRC(const std::string& msg, signed char& c1, signed char& c2)
 {
 	int num = 0;
 	for(unsigned int i = 0U; i < msg.length(); i++) {
 		num += msg[i];
 	}
 
-	c1 = doWhatever((char)((num >> 4) & 15));
-	c2 = doWhatever((char)(num & 15));
+	c1 = doWhatever((signed char)((num >> 4) & 15));
+	c2 = doWhatever((signed char)(num & 15));
 }
 
-char CRSMS1AMessageBuilder::doWhatever(char b2) {
+signed char CRSMS1AMessageBuilder::doWhatever(signed char b2) {
     int i;
     int i2 = b2 & 255;
     if (i2 >= 0 && i2 <= 9) {
@@ -86,7 +86,7 @@ char CRSMS1AMessageBuilder::doWhatever(char b2) {
     } else {
         i = b2 + 55;
     }
-    return (char) i;
+    return (signed char) i;
 }
 
 RSMS1A_PARSE_STATUS CRSMS1AMessageBuilder::parseMessage(std::string& sender, std::string& recipient, std::string& body, const std::string& message)
