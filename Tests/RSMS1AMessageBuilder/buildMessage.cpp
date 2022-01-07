@@ -32,7 +32,7 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "ABC");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118ABCF\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118ABCF\r");
     }
 
     TEST_F(RSMS1AMessageBuilder_buildMessage, A)
@@ -40,7 +40,7 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "A");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\r");
     }
 
     TEST_F(RSMS1AMessageBuilder_buildMessage, AA)
@@ -48,7 +48,7 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "AA");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\02\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\02\r");
     }
 
     TEST_F(RSMS1AMessageBuilder_buildMessage, SalutCommentVasTu)
@@ -56,7 +56,7 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "Salut, comment vas tu?");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?z\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?z\r");
     }
 
     TEST_F(RSMS1AMessageBuilder_buildMessage, escapeComma)
@@ -64,7 +64,7 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", ",");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118o,o,\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118o,o,\r");
     }
 
     TEST_F(RSMS1AMessageBuilder_buildMessage, INeedMoreDollars)
@@ -72,6 +72,15 @@ namespace RSMS1AMessageBuilder
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "I need more $$$$");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118I need more o$o$o$o$\x08\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118I need more o$o$o$o$\x08\r");
+    }
+
+    //"$$Msg,KC3FRA,F4FXL 7,00116Fhello\024\r"
+    TEST_F(RSMS1AMessageBuilder_buildMessage, hello)
+    {
+        std::string message;
+        CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL 7", "hello");
+
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL 7,00116Fhello\024\r");
     }
 };

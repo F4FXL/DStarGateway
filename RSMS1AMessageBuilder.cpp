@@ -16,6 +16,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <boost/algorithm/string.hpp>
+
 #include "RSMS1AMessageBuilder.h"
 #include "StringUtils.h"
 
@@ -25,14 +27,14 @@ void CRSMS1AMessageBuilder::buildMessage(std::string& message, const std::string
 {
     auto bodyCrc = calculateBodyCRC(body);
     std::string bodyTmp;
-    escapeBody(bodyTmp, body + bodyCrc);
+    escapeBody(bodyTmp, body + (char)bodyCrc);
     
     std::string header = CStringUtils::string_format("%s,%s,0011", sender.c_str(), recipient.c_str());
     char c1, c2;
     calcMsgIcomCRC(header, c1, c2);
     header.push_back(c1);
     header.push_back(c2);
-    message = "$$Msg," + header + bodyTmp + '\n';
+    message = "$$Msg," + header + bodyTmp + '\r';
 }   
 
 char CRSMS1AMessageBuilder::calculateBodyCRC(const std::string& body)
@@ -40,12 +42,16 @@ char CRSMS1AMessageBuilder::calculateBodyCRC(const std::string& body)
     if(body.length() == 1)
         return body[0];
 
-    int num = 0;
+    unsigned int num = 0;
     for(auto c : body) {
         num += c;
     }
 
-    return (char)((num & 255) - 128);
+    auto res = (num & 255);
+    if(res >= 128)
+        res -= 128;
+    
+    return (char)res;
 }
 
 void CRSMS1AMessageBuilder::escapeBody(std::string& output, const std::string& body)
@@ -81,4 +87,71 @@ char CRSMS1AMessageBuilder::doWhatever(char b2) {
         i = b2 + 55;
     }
     return (char) i;
+}
+
+RSMS1A_PARSE_STATUS CRSMS1AMessageBuilder::parseMessage(std::string& sender, std::string& recipient, std::string& body, const std::string& message)
+{
+    sender.clear();
+    recipient.clear();
+    body.clear();
+
+    if(!boost::starts_with(message, "$$Msg,"))
+        return RSMS_FAIL;
+
+    auto firstCommaPos = message.find_first_of(',');
+    if(firstCommaPos == std::string::npos || (firstCommaPos + 1) >= message.length())
+        return RSMS_FAIL;
+    
+    auto secondCommaPos = message.find_first_of(',', firstCommaPos + 1);
+    if(secondCommaPos == std::string::npos || (secondCommaPos + 1) >= message.length())
+        return RSMS_FAIL;
+
+    auto thirdCommaPos = message.find_first_of(',', secondCommaPos + 1);
+    if(thirdCommaPos == std::string::npos || (thirdCommaPos + 1 + 6) >= message.length())
+        return RSMS_FAIL;
+
+    sender.assign(message.substr(firstCommaPos + 1, secondCommaPos - firstCommaPos - 1));
+    recipient.assign(message.substr(secondCommaPos + 1, thirdCommaPos - secondCommaPos - 1));
+    body.assign(message.substr(thirdCommaPos + 1 + 6));
+    unescapeBody(body, std::string(body));
+    if(body.length() >= 2U) body.resize(body.length() - 2U);
+
+    // build a message out of what we received in order to check if all checksums matches
+    // use only header of message to match checksum
+    std::string messagecheck;
+    buildMessage(messagecheck, sender, recipient, " ");
+    messagecheck.resize(messagecheck.length() - 3U);// get rid of body, body check byte and trailing \r
+
+    if(messagecheck != message.substr(0, messagecheck.length())) {
+        sender.clear();
+        recipient.clear();
+        body.clear();
+        return RSMS_FAIL; // we do not allow any errors in message header
+    }
+
+    //rebuild complete messsage with body
+    buildMessage(messagecheck, sender, recipient, body);
+    if(messagecheck != message)
+        return RSMS_ERRONEOUS_MSG; // we allow erros to occur in the message body
+
+    return RSMS_OK;
+}
+
+void CRSMS1AMessageBuilder::unescapeBody(std::string& output, const std::string& body)
+{
+    output.clear();
+    if(body.empty())
+        return;
+
+    for(unsigned int i = 0U; i < body.length(); i++) {
+        auto c = body[i];
+        auto next = body[i + 1U];
+        if(c == 'o' && std::find(m_charsToEscape.begin(), m_charsToEscape.end(), next) != m_charsToEscape.end()) {
+            output.push_back(next);
+            i++;
+            continue;
+        }
+        
+        output.push_back(c);
+    }
 }
