@@ -67,6 +67,10 @@ unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned 
     if(parseRes == RSMS_FAIL)
         return 0U;
 
+    CAPRSUtils::dstarCallsignToAPRS(sender);
+    CAPRSUtils::dstarCallsignToAPRS(recipient);
+    recipient.resize(9U, ' ');
+    
     auto seqNum = rand() % 0xFFFFFU;
     auto aprsFrame = CStringUtils::string_format("%s-5>APDPRS,DSTAR*::%s:%s{%05X", sender.c_str(), recipient.c_str(), body.c_str(), seqNum);
     
