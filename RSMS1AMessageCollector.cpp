@@ -58,8 +58,12 @@ bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
                 && !splits[1].empty()
                 && !splits[2].empty();
 
-    CUtils::dump("RS-MS1A:", (unsigned char *)msg.c_str(), msg.length() + 1U);
-    CLog::logDebug("RS-MS1A: %s", msg.c_str());
+    if(ret) {
+        CUtils::dump("RS-MS1A:", (unsigned char *)msg.c_str(), msg.length() + 1U);
+        CLog::logDebug("RS-MS1A: %s", msg.c_str());
+
+        
+    }
 
     return ret;
 
@@ -76,32 +80,6 @@ bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
     // auto expectedCsum = gpsa.substr(5U, APRS_CSUM_LENGTH);
     // bool res = ::strcasecmp(csumStr.c_str(), expectedCsum.c_str()) == 0;
     // return res;
-}
-
-unsigned int CRSMS1AMessageCollector::calcCRC(const std::string& gpsa, unsigned int start, unsigned int length)
-{
-	unsigned int icomcrc = 0xFFFFU;
-    auto end = start + length;
-    if(end > gpsa.length()) {
-        end = gpsa.length();
-    }
-
-	for (unsigned int j = start; j < end; j++) {
-		unsigned char ch = (unsigned char)gpsa[j];
-
-		for (unsigned int i = 0U; i < 8U; i++) {
-			bool xorflag = (((icomcrc ^ ch) & 0x01U) == 0x01U);
-
-			icomcrc >>= 1;
-
-			if (xorflag)
-				icomcrc ^= 0x8408U;
-
-			ch >>= 1;
-		} 
-	}
-
-	return ~icomcrc & 0xFFFFU;
 }
 
 unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned int length)
