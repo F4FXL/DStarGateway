@@ -28,7 +28,7 @@ public:
 
 private:
     static void calcMsgIcomCRC(const std::string& msg, char& c1, char& c2);
-    static void escapeBody(std::string output, const std::string& body);
+    static void escapeBody(std::string& output, const std::string& body);
     static void escapeBytes(std::vector<char> output, const std::vector<char> input);
     static char calculateBodyCRC(const std::string& body);
     static char doWhatever(char b2);

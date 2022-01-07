@@ -27,7 +27,7 @@ namespace RSMS1AMessageBuilder
     
     };
 
-    TEST_F(RSMS1AMessageBuilder_buildMessage, testABC)
+    TEST_F(RSMS1AMessageBuilder_buildMessage, ABC)
     {
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "ABC");
@@ -35,7 +35,7 @@ namespace RSMS1AMessageBuilder
         EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118ABCF\n");
     }
 
-    TEST_F(RSMS1AMessageBuilder_buildMessage, testA)
+    TEST_F(RSMS1AMessageBuilder_buildMessage, A)
     {
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "A");
@@ -43,7 +43,7 @@ namespace RSMS1AMessageBuilder
         EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\n");
     }
 
-    TEST_F(RSMS1AMessageBuilder_buildMessage, testAA)
+    TEST_F(RSMS1AMessageBuilder_buildMessage, AA)
     {
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "AA");
@@ -51,11 +51,27 @@ namespace RSMS1AMessageBuilder
         EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118AA\02\n");
     }
 
-    TEST_F(RSMS1AMessageBuilder_buildMessage, testSalutCommentVasTu)
+    TEST_F(RSMS1AMessageBuilder_buildMessage, SalutCommentVasTu)
     {
         std::string message;
         CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "Salut, comment vas tu?");
 
-        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?\x7A\n");
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?z\n");
+    }
+
+    TEST_F(RSMS1AMessageBuilder_buildMessage, escapeComma)
+    {
+        std::string message;
+        CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", ",");
+
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118o,o,\n");
+    }
+
+    TEST_F(RSMS1AMessageBuilder_buildMessage, INeedMoreDollars)
+    {
+        std::string message;
+        CRSMS1AMessageBuilder::buildMessage(message, "KC3FRA", "F4FXL", "I need more $$$$");
+
+        EXPECT_STREQ(message.c_str(), "$$Msg,KC3FRA,F4FXL,001118I need more o$o$o$o$\x08\n");
     }
 };

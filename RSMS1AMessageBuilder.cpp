@@ -23,11 +23,9 @@ std::vector<char> CRSMS1AMessageBuilder::m_charsToEscape = {-17, 0, 17, 19, -2, 
 
 void CRSMS1AMessageBuilder::buildMessage(std::string& message, const std::string& sender, const std::string& recipient, const std::string body)
 {
-
-    std::string bodyTmp(body);
     auto bodyCrc = calculateBodyCRC(body);
-    bodyTmp.push_back(bodyCrc);
-    escapeBody(bodyTmp, std::string(bodyTmp));
+    std::string bodyTmp;
+    escapeBody(bodyTmp, body + bodyCrc);
     
     std::string header = CStringUtils::string_format("%s,%s,0011", sender.c_str(), recipient.c_str());
     char c1, c2;
@@ -47,15 +45,15 @@ char CRSMS1AMessageBuilder::calculateBodyCRC(const std::string& body)
         num += c;
     }
 
-    return (char)((num & 255) /*- 128*/);
+    return (char)((num & 255) - 128);
 }
 
-void CRSMS1AMessageBuilder::escapeBody(std::string output, const std::string& body)
+void CRSMS1AMessageBuilder::escapeBody(std::string& output, const std::string& body)
 {
     output.clear();
     for(char c : body) {
         if(std::find(m_charsToEscape.begin(), m_charsToEscape.end(), c) != m_charsToEscape.end()) {
-            output.push_back(-17);
+            output.push_back('o');
         }
         output.push_back(c);
     }
