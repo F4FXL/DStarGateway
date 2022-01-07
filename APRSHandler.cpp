@@ -130,6 +130,11 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 	}
 
 	unsigned int length = collector->getData(SLOW_DATA_TYPE_GPS, buffer, 400U);
+
+	if(length == 0U) {
+		return;
+	}
+	
 	std::string text((char*)buffer, length);
 
 	CAPRSFrame frame;
