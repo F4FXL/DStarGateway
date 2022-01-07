@@ -106,7 +106,7 @@ public:
 
 private:
     void stripComment(std::string& s) const;
-    TConfigValue * readKeyAndValue(const std::string s) const;
+    TConfigValue * readKeyAndValue(const std::string& s) const;
     TConfigValue * lookupValue(const std::string& section, const std::string& key) const;
 
     std::string m_filename;

@@ -72,11 +72,11 @@ git checkout develop
 ## 3.4. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
-apt install build-essential libcurl4-openssl-dev libboost-dev
+sudo apt install build-essential libcurl4-openssl-dev libboost-dev
 ```
 If you are going to build with gpsd support, also install libgps-dev
 ```
-apt install libgps-dev
+sudo apt install libgps-dev
 ```
 ## 3.5. Building
 Regular building
@@ -117,6 +117,7 @@ the testing framwrok used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
+- [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.2. Version 0.4
