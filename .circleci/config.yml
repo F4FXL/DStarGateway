@@ -21,13 +21,13 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build App"
-          command: "make ENABLE_DEBUG=1 -j 3 dstargateway"
+          command: "make -j 3 dstargateway"
       - run:
           name: "Build Tests"
-          command: "make ENABLE_DEBUG=1 -j 3 tests"
+          command: "make -j 3 tests"
       - run:
           name: "Run Tests"
-          command: "make ENABLE_DEBUG=1 run-tests"
+          command: "make run-tests"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
