@@ -9,7 +9,9 @@
             "command": "make",
             "args": [
                 "-j3",
-                "USE_GPSD=1"
+                "tests",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
             ],
             "group": "build",
             "problemMatcher": []
@@ -21,7 +23,8 @@
             "args": [
                 "-j3",
                 "tests",
-                "USE_GPSD=1"
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
             ],
             "group": {
                 "kind": "build",
