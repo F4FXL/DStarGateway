@@ -33,13 +33,6 @@ bool CAPRSFormater::frameToString(std::string& output, CAPRSFrame& frame)
             return false;
     }
 
-    // std::string path(frame.getPath().size() > 0U ? "," :  "");
-    // for(auto pathItem : frame.getPath()) {
-    //     path.append(boost::trim_copy(pathItem)).push_back(',');
-    // }
-
-    // boost::trim_right_if(path, [](char c){ return c == ','; });
-
     auto path = boost::join_if(frame.getPath(), ",", [](std::string s) { return  !string_is_blank_or_empty(s); });
 
     CStringUtils::string_format_in_place(output, "%s>%s%s%s:%s",
