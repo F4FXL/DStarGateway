@@ -21,7 +21,7 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build App"
-          command: "make ENABLE_DEBUG=1 -j 3 dstargateway"
+          command: "make ENABLE_DEBUG=1 -j 3 clean dstargateway"
       - run:
           name: "Build Tests"
           command: "make ENABLE_DEBUG=1 -j 3 tests"
@@ -44,7 +44,7 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build App"
-          command: "make -j 3 dstargateway"
+          command: "make -j 3 clean dstargateway"
       - run:
           name: "Build Tests"
           command: "make -j 3 tests"
