@@ -54,8 +54,31 @@ bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
 
 unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned int length)
 {
-    if(data == nullptr || length == 0U || getSentence().empty())
+    if(data == nullptr || length == 0U)
         return 0U;
+
+    std::string aprsFrame;
+    if(!getDataInt(aprsFrame))
+        return 0U;
+    
+    auto aprsFrameLen = aprsFrame.length();
+
+    if(length < aprsFrameLen) {
+        CLog::logDebug("Not enough space to copy RSMS1A message frame");
+        return 0U;
+    }
+
+    for(unsigned int i = 0U; i < aprsFrameLen; i++){
+        data[i] = aprsFrame[i];
+    }
+
+    return aprsFrameLen;
+}
+
+bool CRSMS1AMessageCollector::getDataInt(std::string& data)
+{
+    if(getSentence().empty())
+        return false;
 
     std::string sender, recipient, body, sentence;
     sentence = getSentence();
@@ -65,25 +88,14 @@ unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned 
                                                 (unsigned char *)sentence.c_str(), sentence.length());
 
     if(parseRes == RSMS_FAIL)
-        return 0U;
+        return false;
 
     CAPRSUtils::dstarCallsignToAPRS(sender);
     CAPRSUtils::dstarCallsignToAPRS(recipient);
     recipient.resize(9U, ' ');
     
     auto seqNum = rand() % 0xFFFFFU;
-    auto aprsFrame = CStringUtils::string_format("%s-5>APDPRS,DSTAR*::%s:%s{%05X", sender.c_str(), recipient.c_str(), body.c_str(), seqNum);
+    CStringUtils::string_format_in_place(data, "%s-5>APDPRS,DSTAR*::%s:%s{%05X", sender.c_str(), recipient.c_str(), body.c_str(), seqNum);
     
-    auto aprsFrameLen = aprsFrame.length();
-
-    if(length < aprsFrameLen) {
-        CLog::logDebug("Not enough space to copy GPS-A APRS frame");
-        return 0U;
-    }
-
-    for(unsigned int i = 0U; i < aprsFrameLen; i++){
-        data[i] = aprsFrame[i];
-    }
-
-    return aprsFrameLen;
+    return true;
 }

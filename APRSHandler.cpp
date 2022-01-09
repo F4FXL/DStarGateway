@@ -122,43 +122,28 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 		return;
 	}
 
-	// Check the transmission timer
-	bool ok = entry->isOK();
-	if (!ok) {
-		collector->reset();
-		return;
-	}
+	collector->getData([=](const std::string& text)
+	{
+		CAPRSFrame frame;
+		if(!CAPRSParser::parseFrame(text, frame)) {
+			CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
+			return;
+		}
 
-	unsigned int length = collector->getData(SLOW_DATA_TYPE_GPS, buffer, 400U);
+		// If we already have a q-construct, don't send it on
+		if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
+			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
+			return;
+		}
 
-	if(length == 0U) {
-		return;
-	}
-	
-	std::string text((char*)buffer, length);
+		frame.getPath().push_back("qAR");
+		frame.getPath().push_back(CStringUtils::string_format("%s-%s", entry->getCallsign().c_str(), entry->getBand().c_str()));
+		
+		std::string output ;
+		CAPRSFormater::frameToString(output, frame);
 
-	CAPRSFrame frame;
-	if(!CAPRSParser::parseFrame(text, frame)) {
-		collector->reset();
-		CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
-		return;
-	}
-
-	// If we already have a q-construct, don't send it on
-	if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
-		CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
-		return;
-	}
-
-	frame.getPath().push_back("qAR");
-	frame.getPath().push_back(CStringUtils::string_format("%s-%s", entry->getCallsign().c_str(), entry->getBand().c_str()));
-	
-	std::string output ;
-	CAPRSFormater::frameToString(output, frame);
-
-	m_thread->write(frame);
-
-	collector->reset();
+		m_thread->write(frame);
+	});
 }
 
 void CAPRSHandler::writeStatus(const std::string& callsign, const std::string status)

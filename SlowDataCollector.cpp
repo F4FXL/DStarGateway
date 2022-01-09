@@ -85,10 +85,14 @@ unsigned int CSlowDataCollector::getData(unsigned char * data, unsigned int leng
     return getDataInt(data, length);
 }
 
+bool CSlowDataCollector::getData(std::string& data)
+{
+    return getDataInt(data);
+}
+
 void CSlowDataCollector::reset()
 {
     m_state = SS_FIRST;
-    m_myCall.clear();
     resetInt();
 }
 

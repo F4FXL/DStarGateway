@@ -24,7 +24,23 @@
 #include "DStarDefines.h"
 #include "Defs.h"
 
-class CSlowDataCollector
+class ISlowDataCollector
+{
+public:
+    virtual ~ISlowDataCollector() { } ;
+
+    virtual std::string getMyCall() const = 0;
+    virtual void setMyCall(const std::string& mycall) = 0;
+    virtual bool writeData(const unsigned char* data) = 0;
+    virtual void sync() = 0;
+    virtual unsigned int getData(unsigned char* data, unsigned int length) = 0;
+    virtual bool getData(std::string& data) = 0;
+    virtual void reset() = 0;
+    virtual unsigned char getDataType() = 0;
+    virtual void clock(unsigned int ms) = 0;
+};
+
+class CSlowDataCollector : public ISlowDataCollector
 {
 public:
     CSlowDataCollector(unsigned char slowDataType);
@@ -35,12 +51,15 @@ public:
     bool writeData(const unsigned char* data);
     void sync();
     unsigned int getData(unsigned char* data, unsigned int length);
+    bool getData(std::string& data);
     void reset();
     unsigned char getDataType();
+    void clock(unsigned int) { };
 
 protected:
     virtual bool addData(const unsigned char* data) = 0;
     virtual unsigned int getDataInt(unsigned char* data, unsigned int length) = 0;
+    virtual bool getDataInt(std::string& data) = 0;
     virtual void resetInt() { }
     
 private:

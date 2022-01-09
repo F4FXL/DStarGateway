@@ -216,8 +216,8 @@ void CAPRSHandlerThread::write(CAPRSFrame& frame)
 
 	std::string frameString;
 	if(CAPRSFormater::frameToString(frameString, frame)) {
-
 		boost::trim_if(frameString, [] (char c) { return c == '\r' || c == '\n'; }); // trim all CRLF, we will add our own, just to make sure we get rid of any garbage that might come from slow data
+		CLog::logTrace("Queued APRS Frame : %s", frameString.c_str());
 		frameString.append("\r\n");
 
 		m_queue.addData(frameString);

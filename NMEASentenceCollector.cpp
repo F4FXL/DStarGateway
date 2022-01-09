@@ -76,17 +76,12 @@ unsigned char CNMEASentenceCollector::calcXOR(const std::string& nmea)
 
 unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned int length)
 {   
-    if(data == nullptr || length == 0U || getMyCall().empty() || getSentence().empty())
+    if(data == nullptr || length == 0U)
         return 0U;
 
-    auto nmea = getSentence();
-    fixUpNMEATimeStamp(nmea);
-
-    std::string fromCall = getMyCall();
-    CAPRSUtils::dstarCallsignToAPRS(fromCall);
-    std::string aprsFrame(fromCall);
-    aprsFrame.append("-5>GPS30,DSTAR*:")
-             .append(nmea);
+    std::string aprsFrame;
+    if(!getDataInt(aprsFrame))
+        return 0U;
 
     auto aprsFrameLen = aprsFrame.length();
     if(length < aprsFrameLen) {
@@ -99,6 +94,25 @@ unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned i
     }
 
     return aprsFrameLen;
+}
+
+bool CNMEASentenceCollector::getDataInt(std::string& data)
+{
+    if(getMyCall().empty() || getSentence().empty())
+        return false;
+
+    data.clear();
+    auto nmea = getSentence();
+    fixUpNMEATimeStamp(nmea);
+
+    std::string fromCall = getMyCall();
+    CAPRSUtils::dstarCallsignToAPRS(fromCall);
+    std::string aprsFrame(fromCall);
+    aprsFrame.append("-5>GPS30,DSTAR*:")
+             .append(nmea);
+
+    data.assign(aprsFrame);
+    return true;     
 }
 
 // When set on manual position Icom radios send 000000.00 as NMEA timestamps

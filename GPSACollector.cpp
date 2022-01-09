@@ -54,14 +54,14 @@ bool CGPSACollector::isValidGPSA(const std::string& gpsa)
 
 unsigned int CGPSACollector::getDataInt(unsigned char * data, unsigned int length)
 {
-    if(data == nullptr || length == 0U || getSentence().empty())
+    if(data == nullptr || length == 0U)
         return 0U;
 
-    auto aprsFrame = getSentence();
-    if(aprsFrame.length() < 11U)
+    std::string aprsFrame;
+
+    if(!getDataInt(aprsFrame))
         return 0U;
 
-    aprsFrame = aprsFrame.substr(10).append("\r\n");
     auto aprsFrameLen = aprsFrame.length();
 
     if(length < aprsFrameLen) {
@@ -74,4 +74,19 @@ unsigned int CGPSACollector::getDataInt(unsigned char * data, unsigned int lengt
     }
 
     return aprsFrameLen;
+}
+
+bool CGPSACollector::getDataInt(std::string& data)
+{
+    if(getSentence().empty())
+        return false;
+
+    data.clear();
+    auto aprsFrame = getSentence();
+    if(aprsFrame.length() < 11U)//do we have enough data beyond CRC?
+        return false;
+
+    data = aprsFrame.substr(10);
+
+    return true;
 }
