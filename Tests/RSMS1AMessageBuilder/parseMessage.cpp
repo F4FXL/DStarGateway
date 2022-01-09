@@ -20,7 +20,7 @@
 
 #include "../../RSMS1AMessageBuilder.h"
 
-namespace RSMS1AMessageBuilder
+namespace RSMS1AMessageBuilderTests
 {
     class RSMS1AMessageBuilder_parseMessage : public ::testing::Test {
     
