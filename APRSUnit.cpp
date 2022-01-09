@@ -21,15 +21,20 @@
 #include "APRSUnit.h"
 #include "APRSFormater.h"
 #include "StringUtils.h"
-#include "APRSUtils.h"
-#include "SlowDataEncoder.h"
+#include "APRStoDPRS.h"
 
 CAPRSUnit::CAPRSUnit(IRepeaterCallback * repeaterHandler) :
 m_frameBuffer(20U),
 m_status(APS_IDLE),
 m_repeaterHandler(repeaterHandler),
 m_headerData(nullptr),
-m_timer(1000U, 2U)
+m_slowData(nullptr),
+m_out(0U),
+m_seq(0U),
+m_totalNeeded(0U),
+m_timer(1000U, 2U),
+m_dprs(),
+m_start()
 {
     m_timer.start();
 }
@@ -40,75 +45,72 @@ void CAPRSUnit::writeFrame(CAPRSFrame& frame)
     frameCopy->getPath().clear();//path is of no use for us, just clear it
 
     m_frameBuffer.push_back(frameCopy);
+    m_timer.start();
 }
 
 void CAPRSUnit::clock(unsigned int ms)
 {
     m_timer.clock(ms);
     if(m_status == APS_IDLE && !m_frameBuffer.empty() && m_timer.hasExpired()) {
+        m_status = APS_TRANSMIT;
         auto frame = m_frameBuffer.front();
+        m_frameBuffer.pop_front();
 
-        m_id = CHeaderData::createId();
+        m_headerData = new CHeaderData();
+        CAPRSToDPRS::aprsToDPRS(m_dprs, *m_headerData, *frame);
 
-		m_headerData = new CHeaderData();
-		m_headerData->setMyCall1(frame->getSource());
-		m_headerData->setMyCall2("APRS");
-		m_headerData->setYourCall("CQCQCQ  ");
-		m_headerData->setId(m_id);
+        m_slowData = new CSlowDataEncoder();
+        // icom rs-ms1 seem to not support messaiging mixed with other slow data 
+        // send the message on its own for now
+        // m_slowData->setHeaderData(*m_headerData);
+        m_slowData->setGPSData(m_dprs);
+        // m_slowData->setTextData("APRS to DPRS");
+
+        m_totalNeeded = (m_slowData->getInterleavedDataLength() / (DATA_FRAME_LENGTH_BYTES)) * 2U;
 
         m_repeaterHandler->process(*m_headerData, DIR_INCOMING, AS_INFO);
 
-        m_status = APS_TRANSMIT;
+        m_out = 0U;
+        m_seq = 0U;
+
+        m_start = std::chrono::high_resolution_clock::now();
+        return;
     }
 
-    if(m_status == APS_TRANSMIT && !m_frameBuffer.empty())
-    {
-        auto frame = m_frameBuffer.front();
-        std::string frameString;
-        CAPRSFormater::frameToString(frameString, *frame);
-        boost::trim_right_if(frameString, [](char c) { return c == '\n' || c == '\r'; });
-        frameString.push_back('\r');
+    if(m_status == APS_TRANSMIT) {
+        unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_start).count();
+		needed /= DSTAR_FRAME_TIME_MS;
 
-        std::string crc = CStringUtils::string_format("$$CRC%04X", CAPRSUtils::calcGPSAIcomCRC(frameString));
-        frameString.insert(0, crc);
-
-        CSlowDataEncoder encoder;
-        encoder.setHeaderData(*m_headerData);
-        encoder.setGPSData(frameString);
-        encoder.setTextData("APRS to DPRS");
-
-        CAMBEData data;
-        data.setId(m_id);
-
-        unsigned int out = 0U;
-        unsigned int dataOut = 0U;
-        unsigned int needed = (encoder.getInterleavedDataLength() / (DATA_FRAME_LENGTH_BYTES)) * 2U;
         unsigned char buffer[DV_FRAME_LENGTH_BYTES];
 
-        while (dataOut < needed) {
-            data.setSeq(out);
+        while (m_out < needed && m_out < m_totalNeeded) {
+            CAMBEData data;
+            data.setId(m_headerData->getId());
+            data.setSeq(m_seq);
+            if(m_out == m_totalNeeded - 1U)
+                data.setEnd(true);
 
             ::memcpy(buffer + 0U, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
 
             // Insert sync bytes when the sequence number is zero, slow data otherwise
-            if (out == 0U) {
+            if (m_seq == 0U) {
                 ::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
             } else {
-                encoder.getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);		
-                dataOut++;
+                m_slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);		
+                m_out++;
             }
 
             data.setData(buffer, DV_FRAME_LENGTH_BYTES);
-
             m_repeaterHandler->process(data, DIR_INCOMING, AS_INFO);
-            out++;
 
-            if (out == 21U) out = 0U;
+            m_seq++;
+            if (m_seq == 21U) m_seq = 0U;
         }
 
-        m_frameBuffer.pop_front();
-        delete frame;
-        m_status = APS_IDLE;
-        m_timer.start();
+        if(m_out >= m_totalNeeded) {
+            m_status = APS_IDLE;
+            delete m_headerData;
+            delete m_slowData;
+        }
     }
 }

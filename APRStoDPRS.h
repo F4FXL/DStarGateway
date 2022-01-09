@@ -19,40 +19,15 @@
 #pragma once
 
 #include <string>
-#include <boost/circular_buffer.hpp>
-#include <chrono>
 
+#include "HeaderData.h"
 #include "APRSFrame.h"
-#include "RepeaterCallback.h"
-#include "Timer.h"
-#include "SlowDataEncoder.h"
 
-enum APRSUNIT_STATUS {
-    APS_IDLE,
-    APS_WAIT,
-    APS_TRANSMIT
-};
-
-class CAPRSUnit
+class CAPRSToDPRS
 {
 public:
-    CAPRSUnit(IRepeaterCallback * repeaterHandler);
-    void writeFrame(CAPRSFrame& aprsFrame);
-    void clock(unsigned ms);
+    static bool aprsToDPRS(std::string& dprs, CHeaderData& header, CAPRSFrame& frame);
 
 private:
-    // CRingBuffer<CAPRSFrame *> m_frameBuffer;
-    boost::circular_buffer<CAPRSFrame *> m_frameBuffer;
-    APRSUNIT_STATUS m_status;
-    IRepeaterCallback * m_repeaterHandler;
-    CHeaderData * m_headerData;
-    CSlowDataEncoder *  m_slowData;
-    unsigned int m_out;
-    unsigned int m_seq;
-    unsigned int m_totalNeeded;
-    CTimer m_timer;
-    std::string m_dprs;
-    std::chrono::high_resolution_clock::time_point m_start;
+    static bool messageToDPRS(std::string& drps, CHeaderData& header, CAPRSFrame& frame);
 };
-
-
