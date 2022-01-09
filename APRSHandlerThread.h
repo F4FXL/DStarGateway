@@ -58,6 +58,7 @@ private:
 	bool                   m_exit;
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
+	CTimer				   m_keepAliveTimer;
 	unsigned int           m_tries;
 	std::vector<IReadAPRSFrameCallback *>  m_APRSReadCallbacks;
 	std::string               m_filter;

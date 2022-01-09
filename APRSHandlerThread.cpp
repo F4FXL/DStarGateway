@@ -34,6 +34,7 @@
 
 const unsigned int APRS_TIMEOUT = 10U;
 const unsigned int APRS_READ_TIMEOUT = 1U;
+const unsigned int APRS_KEEP_ALIVE_TIMEOUT = 60U;
 
 CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
 CThread(),
@@ -45,6 +46,7 @@ m_queue(20U),
 m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
+m_keepAliveTimer(1000U, APRS_KEEP_ALIVE_TIMEOUT),
 m_tries(0U),
 m_APRSReadCallbacks(),
 m_filter(),
@@ -72,6 +74,7 @@ m_queue(20U),
 m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
+m_keepAliveTimer(1000U, APRS_KEEP_ALIVE_TIMEOUT),
 m_tries(0U),
 m_APRSReadCallbacks(),
 m_filter(filter),
@@ -121,6 +124,7 @@ void* CAPRSHandlerThread::Entry()
 	}
 
 	try {
+		m_keepAliveTimer.start();
 		while (!m_exit) {
 			if (!m_connected) {
 				if (m_reconnectTimer.isRunning() && m_reconnectTimer.hasExpired()) {
@@ -130,6 +134,9 @@ void* CAPRSHandlerThread::Entry()
 					if (!m_connected) {
 						CLog::logInfo("Reconnect attempt to the APRS server has failed");
 						startReconnectionTimer();
+					}
+					else {
+						m_keepAliveTimer.start();
 					}
 				}
 			}
@@ -154,22 +161,18 @@ void* CAPRSHandlerThread::Entry()
 					std::string line;
 					int length = m_socket.readLine(line, APRS_READ_TIMEOUT);
 
-					/*if (length == 0)
-						CLog::logWarning(("No response from the APRS server after %u seconds", APRS_TIMEOUT);*/
-
-					if (length < 0) {
+					if (length < 0 || m_keepAliveTimer.hasExpired()) {
 						m_connected = false;
 						m_socket.close();
 						CLog::logError("Error when reading from the APRS server");
 						startReconnectionTimer();
 					}
-
-					if(line.length() > 0 && line[0] != '#')
-						CLog::logDebug("Received APRS Frame : %s", line.c_str());
-
-					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
-					    && m_APRSReadCallbacks.size() > 0U)//do we have someone wanting an APRS Frame?
-					{	
+					else if(length > 0 && line[0] == '#') {
+						m_keepAliveTimer.start();
+					}
+					else if(line.length() > 0 && line[0] != '#') {
+						m_keepAliveTimer.start();
+						CLog::logDebug("APRS <== %s", line.c_str());
 						CAPRSFrame readFrame;
 						if(CAPRSParser::parseFrame(line, readFrame)) {
 							for(auto cb : m_APRSReadCallbacks) {
@@ -179,7 +182,6 @@ void* CAPRSHandlerThread::Entry()
 						}
 					}
 				}
-
 			}
 		}
 
@@ -240,10 +242,12 @@ void CAPRSHandlerThread::stop()
 void CAPRSHandlerThread::clock(unsigned int ms)
 {
 	m_reconnectTimer.clock(ms);
+	m_keepAliveTimer.clock(ms);
 }
 
 bool CAPRSHandlerThread::connect()
 {
+	m_socket.close();
 	bool ret = m_socket.open();
 	if (!ret)
 		return false;
