@@ -33,6 +33,7 @@
 // #define	DUMP_TX
 
 const unsigned int APRS_TIMEOUT = 10U;
+const unsigned int APRS_READ_TIMEOUT = 1U;
 
 CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
 CThread(),
@@ -151,7 +152,7 @@ void* CAPRSHandlerThread::Entry()
 				}
 				{
 					std::string line;
-					int length = m_socket.readLine(line, APRS_TIMEOUT);
+					int length = m_socket.readLine(line, APRS_READ_TIMEOUT);
 
 					/*if (length == 0)
 						CLog::logWarning(("No response from the APRS server after %u seconds", APRS_TIMEOUT);*/
