@@ -127,9 +127,11 @@ void* CAPRSHandlerThread::Entry()
 		m_keepAliveTimer.start();
 		while (!m_exit) {
 			if (!m_connected) {
+				Sleep(100U);
 				if (m_reconnectTimer.isRunning() && m_reconnectTimer.hasExpired()) {
 					m_reconnectTimer.stop();
 
+					CLog::logDebug("Trying to reconnect to the APRS server");
 					m_connected = connect();
 					if (!m_connected) {
 						CLog::logInfo("Reconnect attempt to the APRS server has failed");
@@ -153,7 +155,7 @@ void* CAPRSHandlerThread::Entry()
 					if (!ret) {
 						m_connected = false;
 						m_socket.close();
-						CLog::logInfo("Connection to the APRS thread has failed");
+						CLog::logInfo("Error when writing to the APRS server");
 						startReconnectionTimer();
 					}
 				}
@@ -284,7 +286,7 @@ bool CAPRSHandlerThread::connect()
 		return false;
 	}
 	if (length < 0) {
-		CLog::logInfo("Error when reading from the APRS server");
+		CLog::logInfo("Error when reading from the APRS server (connect)");
 		m_socket.close();
 		return false;
 	}
@@ -302,6 +304,8 @@ void CAPRSHandlerThread::startReconnectionTimer()
 	m_tries++;
 	if (m_tries > 10U)
 		m_tries = 10U;
+
+	CLog::logDebug("Next APRS reconnection try in %u minute", m_tries);
 
 	m_reconnectTimer.setTimeout(m_tries * 60U);
 	m_reconnectTimer.start();
