@@ -47,7 +47,7 @@ m_idFrameProvider(nullptr)
 	assert(!gateway.empty());
 	assert(!password.empty());
 
-	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port, "m/20");
+	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port);
 
 	m_gateway = gateway;
 	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
