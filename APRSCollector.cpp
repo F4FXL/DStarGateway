@@ -30,13 +30,6 @@
 #include "RSMS1AMessageCollector.h"
 #include "SlowDataCollectorThrottle.h"
 
-const unsigned int APRS_CSUM_LENGTH = 4U;
-const unsigned int APRS_DATA_LENGTH = 300U;
-const unsigned int SLOW_DATA_BLOCK_LENGTH = 6U;
-
-const char APRS_OVERLAY = '\\';
-const char APRS_SYMBOL  = 'K';
-
 CAPRSCollector::CAPRSCollector() :
 m_collectors()
 {
@@ -68,6 +61,7 @@ void CAPRSCollector::writeHeader(const std::string& callsign)
 bool CAPRSCollector::writeData(const unsigned char* data)
 {
 	bool ret = false;
+
 	for(auto collector : m_collectors) {
 		bool ret2 = collector->writeData(data);
 		ret = ret || ret2;
