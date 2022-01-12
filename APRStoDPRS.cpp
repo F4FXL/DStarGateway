@@ -46,7 +46,7 @@ bool CAPRSToDPRS::messageToDPRS(std::string& dprs, CHeaderData& header, CAPRSFra
 
     // extract recipient
     auto recipient = boost::trim_copy(frameBody.substr(1, 9));
-    if(recipient.length() == 0U) {
+    if(recipient.empty()) {
         CLog::logDebug("APRS message has no recipient");
         return false;
     }
@@ -54,7 +54,7 @@ bool CAPRSToDPRS::messageToDPRS(std::string& dprs, CHeaderData& header, CAPRSFra
     if(dashPos != std::string::npos)
         recipient = recipient.substr(0, dashPos);
 
-
+    //extract message body
     auto messageBody = boost::trim_copy(frameBody.substr(11));
 
     header.setId(header.createId());
