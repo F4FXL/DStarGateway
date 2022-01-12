@@ -48,6 +48,7 @@ bool CRSMS1AMessageCollector::isValidSentence(const std::string& sentence)
 
 bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
 {
+    CLog::logDebug("RS-MS1A");
     // checking validity involves parsing, so we do minumum checks here. Big chekc done in getDataInt
     return !msg.empty() && boost::starts_with(msg, "$$Msg");
 }

@@ -37,6 +37,7 @@ CSentenceCollector(SLOW_DATA_TYPE_GPS, "$$CRC", '\x0D')
 
 bool CGPSACollector::isValidSentence(const std::string& sentence)
 {
+    CLog::logDebug("GPSA");
     return isValidGPSA(sentence);
 }
 
