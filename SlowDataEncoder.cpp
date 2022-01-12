@@ -17,6 +17,7 @@
 #include "SlowDataEncoder.h"
 #include "CCITTChecksum.h"
 #include "DStarDefines.h"
+#include "Utils.h"
 
 const unsigned int  SLOW_DATA_BLOCK_SIZE = 6U;
 
@@ -130,14 +131,14 @@ void CSlowDataEncoder::getInterleavedData(unsigned char* data)
 		getHeaderData(data);
 	else {
 		buildInterleavedData();
-		getData(m_interleavedData, data, m_interleavedPtr, m_gpsDataFullSize);
+		getData(m_interleavedData, data, m_interleavedPtr, m_interleavedDataFullSize);
 	}
 }
 
 void CSlowDataEncoder::buildInterleavedData()
 {
 	//first build interleaved data if we do not have it
-	if(!m_interleavedData)
+	if(m_interleavedData == nullptr)
 	{	
 		getInterleavedDataLength();
 		m_interleavedData = new unsigned char[m_interleavedDataFullSize];
@@ -145,36 +146,38 @@ void CSlowDataEncoder::buildInterleavedData()
 
 		unsigned int textPtr = 0U;
 		unsigned int gpsPtr = 0U;
-		unsigned int headerPtr = 0U;
 
 		//now proceed with data copying, according to this document http://www.qsl.net/kb9mwr/projects/dv/dstar/Slow%20Data.pdf
-		if(m_textData && m_gpsData){
-			for(unsigned int interleavedPtr = 0; interleavedPtr < m_interleavedDataFullSize; interleavedPtr += SLOW_DATA_BLOCK_SIZE){
+		if(m_textData != nullptr && m_gpsData != nullptr){
+			unsigned int interleavedPtr = 0;
+			while(textPtr < TEXT_SIZE || gpsPtr < m_gpsDataSize){
 				if(textPtr < TEXT_SIZE
 				   && ((interleavedPtr / SLOW_DATA_BLOCK_SIZE) & 0x01U) == 0)
 				{
 					::memcpy(m_interleavedData + interleavedPtr, m_textData + textPtr, SLOW_DATA_BLOCK_SIZE);
 					textPtr += SLOW_DATA_BLOCK_SIZE;
 				}
-				else if(gpsPtr < m_gpsDataSize){
+				else if(gpsPtr < m_gpsDataSize) {
 					::memcpy(m_interleavedData + interleavedPtr, m_gpsData + gpsPtr, SLOW_DATA_BLOCK_SIZE);
 					gpsPtr += SLOW_DATA_BLOCK_SIZE;
 				}
-				else if(m_headerData && headerPtr < HEADER_SIZE){
-					::memcpy(m_interleavedData + interleavedPtr, m_headerData + headerPtr, SLOW_DATA_BLOCK_SIZE);
-					headerPtr += SLOW_DATA_BLOCK_SIZE;
-				}
+				interleavedPtr += SLOW_DATA_BLOCK_SIZE;
+			}
+
+			if(m_headerData != nullptr) {
+				//append header dat in one block at the end
+				::memcpy(m_interleavedData + interleavedPtr, m_headerData, HEADER_SIZE);
 			}
 		}
-		else if(m_textData && !m_gpsData && m_headerData){
+		else if(m_textData != nullptr && m_gpsData == nullptr && m_headerData != nullptr){
 			//according to above doc, header and text are not interleaved, just on after the other. filler bytes between resync bytes.
 			::memcpy(m_interleavedData, m_textData, SLOW_DATA_FULL_BLOCK_SIZE);
 			::memcpy(m_interleavedData + SLOW_DATA_FULL_BLOCK_SIZE, m_headerData, SLOW_DATA_FULL_BLOCK_SIZE);
 		}
-		else if(!m_textData && m_gpsData && m_headerData){
+		else if(m_textData == nullptr && m_gpsData != nullptr && m_headerData != nullptr){
 			//could not find any spec about this particular case, let's put the data one after the other
 			::memcpy(m_interleavedData, m_gpsData, SLOW_DATA_FULL_BLOCK_SIZE);
-			::memcpy(m_interleavedData + SLOW_DATA_FULL_BLOCK_SIZE, m_headerData, SLOW_DATA_FULL_BLOCK_SIZE);
+			::memcpy(m_interleavedData + SLOW_DATA_FULL_BLOCK_SIZE, m_headerData, HEADER_SIZE);
 		}
 	}
 }
@@ -347,8 +350,8 @@ void CSlowDataEncoder::setGPSData(const std::string& gpsData)
 		m_gpsData = new unsigned char[m_gpsDataFullSize];
 		::memset(m_gpsData, 'f', m_gpsDataFullSize);
 
-		for(gpsDataPos = 0; gpsDataPos < m_gpsDataFullSize;){
-			unsigned int dataLen = gpsDataStrLen - strPos < 5U ? gpsDataStrLen - strPos : 5U;
+		for(gpsDataPos = 0; gpsDataPos < m_gpsDataSize;){
+			unsigned int dataLen = gpsDataStrLen - strPos< 5U ? gpsDataStrLen - strPos : 5U;
 			m_gpsData[gpsDataPos++] = SLOW_DATA_TYPE_GPS | dataLen;
 
 			for(unsigned int i = 0U; i < dataLen; i++){

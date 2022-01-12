@@ -60,11 +60,10 @@ void CAPRSUnit::clock(unsigned int ms)
         CAPRSToDPRS::aprsToDPRS(m_dprs, *m_headerData, *frame);
 
         m_slowData = new CSlowDataEncoder();
-        // icom rs-ms1 seem to not support messaiging mixed with other slow data 
-        // send the message on its own for now
-        // m_slowData->setHeaderData(*m_headerData);
+        
+        m_slowData->setHeaderData(*m_headerData);
         m_slowData->setGPSData(m_dprs);
-        // m_slowData->setTextData("APRS to DPRS");
+        m_slowData->setTextData("APRS to DPRS");
 
         m_totalNeeded = (m_slowData->getInterleavedDataLength() / (DATA_FRAME_LENGTH_BYTES)) * 2U;
 
