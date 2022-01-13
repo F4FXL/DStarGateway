@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include "HeaderData.h"
 #include "APRSFrame.h"
@@ -26,8 +27,8 @@
 class CAPRSToDPRS
 {
 public:
-    static bool aprsToDPRS(std::string& dprs, CHeaderData& header, CAPRSFrame& frame);
+    static bool aprsToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame);
 
 private:
-    static bool messageToDPRS(std::string& drps, CHeaderData& header, CAPRSFrame& frame);
+    static bool messageToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame);
 };

@@ -51,7 +51,6 @@ private:
     unsigned int m_seq;
     unsigned int m_totalNeeded;
     CTimer m_timer;
-    std::string m_dprs;
     std::chrono::high_resolution_clock::time_point m_start;
 };
 

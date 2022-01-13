@@ -33,7 +33,6 @@ m_out(0U),
 m_seq(0U),
 m_totalNeeded(0U),
 m_timer(1000U, 2U),
-m_dprs(),
 m_start()
 {
     m_timer.start();
@@ -57,13 +56,14 @@ void CAPRSUnit::clock(unsigned int ms)
         m_frameBuffer.pop_front();
 
         m_headerData = new CHeaderData();
-        CAPRSToDPRS::aprsToDPRS(m_dprs, *m_headerData, *frame);
+        std::string dprs, text;
+        CAPRSToDPRS::aprsToDPRS(dprs, text, *m_headerData, *frame);
 
         m_slowData = new CSlowDataEncoder();
         
         m_slowData->setHeaderData(*m_headerData);
-        m_slowData->setGPSData(m_dprs);
-        m_slowData->setTextData("APRS to DPRS");
+        m_slowData->setGPSData(dprs);
+        m_slowData->setTextData(text);
 
         m_totalNeeded = (m_slowData->getInterleavedDataLength() / (DATA_FRAME_LENGTH_BYTES)) * 2U;
 

@@ -22,13 +22,16 @@
 #include "Log.h"
 #include "RSMS1AMessageBuilder.h"
 
-bool CAPRSToDPRS::aprsToDPRS(std::string& dprs, CHeaderData& header, CAPRSFrame& frame)
+
+
+bool CAPRSToDPRS::aprsToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame)
 {
     dprs.clear();
+    text.clear();
     switch (frame.getType())
     {
         case APFT_MESSAGE :
-            return messageToDPRS(dprs, header, frame);
+            return messageToDPRS(dprs, text, header, frame);
         default:
             break;
     }
@@ -36,7 +39,7 @@ bool CAPRSToDPRS::aprsToDPRS(std::string& dprs, CHeaderData& header, CAPRSFrame&
     return false;
 }
 
-bool CAPRSToDPRS::messageToDPRS(std::string& dprs, CHeaderData& header, CAPRSFrame& frame)
+bool CAPRSToDPRS::messageToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame)
 {
     auto frameBody = frame.getBody();
     if(frameBody.length() < 11 || frameBody[0] != ':' || frameBody[10] != ':') {
@@ -63,6 +66,8 @@ bool CAPRSToDPRS::messageToDPRS(std::string& dprs, CHeaderData& header, CAPRSFra
     header.setYourCall(recipient);
 
     CRSMS1AMessageBuilder::buildMessage(dprs, frame.getSource(), recipient, messageBody);
+
+    text = messageBody;
 
     return true;
 }

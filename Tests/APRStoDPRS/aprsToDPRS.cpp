@@ -30,35 +30,47 @@ namespace APRStoDPRSTests
     {
         CAPRSFrame frame("KC3FRA", "APRS", {"WIDE1-1", "WIDE2-2"}, ":F4FXL    :Salut, comment vas tu?", APFT_MESSAGE);
 
-        std::string dprs;
+        std::string dprs, text;
         CHeaderData header;
-        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, header, frame);
+        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, text, header, frame);
 
         EXPECT_TRUE(ret);
         EXPECT_STREQ(dprs.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?z\r");
+        EXPECT_STREQ(text.c_str(), "Salut, comment vas tu?");
+        EXPECT_STREQ(header.getMyCall1().c_str(), "KC3FRA  ");
+        EXPECT_STREQ(header.getMyCall2().c_str(), "MSG ");
+        EXPECT_STREQ(header.getYourCall().c_str(), "F4FXL   ");
     }
 
     TEST_F(APRStoDPRS_aprsToDPRS, validMessageRecipientWithSSID)
     {
         CAPRSFrame frame("KC3FRA", "APRS", {"WIDE1-1", "WIDE2-2"}, ":F4FXL-7  :Salut, comment vas tu?", APFT_MESSAGE);
 
-        std::string dprs;
+        std::string dprs, text;
         CHeaderData header;
-        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, header, frame);
+        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, text, header, frame);
 
         EXPECT_TRUE(ret);
         EXPECT_STREQ(dprs.c_str(), "$$Msg,KC3FRA,F4FXL,001118Saluto, comment vas tu?z\r");
+        EXPECT_STREQ(text.c_str(), "Salut, comment vas tu?");
+        EXPECT_STREQ(header.getMyCall1().c_str(), "KC3FRA  ");
+        EXPECT_STREQ(header.getMyCall2().c_str(), "MSG ");
+        EXPECT_STREQ(header.getYourCall().c_str(), "F4FXL   ");
     }
 
     TEST_F(APRStoDPRS_aprsToDPRS, emptyRecipient)
     {
         CAPRSFrame frame("KC3FRA", "APRS", {"WIDE1-1", "WIDE2-2"}, ":         :Salut, comment vas tu?", APFT_MESSAGE);
 
-        std::string dprs;
+        std::string dprs, text;
         CHeaderData header;
-        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, header, frame);
+        bool ret = CAPRSToDPRS::aprsToDPRS(dprs, text, header, frame);
 
         EXPECT_FALSE(ret);
         EXPECT_STREQ(dprs.c_str(), "");
+        EXPECT_STREQ(text.c_str(), "");
+        EXPECT_STREQ(header.getMyCall1().c_str(), "        ");
+        EXPECT_STREQ(header.getMyCall2().c_str(), "    ");
+        EXPECT_STREQ(header.getYourCall().c_str(), "        ");
     }
 }
