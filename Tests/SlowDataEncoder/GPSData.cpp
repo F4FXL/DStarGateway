@@ -31,45 +31,47 @@ namespace SlowDataEncoderTests
     {
         CSlowDataEncoder encoder;
         encoder.setGPSData("ABCDEFGHIJKLMN");
+        
+        for(unsigned int testCount = 0U; testCount < 2U; testCount++) {
+            unsigned char buffer[6U];
 
-        unsigned char buffer[6U];
-
-        encoder.getGPSData(buffer);
-        encoder.getGPSData(buffer + 3);
-        EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x5U);
-        EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'A');
-        EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'B');
-        EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'C');
-        EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'D');
-        EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'E');
-
-        encoder.getGPSData(buffer);
-        encoder.getGPSData(buffer + 3);
-        EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x5U);
-        EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'F');
-        EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'G');
-        EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'H');
-        EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'I');
-        EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'J');
-
-        encoder.getGPSData(buffer);
-        encoder.getGPSData(buffer + 3);
-        EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x4U);
-        EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'K');
-        EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'L');
-        EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'M');
-        EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'N');
-        EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'f');
-
-        for(unsigned int i = 18; i < 60U; i+= 6U) {
             encoder.getGPSData(buffer);
             encoder.getGPSData(buffer + 3);
-            EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, 'f');
-            EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'f');
-            EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'f');
-            EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'f');
-            EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'f');
+            EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x5U);
+            EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'A');
+            EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'B');
+            EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'C');
+            EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'D');
+            EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'E');
+
+            encoder.getGPSData(buffer);
+            encoder.getGPSData(buffer + 3);
+            EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x5U);
+            EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'F');
+            EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'G');
+            EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'H');
+            EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'I');
+            EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'J');
+
+            encoder.getGPSData(buffer);
+            encoder.getGPSData(buffer + 3);
+            EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, SLOW_DATA_TYPE_GPS | 0x4U);
+            EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'K');
+            EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'L');
+            EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'M');
+            EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'N');
             EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'f');
+
+            for(unsigned int i = 18; i < 60U; i+= 6U) {
+                encoder.getGPSData(buffer);
+                encoder.getGPSData(buffer + 3);
+                EXPECT_EQ(buffer[0] ^ SCRAMBLER_BYTE1, 'f');
+                EXPECT_EQ(buffer[1] ^ SCRAMBLER_BYTE2, 'f');
+                EXPECT_EQ(buffer[2] ^ SCRAMBLER_BYTE3, 'f');
+                EXPECT_EQ(buffer[3] ^ SCRAMBLER_BYTE1, 'f');
+                EXPECT_EQ(buffer[4] ^ SCRAMBLER_BYTE2, 'f');
+                EXPECT_EQ(buffer[5] ^ SCRAMBLER_BYTE3, 'f');
+            }
         }
     }
 }
