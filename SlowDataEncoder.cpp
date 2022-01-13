@@ -190,7 +190,7 @@ unsigned int CSlowDataEncoder::getInterleavedDataLength()
 	m_interleavedDataFullSize = 0U;
 	if(m_textData) m_interleavedDataFullSize += TEXT_SIZE;
 	if(m_headerData) m_interleavedDataFullSize += SLOW_DATA_BLOCK_SIZE;
-	if(m_gpsData) m_interleavedDataFullSize += m_gpsDataFullSize;
+	if(m_gpsData) m_interleavedDataFullSize += m_gpsDataSize;
 	m_interleavedDataFullSize = roundUpToMultipleOf(m_interleavedDataFullSize, SLOW_DATA_FULL_BLOCK_SIZE); //SLOW_DATA_FULL_BLOCK_SIZE * (1U + ((m_interleavedDataFullSize - 1U) / SLOW_DATA_FULL_BLOCK_SIZE));
 	return m_interleavedDataFullSize;
 }
