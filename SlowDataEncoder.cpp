@@ -168,7 +168,7 @@ void CSlowDataEncoder::buildInterleavedData()
 
 			if(m_headerData != nullptr) {
 				//append header dat in one block at the end
-				::memcpy(m_interleavedData + interleavedPtr, m_headerData, HEADER_SIZE);
+				::memcpy(m_interleavedData +  roundUpToMultipleOf(interleavedPtr, SLOW_DATA_FULL_BLOCK_SIZE), m_headerData, HEADER_SIZE);
 			}
 		}
 		else if(m_textData != nullptr && m_gpsData == nullptr && m_headerData != nullptr){
@@ -189,7 +189,7 @@ unsigned int CSlowDataEncoder::getInterleavedDataLength()
 	//calculate size (including filler bytes);
 	m_interleavedDataFullSize = 0U;
 	if(m_textData) m_interleavedDataFullSize += TEXT_SIZE;
-	if(m_headerData) m_interleavedDataFullSize += SLOW_DATA_BLOCK_SIZE;
+	if(m_headerData) m_interleavedDataFullSize += SLOW_DATA_FULL_BLOCK_SIZE; // the is because header data is transmitted as one contiguous block. Unused bytes fileld with 'f'
 	if(m_gpsData) m_interleavedDataFullSize += m_gpsDataSize;
 	m_interleavedDataFullSize = roundUpToMultipleOf(m_interleavedDataFullSize, SLOW_DATA_FULL_BLOCK_SIZE); //SLOW_DATA_FULL_BLOCK_SIZE * (1U + ((m_interleavedDataFullSize - 1U) / SLOW_DATA_FULL_BLOCK_SIZE));
 	return m_interleavedDataFullSize;
