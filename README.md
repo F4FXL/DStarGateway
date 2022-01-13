@@ -113,7 +113,7 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - Code formating rules are observed (these are very lousy though)
 ## 4.2. Continuous Integration
 I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all) I am trying to rewrite the code so that it can be put into some Behavior Driven Development scheme. This is a long haul task and I'll try do do it on the go while changing/adding stuff.
-the testing framwrok used is Google Test.
+the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
