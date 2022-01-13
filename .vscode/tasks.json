@@ -12,10 +12,7 @@
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -28,7 +25,10 @@
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         }
     ]
