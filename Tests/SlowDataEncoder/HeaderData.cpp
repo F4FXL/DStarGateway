@@ -27,7 +27,7 @@ namespace SlowDataEncoderTests
     
     };
 
-    TEST_F(SlowDataEncoder_headerData, textDataCorrectlySet)
+    TEST_F(SlowDataEncoder_headerData, headerDataCorrectlySet)
     {
         CHeaderData header;
         header.setFlags('1', '2', '3');
