@@ -17,7 +17,9 @@
 #include "SlowDataEncoder.h"
 #include "CCITTChecksum.h"
 #include "DStarDefines.h"
-#include "Utils.h"
+
+// Only works for positive numbers
+#define roundUpToMultipleOf(n, m)(((n + m - 1) / m) * m)
 
 const unsigned int  SLOW_DATA_BLOCK_SIZE = 6U;
 
@@ -137,7 +139,7 @@ void CSlowDataEncoder::getInterleavedData(unsigned char* data)
 
 void CSlowDataEncoder::buildInterleavedData()
 {
-	//first build interleaved data if we do not have it
+	//first build interleaved data if we do not h(x + multiple - 1 - (x % multiple))ave it
 	if(m_interleavedData == nullptr)
 	{	
 		getInterleavedDataLength();
@@ -177,7 +179,7 @@ void CSlowDataEncoder::buildInterleavedData()
 		else if(m_textData == nullptr && m_gpsData != nullptr && m_headerData != nullptr){
 			//could not find any spec about this particular case, let's put the data one after the other
 			::memcpy(m_interleavedData, m_gpsData, SLOW_DATA_FULL_BLOCK_SIZE);
-			::memcpy(m_interleavedData + SLOW_DATA_FULL_BLOCK_SIZE, m_headerData, HEADER_SIZE);
+			::memcpy(m_interleavedData + SLOW_DATA_FULL_BLOCK_SIZE, m_headerData, SLOW_DATA_FULL_BLOCK_SIZE);
 		}
 	}
 }
@@ -187,9 +189,9 @@ unsigned int CSlowDataEncoder::getInterleavedDataLength()
 	//calculate size (including filler bytes);
 	m_interleavedDataFullSize = 0U;
 	if(m_textData) m_interleavedDataFullSize += TEXT_SIZE;
-	if(m_headerData) m_interleavedDataFullSize += HEADER_SIZE;
-	if(m_gpsData) m_interleavedDataFullSize += m_gpsDataSize;
-	m_interleavedDataFullSize = SLOW_DATA_FULL_BLOCK_SIZE * (1U + ((m_interleavedDataFullSize - 1U) / SLOW_DATA_FULL_BLOCK_SIZE));
+	if(m_headerData) m_interleavedDataFullSize += SLOW_DATA_BLOCK_SIZE;
+	if(m_gpsData) m_interleavedDataFullSize += m_gpsDataFullSize;
+	m_interleavedDataFullSize = roundUpToMultipleOf(m_interleavedDataFullSize, SLOW_DATA_FULL_BLOCK_SIZE); //SLOW_DATA_FULL_BLOCK_SIZE * (1U + ((m_interleavedDataFullSize - 1U) / SLOW_DATA_FULL_BLOCK_SIZE));
 	return m_interleavedDataFullSize;
 }
 
@@ -343,9 +345,9 @@ void CSlowDataEncoder::setGPSData(const std::string& gpsData)
 	if((gpsDataStrLen = gpsData.size()) > 0){
 		unsigned int gpsDataPos;
 		unsigned int strPos = 0;
-		m_gpsDataSize = 1U + ((gpsDataStrLen - 1U) / 6U);//to make room for the type bytes
-		m_gpsDataSize += gpsDataStrLen;
-		m_gpsDataFullSize = SLOW_DATA_FULL_BLOCK_SIZE * (1U + ((m_gpsDataSize - 1U) / SLOW_DATA_FULL_BLOCK_SIZE));
+		unsigned int typeBytesCount = 1U + ((gpsDataStrLen - 1U) / SLOW_DATA_BLOCK_SIZE);//to make room for the type bytes
+		m_gpsDataSize = typeBytesCount + gpsDataStrLen;
+		m_gpsDataFullSize = roundUpToMultipleOf(m_gpsDataSize, SLOW_DATA_FULL_BLOCK_SIZE);
 
 		m_gpsData = new unsigned char[m_gpsDataFullSize];
 		::memset(m_gpsData, 'f', m_gpsDataFullSize);
