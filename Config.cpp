@@ -43,7 +43,7 @@ bool CConfig::load()
     std::ifstream file;
     file.open(m_filename, std::ios::in);
     if(!file.is_open()) {
-        CLog::logError("Failed to open configuration file %s", m_filename);
+        CLog::logError("Failed to open configuration file %s", m_filename.c_str());
         return false;
     }
 
@@ -93,28 +93,16 @@ void CConfig::stripComment(std::string& s) const
     free(sdup);// could we use delete sdup here?
 }
 
-TConfigValue * CConfig::readKeyAndValue(const std::string s) const
+TConfigValue * CConfig::readKeyAndValue(const std::string& s) const
 {
     TConfigValue* res = nullptr;
-
-    char * sdup = strdup(boost::trim_copy(s).c_str());
-
-    char * keyPtr = strtok(sdup, "=");
-    std::string key(keyPtr != nullptr ? keyPtr : "");
-
-    boost::trim(key);
-
-    if(!key.empty()) {
-        char * valuePtr = strtok(nullptr, "=");
-        std::string value(valuePtr != nullptr? valuePtr : "");
-
+    auto sCopy = boost::trim_copy(s);
+    auto equalPos = sCopy.find_first_of('=');
+    if(equalPos != std::string::npos) {
         res = new TConfigValue;
-        res->m_key = key;
-        res->m_value = boost::trim_copy(value);
+        res->m_key.assign(sCopy.substr(0, equalPos));
+        res->m_value.assign(sCopy.substr(equalPos + 1));
     }
-
-    free(sdup);// could we use delete sdup here?
-
     return res;
 }
 
