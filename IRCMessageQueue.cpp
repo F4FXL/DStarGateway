@@ -33,7 +33,7 @@ IRCMessageQueue::IRCMessageQueue()
 
 IRCMessageQueue::~IRCMessageQueue()
 {
-	std::lock_guard lockAccessQueue(accessMutex);
+	std::lock_guard lockAccessQueue(m_accessMutex);
 	while (! m_queue.empty()) {
 		delete m_queue.front();
 		m_queue.pop();
@@ -52,7 +52,7 @@ void IRCMessageQueue::signalEOF()
 
 bool IRCMessageQueue::messageAvailable()
 {
-  std::lock_guard lockAccessQueue(accessMutex);
+  std::lock_guard lockAccessQueue(m_accessMutex);
   bool retv = ! m_queue.empty();
 
   return retv;
@@ -60,14 +60,14 @@ bool IRCMessageQueue::messageAvailable()
 
 IRCMessage *IRCMessageQueue::peekFirst()
 {
-	std::lock_guard lockAccessQueue(accessMutex);
+	std::lock_guard lockAccessQueue(m_accessMutex);
 	IRCMessage *msg = m_queue.empty() ? NULL : m_queue.front();
 	return msg;
 }
 
 IRCMessage *IRCMessageQueue::getMessage()
 {
-	std::lock_guard lockAccessQueue(accessMutex);
+	std::lock_guard lockAccessQueue(m_accessMutex);
 	IRCMessage *msg = m_queue.empty() ? NULL : m_queue.front();
 	if (msg)
 		m_queue.pop();
@@ -77,7 +77,7 @@ IRCMessage *IRCMessageQueue::getMessage()
 
 void IRCMessageQueue::putMessage(IRCMessage *m)
 {
-	std::lock_guard lockAccessQueue(accessMutex);
+	std::lock_guard lockAccessQueue(m_accessMutex);
 	m_queue.push(m);
 }
 

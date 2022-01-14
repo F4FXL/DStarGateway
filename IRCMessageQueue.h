@@ -46,7 +46,7 @@ public:
 
 private:
 	bool m_eof;
-	std::mutex accessMutex;
+	std::mutex m_accessMutex;
 	std::queue<IRCMessage *> m_queue;
 };
 
