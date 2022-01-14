@@ -20,102 +20,182 @@
 
 #include "../../APRSParser.h"
 
-class APRSParser_parseAPRSFrame : public ::testing::Test {
- 
-};
+namespace APRSParserTests
+{
+    class APRSParser_parseAPRSFrame : public ::testing::Test {
+    
+    };
 
-TEST_F(APRSParser_parseAPRSFrame, EmpyString) {
+    TEST_F(APRSParser_parseAPRSFrame, EmpyString)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("", aprsFrame);
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("", aprsFrame);
+        EXPECT_FALSE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
+        EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0U);
+    }
 
-    EXPECT_FALSE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
-    EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
-    EXPECT_EQ(aprsFrame.getPath().size(), 0U);
-}
+    TEST_F(APRSParser_parseAPRSFrame, NoSourceCallsign)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame(">APRS::F4ABC    Test Message", aprsFrame);
 
-TEST_F(APRSParser_parseAPRSFrame, NoSourceCallsign) {
+        EXPECT_FALSE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
+        EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0U);
+    }
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame(">APRS::F4ABC    Test Message", aprsFrame);
+    TEST_F(APRSParser_parseAPRSFrame, NoDestCallsign)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("N0CALL>::F4ABC    Test Message", aprsFrame);
 
-    EXPECT_FALSE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
-    EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
-    EXPECT_EQ(aprsFrame.getPath().size(), 0U);
-}
+        EXPECT_FALSE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
+        EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0U);
+    }
 
-TEST_F(APRSParser_parseAPRSFrame, NoDestCallsign) {
+    TEST_F(APRSParser_parseAPRSFrame, CorrectMessageFrameWithDigipeater)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("N0CALL>APRS,WIDE1-1,WIDE2-2::F4ABC    :Test Message", aprsFrame);
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("N0CALL>::F4ABC    Test Message", aprsFrame);
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "N0CALL");
+        EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
+        EXPECT_EQ(aprsFrame.getPath().size(), 2);
+        EXPECT_STREQ(aprsFrame.getPath()[0].c_str(), "WIDE1-1");
+        EXPECT_STREQ(aprsFrame.getPath()[1].c_str(), "WIDE2-2");
+    }
 
-    EXPECT_FALSE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
-    EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
-    EXPECT_EQ(aprsFrame.getPath().size(), 0U);
-}
+    TEST_F(APRSParser_parseAPRSFrame, CorrectMessageFrameWithoutDigipeater)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("N0CALL>APRS::F4ABC    :Test Message", aprsFrame);
 
-TEST_F(APRSParser_parseAPRSFrame, CorrectMessageFrameWithDigipeater) {
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "N0CALL");
+        EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("N0CALL>APRS,WIDE1-1,WIDE2-2::F4ABC    :Test Message", aprsFrame);
+    TEST_F(APRSParser_parseAPRSFrame, InvalidMessageFrame)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("N0CALL>APRS::F4ABC&@#$:Test Message", aprsFrame);
 
-    EXPECT_TRUE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "N0CALL");
-    EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
-    EXPECT_EQ(aprsFrame.getPath().size(), 2);
-    EXPECT_STREQ(aprsFrame.getPath()[0].c_str(), "WIDE1-1");
-    EXPECT_STREQ(aprsFrame.getPath()[1].c_str(), "WIDE2-2");
-}
+        EXPECT_FALSE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
+        EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0U);
+    }
 
-TEST_F(APRSParser_parseAPRSFrame, CorrectMessageFrameWithoutDigipeater) {
+    TEST_F(APRSParser_parseAPRSFrame, ID51)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F4FXL-8>API51,DSTAR:!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n", aprsFrame);
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("N0CALL>APRS::F4ABC    :Test Message", aprsFrame);
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "API51");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F4FXL-8");
+        EXPECT_EQ(aprsFrame.getType(), APFT_POSITION);
+        EXPECT_EQ(aprsFrame.getPath().size(), 1);
+        EXPECT_STREQ(aprsFrame.getPath()[0].c_str(), "DSTAR");
+    }
 
-    EXPECT_TRUE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "N0CALL");
-    EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
-    EXPECT_EQ(aprsFrame.getPath().size(), 0);
-}
+    TEST_F(APRSParser_parseAPRSFrame, telemetryLabels)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F5ZEE-C>APRS::F5ZEE-C  :PARM.PA Temp", aprsFrame);
 
-TEST_F(APRSParser_parseAPRSFrame, InvalidMessageFrame) {
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F5ZEE-C  :PARM.PA Temp");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F5ZEE-C");
+        EXPECT_EQ(aprsFrame.getType(), APFT_TELEMETRY);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("N0CALL>APRS::F4ABC&@#$:Test Message", aprsFrame);
+    TEST_F(APRSParser_parseAPRSFrame, telemetryEQNS)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F5ZEE-C>APRS::F5ZEE-C  :EQNS.0,0.16016,-40,0,0,0,0,0,0,0,0,0,0,0,0", aprsFrame);
 
-    EXPECT_FALSE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "");
-    EXPECT_EQ(aprsFrame.getType(), APFT_UNKNOWN);
-    EXPECT_EQ(aprsFrame.getPath().size(), 0U);
-}
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F5ZEE-C  :EQNS.0,0.16016,-40,0,0,0,0,0,0,0,0,0,0,0,0");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F5ZEE-C");
+        EXPECT_EQ(aprsFrame.getType(), APFT_TELEMETRY);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
 
-// 
+    TEST_F(APRSParser_parseAPRSFrame, telemetryEQNSWithSeqnum)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F5ZEE-C>APRS::F5ZEE-C  :EQNS.0,0.16016,-40,0,0,0,0,0,0,0,0,0,0,0,0{ABCD", aprsFrame);
 
-TEST_F(APRSParser_parseAPRSFrame, ID51) {
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F5ZEE-C  :EQNS.0,0.16016,-40,0,0,0,0,0,0,0,0,0,0,0,0{ABCD");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F5ZEE-C");
+        EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
 
-    CAPRSFrame aprsFrame;
-    bool retVal = CAPRSParser::parseFrame("F4FXL-8>API51,DSTAR:!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n", aprsFrame);
 
-    EXPECT_TRUE(retVal);
-    EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "!1234.56N/12345.67E[/A=000886QRV DStar\r\r\n");
-    EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "API51");
-    EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F4FXL-8");
-    EXPECT_EQ(aprsFrame.getType(), APFT_POSITION);
-    EXPECT_EQ(aprsFrame.getPath().size(), 1);
-    EXPECT_STREQ(aprsFrame.getPath()[0].c_str(), "DSTAR");
+    TEST_F(APRSParser_parseAPRSFrame, telemetryReport)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F5ZEE-C>APRS:T#581,342,000,000,000,000,00000000", aprsFrame);
+
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), "T#581,342,000,000,000,000,00000000");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F5ZEE-C");
+        EXPECT_EQ(aprsFrame.getType(), APFT_TELEMETRY);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
+
+    TEST_F(APRSParser_parseAPRSFrame, messageToSelf)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F4ABC>APRS::F4ABC    :Test Message{ABCD", aprsFrame);
+
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message{ABCD");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F4ABC");
+        EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
+
+    TEST_F(APRSParser_parseAPRSFrame, messageToSelfNoSeqNum)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F4ABC>APRS::F4ABC    :Test Message", aprsFrame);
+
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ":F4ABC    :Test Message");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "APRS");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F4ABC");
+        EXPECT_EQ(aprsFrame.getType(), APFT_MESSAGE);
+        EXPECT_EQ(aprsFrame.getPath().size(), 0);
+    }
 }

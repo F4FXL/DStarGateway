@@ -106,9 +106,21 @@ bool CAPRSParser::parseInt(CAPRSFrame& frame)
             }
             break;
         case ':':
-            if(body[9] == ':' && std::all_of(body.begin(), body.begin() + 9,
-                                            [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); }))
+            // we have either message or telemetry labels or telemetry EQNS
+            if(body[9] == ':'
+                && std::all_of(body.begin(), body.begin() + 9, [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); })) {
                 type = APFT_MESSAGE;
+
+                //If reciepient is same as source and we donot have a sequence number at the end of message, Then it is telemetry
+                if(body.find(frame.getSource()) == 0U) {
+                    auto eqnsPos = body.find("EQNS.");
+                    auto parmPos = body.find("PARM.");
+                    auto seqNumPos = body.find_last_of('{');
+                    if((eqnsPos == 10U || parmPos == 10U) && seqNumPos == std::string::npos) {
+                        type = APFT_TELEMETRY;
+                    }
+                }
+            }
             break;
         case '>':
             type = APFT_STATUS;
@@ -120,6 +132,11 @@ bool CAPRSParser::parseInt(CAPRSFrame& frame)
             break;
         case '{':
             type = APFT_UNKNOWN; //
+            break;
+        case 'T':
+            if(body[0] == '#') {
+                type = APFT_TELEMETRY;
+            }
             break;
         default:
             type = APFT_UNKNOWN;

@@ -29,7 +29,8 @@ enum APRS_FRAME_TYPE {
     APFT_NMEA,
     APFT_STATUS,
     APFT_OBJECT,
-    APFT_WX
+    APFT_WX,
+    APFT_TELEMETRY
 };
 
 class CAPRSFrame {
