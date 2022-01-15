@@ -1,5 +1,6 @@
 /*
  *   Copyright (C) 2010,2011,2012,2013,2014,2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,7 +17,6 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if defined(ENABLE_NAT_TRAVERSAL)
 #ifndef NatTraversalHandler_H
 #define NatTraversalHandler_H
 
@@ -24,7 +24,8 @@
 
 #include "G2ProtocolHandler.h"
 
-#include <wx/wx.h>
+#include <string>
+#include <unordered_map>
 #include <ctime>
 
 enum NAT_TRAVERSAL_TYPE {
@@ -36,7 +37,7 @@ enum NAT_TRAVERSAL_TYPE {
 
 class CNatTraversalRecord {
 public:
-    CNatTraversalRecord(const wxString& address) :
+    CNatTraversalRecord(const std::string& address) :
     m_address(address),
     m_timestamp(0)
     {
@@ -53,11 +54,9 @@ public:
     }
 
 private:
-    wxString m_address;
+    std::string m_address;
     std::time_t m_timestamp;
 };
-
-WX_DECLARE_STRING_HASH_MAP(CNatTraversalRecord*, CNatTraversalCache_t);
 
 /*
 * This keeps track of when we UDP punched to one destination so to avoid unnecessary traffic on each ircddb reporting
@@ -68,13 +67,11 @@ public:
     ~CNatTraversalHandler();
 
     void setG2Handler(CG2ProtocolHandler* handler);
-    void traverseNatG2(const wxString& address);
+    void traverseNatG2(const std::string& address);
 
 private:
-    CNatTraversalCache_t m_g2cache;    
+    std::unordered_map<std::string, CNatTraversalRecord*> m_g2cache;    
     CG2ProtocolHandler* m_g2Handler;
 };
-
-#endif
 
 #endif

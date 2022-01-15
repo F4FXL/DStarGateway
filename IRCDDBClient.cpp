@@ -400,7 +400,7 @@ bool CIRCDDBClient::receiveUser(std::string& userCallsign, std::string& repeater
 	address = m->getParam(3);
 	timeStamp = m->getParam(4);
 
-	CLog::logTrace("IRC Receive User %s %s %s %s %s", userCallsign.c_str(), repeaterCallsign.c_str(), gatewayCallsign.c_str(), address.c_str(), timeStamp.c_str());
+	//CLog::logTrace("IRC Receive User %s %s %s %s %s", userCallsign.c_str(), repeaterCallsign.c_str(), gatewayCallsign.c_str(), address.c_str(), timeStamp.c_str());
 
 	delete m;
 	return true;

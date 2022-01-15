@@ -634,6 +634,8 @@ bool IRCDDBApp::findUser(const std::string& usrCall)
 	return true;
 }
 
+
+
 void IRCDDBApp::msgChannel(IRCMessage *m)
 {
 	if (0==m->getPrefixNick().compare(0, 2, "s-") && m->numParams>=2)  // server msg

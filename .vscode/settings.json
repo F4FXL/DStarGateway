@@ -7,7 +7,20 @@
         }
     ],
     "files.associations": {
-        "new": "cpp"
+        "new": "cpp",
+        "exception": "cpp",
+        "*.tcc": "cpp",
+        "typeinfo": "cpp",
+        "limits": "cpp",
+        "tuple": "cpp",
+        "bitset": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "mutex": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "stop_token": "cpp",
+        "streambuf": "cpp"
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [

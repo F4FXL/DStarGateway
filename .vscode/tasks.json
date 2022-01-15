@@ -8,9 +8,13 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3", "ENABLE_DEBUG=1"
+                "-j3",
+                "ENABLE_DEBUG=1"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
@@ -19,12 +23,10 @@
             "command": "make",
             "args": [
                 "-j3",
-                "tests", "ENABLE_DEBUG=1"
+                "tests",
+                "ENABLE_DEBUG=1"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         }
     ]

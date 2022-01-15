@@ -1,5 +1,6 @@
 /*
  *   Copyright (C) 2010,2011,2012,2013,2014,2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +17,6 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if defined(ENABLE_NAT_TRAVERSAL)
-
 #include "NatTraversalHandler.h"
 
 const unsigned int CACHE_SIZE = 500U;
@@ -31,8 +30,10 @@ m_g2Handler(NULL)
 
 CNatTraversalHandler::~CNatTraversalHandler()
 {
-    for (CNatTraversalCache_t::iterator it = m_g2cache.begin(); it != m_g2cache.end(); ++it)
+    for (auto it = m_g2cache.begin(); it != m_g2cache.end(); ++it)
 		delete it->second;
+
+    m_g2cache.clear();
 }
 
 void CNatTraversalHandler::setG2Handler(CG2ProtocolHandler * handler)
@@ -40,7 +41,7 @@ void CNatTraversalHandler::setG2Handler(CG2ProtocolHandler * handler)
     m_g2Handler = handler;
 }
 
-void CNatTraversalHandler::traverseNatG2(const wxString& address)
+void CNatTraversalHandler::traverseNatG2(const std::string& address)
 {
     if(m_g2Handler != NULL){
         CNatTraversalRecord* record = m_g2cache[address];
@@ -57,5 +58,3 @@ void CNatTraversalHandler::traverseNatG2(const wxString& address)
         }
     }
 }
-
-#endif

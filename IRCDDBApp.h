@@ -67,6 +67,8 @@ public:
 	bool findRepeater(const std::string& s);
 	bool findGateway(const std::string& s);
 
+	bool notifyRepeaterNatTraversal(const std::string& repeater);
+
 	bool sendHeard(const std::string& myCall, const std::string& myCallExt, const std::string& yourCall, const std::string& rpt1, const std::string& rpt2, unsigned char flag1,
 		unsigned char flag2, unsigned char flag3, const std::string& destination, const std::string& tx_msg, const std::string& tx_stats);
 

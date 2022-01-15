@@ -733,6 +733,7 @@ void CDStarGatewayThread::processIrcDDB()
 		m_statusTimer2.start();
 	}
 
+
 	// Process incoming ircDDB messages, updating the caches
 	for (;;) {
 		IRCDDB_RESPONSE_TYPE type = m_irc->getMessageType();

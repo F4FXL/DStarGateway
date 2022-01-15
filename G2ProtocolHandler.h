@@ -47,9 +47,10 @@ public:
 	CAMBEData*   readAMBE();
 
 	void close();
+	void traverseNat(const std::string& address);
 
 private:
-	std::unordered_map<uint32_t, unsigned int> portmap;
+	std::unordered_map<uint32_t, unsigned int> m_portmap;
 
 	CUDPReaderWriter m_socket;
 	G2_TYPE          m_type;
