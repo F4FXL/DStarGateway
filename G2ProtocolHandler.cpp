@@ -178,7 +178,7 @@ void CG2ProtocolHandler::traverseNat(const std::string& address)
 	
 	in_addr addr = CUDPReaderWriter::lookup(address);
 
-	//wxLogError(wxT("Punching hole to %s"), address.mb_str());
+	CLog::logInfo("Punching hole to %s", address.c_str());
 
 	m_socket.write(buffer, 1, addr, G2_DV_PORT);
 }

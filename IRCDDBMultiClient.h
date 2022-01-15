@@ -156,6 +156,7 @@ public:
 	virtual bool receiveGateway(std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address, std::string & timeStamp);
+	virtual bool receiveNATTraversalG2(std::string& address);
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 	virtual void close();
 

@@ -76,9 +76,7 @@ m_dextraPool(NULL),
 m_dplusPool(NULL),
 m_dcsPool(NULL),
 m_g2Handler(NULL),
-#if defined(ENABLE_NAT_TRAVERSAL)
 m_natTraversal(NULL),
-#endif
 m_aprsWriter(NULL),
 m_irc(NULL),
 m_cache(),
@@ -209,12 +207,10 @@ void* CDStarGatewayThread::Entry()
 		m_g2Handler = NULL;
 	}
 
-#if defined(ENABLE_NAT_TRAVERSAL)
 	if(m_g2Handler != NULL) {
 		m_natTraversal = new CNatTraversalHandler();
 		m_natTraversal->setG2Handler(m_g2Handler);
 	}
-#endif
 
 	// Wait here until we have the essentials to run
 	while (!m_killed && (m_dextraPool == NULL || m_dplusPool == NULL || m_dcsPool == NULL || m_g2Handler == NULL || (m_icomRepeaterHandler == NULL && m_hbRepeaterHandler == NULL && m_dummyRepeaterHandler == NULL) || m_gatewayCallsign.empty()))
@@ -748,9 +744,6 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateUser(user, repeater, gateway, address, timestamp, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("USER: %s NOT FOUND", user.c_str());
 					}
@@ -767,9 +760,6 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateRepeater(repeater, gateway, address, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("REPEATER: %s NOT FOUND", repeater.c_str());
 					}
@@ -787,16 +777,23 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("GATEWAY: %s %s", gateway.c_str(), address.c_str());
 						m_cache.updateGateway(gateway, address, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)						
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("GATEWAY: %s NOT FOUND", gateway.c_str());
 					}
 				}
 				break;
-			case IDRT_NATTRAVERSAL_G2:
+			case IDRT_NATTRAVERSAL_G2: {
+					std::string address;
+					bool res = m_irc->receiveNATTraversalG2(address);
+					if(!res)
+						return;
+
+					CLog::logInfo("%s wants to G2 route to us, punching UDP Holes through NAT", address.c_str());
+					m_g2Handler->traverseNat(address);
+				}
 				break;
+			case IDRT_NONE:
+				return;
 			default:
 				return;
 		}

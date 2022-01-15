@@ -138,6 +138,8 @@ public:
 
 	virtual bool receiveUser(std::string& userCallsign, std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address, std::string& timeStamp) = 0;
 
+	virtual bool receiveNATTraversalG2(std::string& address) = 0;
+
 	virtual void close() = 0;		// Implictely kills any threads in the IRC code
 };
 

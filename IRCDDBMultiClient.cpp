@@ -183,12 +183,24 @@ bool CIRCDDBMultiClient::findUser(const std::string & userCallsign)
 
 bool CIRCDDBMultiClient::notifyRepeaterNatTraversal(const std::string& repeater)
 {
+	// NAT traversal message does not expect a response over IRC
 	bool result = true;
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
 		result = m_clients[i]->notifyRepeaterNatTraversal(repeater) && result;
 	}
 
 	return result;
+}
+
+bool CIRCDDBMultiClient::receiveNATTraversalG2(std::string& address)
+{
+	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_NATTRAVERSAL_G2, "CIRCDDBMultiClient::receiveNATTraversalG2: unexpected response type");
+	if (item == NULL)
+		return false;
+
+	address = item->getAddress();
+
+	return true;
 }
 
 IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
@@ -217,6 +229,11 @@ IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 					type = IDRT_NONE;
 				key = repeater;
 				break;
+			}
+			case IDRT_NATTRAVERSAL_G2: {
+				if (!m_clients[i]->receiveNATTraversalG2(address))
+					type = IDRT_NATTRAVERSAL_G2;
+				key = "NAT_TRAVERSAL_G2";
 			}
 			case IDRT_NONE: {
 			default:

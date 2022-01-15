@@ -37,9 +37,7 @@
 #include "Timer.h"
 #include "Defs.h"
 #include "Thread.h"
-#if defined(ENABLE_NAT_TRAVERSAL)
 #include "NatTraversalHandler.h"
-#endif
 
 class CDStarGatewayThread : public CThread{
 public:
@@ -106,9 +104,7 @@ private:
 	CDPlusProtocolHandlerPool*     m_dplusPool;
 	CDCSProtocolHandlerPool*       m_dcsPool;
 	CG2ProtocolHandler*       m_g2Handler;
-#if defined(ENABLE_NAT_TRAVERSAL)
 	CNatTraversalHandler*     m_natTraversal;
-#endif
 	CAPRSHandler*              m_aprsWriter;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;
