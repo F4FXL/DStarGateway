@@ -51,13 +51,17 @@ void CAPRSUnit::clock(unsigned int ms)
 {
     m_timer.clock(ms);
     if(m_status == APS_IDLE && !m_frameBuffer.empty() && m_timer.hasExpired()) {
-        m_status = APS_TRANSMIT;
+
         auto frame = m_frameBuffer.front();
         m_frameBuffer.pop_front();
 
         m_headerData = new CHeaderData();
         std::string dprs, text;
-        CAPRSToDPRS::aprsToDPRS(dprs, text, *m_headerData, *frame);
+        if(!CAPRSToDPRS::aprsToDPRS(dprs, text, *m_headerData, *frame)) {
+            delete m_headerData;
+            m_headerData = nullptr;
+            return;
+        }
 
         m_slowData = new CSlowDataEncoder();
         
@@ -73,6 +77,7 @@ void CAPRSUnit::clock(unsigned int ms)
         m_seq = 0U;
 
         m_start = std::chrono::high_resolution_clock::now();
+        m_status = APS_TRANSMIT;
         return;
     }
 
