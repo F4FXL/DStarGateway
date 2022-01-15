@@ -24,14 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 IRCMessage::IRCMessage()
 {
-	numParams = 0;
+	m_numParams = 0;
 	m_prefixParsed = false;
 }
 
 IRCMessage::IRCMessage(const std::string& toNick, const std::string& msg)
 {
 	m_command.assign("PRIVMSG");
-	numParams = 2;
+	m_numParams = 2;
 	m_params.push_back(toNick);
 	m_params.push_back(msg);
 	m_prefixParsed = false;
@@ -40,7 +40,7 @@ IRCMessage::IRCMessage(const std::string& toNick, const std::string& msg)
 IRCMessage::IRCMessage(const std::string& cmd)
 {
 	m_command = cmd;
-	numParams = 0;
+	m_numParams = 0;
 	m_prefixParsed = false;
 }
 
@@ -52,7 +52,7 @@ IRCMessage::~IRCMessage()
 void IRCMessage::addParam(const std::string& p)
 {
 	m_params.push_back(p);
-	numParams = m_params.size();
+	m_numParams = m_params.size();
 }
 
 int IRCMessage::getParamCount()
@@ -119,8 +119,8 @@ void IRCMessage::composeMessage(std::string& output)
 
 	o.append(m_command);
 
-	for (int i=0; i < numParams; i++) {
-		if (i == (numParams - 1))
+	for (int i=0; i < m_numParams; i++) {
+		if (i == (m_numParams - 1))
 			o.append(std::string(" :") + m_params[i]);
 		else
 			o.append(std::string(" ") + m_params[i]);

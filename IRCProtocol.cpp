@@ -106,12 +106,12 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 			IRCMessage *m2 = new IRCMessage();
 			m2->m_command = std::string("PONG");
 			if (m->m_params.size() > 0) {
-				m2->numParams = 1;
+				m2->m_numParams = 1;
 				m2->m_params.push_back(m->m_params[0]);
 			}
 			sendQ -> putMessage(m2);
 		} else if (0 == m->m_command.compare("JOIN")) {
-			if (m->numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
 				if (0==m->getPrefixNick().compare(m_currentNick) && 6==m_state) {
 					if (m_debugChannel.size())
 						m_state = 7;  // next: join debug_channel
@@ -121,7 +121,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 					m_app->userJoin(m->getPrefixNick(), m->getPrefixName(), m->getPrefixHost());
 			}
 
-			if (m->numParams>=1 && 0==m->m_params[0].compare(m_debugChannel)) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_debugChannel)) {
 				if (0==m->getPrefixNick().compare(m_currentNick) && 8==m_state)
 					m_state = 10; // next: WHO *
 			}
@@ -131,12 +131,12 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 				m_state = 11;
 			}
 		} else if (0 == m->m_command.compare("PART")) {
-			if (m->numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
 				if (m_app != NULL)
 					m_app->userLeave(m->getPrefixNick());
 			}
 		} else if (0 == m->m_command.compare("KICK")) {
-			if (m->numParams>=2 && 0==m->m_params[0].compare(m_channel)) {
+			if (m->m_numParams>=2 && 0==m->m_params[0].compare(m_channel)) {
 				if (0 == m->m_params[1].compare(m_currentNick)) {
 					// i was kicked!!
 					delete m;
@@ -148,11 +148,11 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 			if (m_app)
 				m_app->userLeave(m->getPrefixNick());
 		} else if (0 == m->m_command.compare("MODE")) {
-			if (m->numParams>=3 && 0==m->m_params[0].compare(m_channel)) {
+			if (m->m_numParams>=3 && 0==m->m_params[0].compare(m_channel)) {
 				if (m_app) {
 					std::string mode = m->m_params[1];
 
-					for (size_t i=1; i<mode.size() && (size_t)m->numParams>=i+2; i++) {
+					for (size_t i=1; i<mode.size() && (size_t)m->m_numParams>=i+2; i++) {
 						if ('o' == mode[i]) {
 							if ('+' == mode[0])
 								m_app->userChanOp(m->m_params[i+1], true);
@@ -163,14 +163,14 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 				}
 			}
 		} else if (0 == m->m_command.compare("PRIVMSG")) {
-			if (m->numParams==2 && m_app) {
+			if (m->m_numParams==2 && m_app) {
 				if (0 == m->m_params[0].compare(m_channel) && m_app)
 					m_app->msgChannel(m);
 				else if (0 == m->m_params[0].compare(m_currentNick) && m_app)
 					m_app->msgQuery(m);
 			}
 		} else if (0 == m->m_command.compare("352")) {  // WHO list
-			if (m->numParams>=7 && 0==m->m_params[0].compare(m_currentNick) && 0==m->m_params[1].compare(m_channel)) {
+			if (m->m_numParams>=7 && 0==m->m_params[0].compare(m_currentNick) && 0==m->m_params[1].compare(m_channel)) {
 				if (m_app) {
 					m_app->userJoin(m->m_params[5], m->m_params[2], m->m_params[3]);
 					m_app->userChanOp(m->m_params[5], 0==m->m_params[6].compare("H@"));
@@ -182,7 +182,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 				m_timer = 10; // wait 5 seconds..
 			}
 		} else if (0==m->m_command.compare("332") || 0==m->m_command.compare("TOPIC")) {  // topic
-			if (2==m->numParams && m_app && 0==m->m_params[0].compare(m_channel))
+			if (2==m->m_numParams && m_app && 0==m->m_params[0].compare(m_channel))
 				m_app->setTopic(m->m_params[1]);
 		}
 
@@ -194,13 +194,13 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 		case 1:
 			m = new IRCMessage();
 			m->m_command = std::string("PASS");
-			m->numParams = 1;
+			m->m_numParams = 1;
 			m->m_params.push_back(m_password);
 			sendQ->putMessage(m);
 
 			m = new IRCMessage();
 			m->m_command = std::string("NICK");
-			m->numParams = 1;
+			m->m_numParams = 1;
 			m->m_params.push_back(m_currentNick);
 			sendQ->putMessage(m);
 
@@ -212,7 +212,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 			if (0 == m_timer) {
 				m = new IRCMessage();
 				m->m_command = std::string("USER");
-				m->numParams = 4;
+				m->m_numParams = 4;
 				m->m_params.push_back(m_name);
 				m->m_params.push_back(std::string("0"));
 				m->m_params.push_back(std::string("*"));
@@ -229,7 +229,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 				chooseNewNick();
 				m = new IRCMessage();
 				m->m_command = std::string("NICK");
-				m->numParams = 1;
+				m->m_numParams = 1;
 				m->m_params.push_back(m_currentNick);
 				sendQ->putMessage(m);
 
@@ -246,7 +246,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 		case 5:
 			m = new IRCMessage();
 			m->m_command = std::string("JOIN");
-			m->numParams = 1;
+			m->m_numParams = 1;
 			m->m_params.push_back(m_channel);
 			sendQ->putMessage(m);
 
@@ -265,7 +265,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 
 			m = new IRCMessage();
 			m->m_command = std::string("JOIN");
-			m->numParams = 1;
+			m->m_numParams = 1;
 			m->m_params.push_back(m_debugChannel);
 			sendQ->putMessage(m);
 
@@ -281,7 +281,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 		case 10:
 			m = new IRCMessage();
 			m->m_command = std::string("WHO");
-			m->numParams = 2;
+			m->m_numParams = 2;
 			m->m_params.push_back(m_channel);
 			m->m_params.push_back(std::string("*"));
 			sendQ->putMessage(m);
@@ -297,7 +297,7 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 			if (0 == m_timer) {
 				m = new IRCMessage();
 				m->m_command = std::string("PING");
-				m->numParams = 1;
+				m->m_numParams = 1;
 				m->m_params.push_back(m_currentNick);
 				sendQ->putMessage(m);
 

@@ -36,7 +36,7 @@ public:
 	std::string m_command;
 	std::vector<std::string> m_params;
 
-	int numParams;
+	int m_numParams;
 	std::string& getPrefixNick();
 	std::string& getPrefixName();
 	std::string& getPrefixHost();

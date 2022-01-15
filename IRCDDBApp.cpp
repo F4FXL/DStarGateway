@@ -670,7 +670,7 @@ bool IRCDDBApp::notifyRepeaterNatTraversal(const std::string& repeater)
 
 void IRCDDBApp::msgChannel(IRCMessage *m)
 {
-	if (0==m->getPrefixNick().compare(0, 2, "s-") && m->numParams>=2)  // server msg
+	if (0==m->getPrefixNick().compare(0, 2, "s-") && m->m_numParams>=2)  // server msg
 		doUpdate(m->m_params[1]);
 }
 
@@ -826,7 +826,7 @@ static std::string getTableIDString(int tableID, bool spaceBeforeNumber)
 
 void IRCDDBApp::msgQuery(IRCMessage *m)
 {
-	if (0 == m->getPrefixNick().compare(0, 2, "s-") && m->numParams >=2 ) {	// server msg
+	if (0 == m->getPrefixNick().compare(0, 2, "s-") && m->m_numParams >=2 ) {	// server msg
 		std::string msg(m->m_params[1]);
 		std::vector<std::string> tkz = CUtils::stringTokenizer(msg);
 

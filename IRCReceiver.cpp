@@ -131,7 +131,7 @@ void IRCReceiver::Entry()
 						case 2:
 							if (b == ' ') {
 								state = 3; // params are next
-								m->numParams = 1;
+								m->m_numParams = 1;
 								m->m_params.push_back(std::string(""));
 							} else
 								m->m_command.push_back(b);
@@ -139,18 +139,18 @@ void IRCReceiver::Entry()
 
 						case 3:
 							if (b == ' ') {
-								m->numParams++;
-								if (m->numParams >= 15)
+								m->m_numParams++;
+								if (m->m_numParams >= 15)
 									state = 5; // ignore the rest
 								m->m_params.push_back(std::string(""));
-							} else if (b==':' && m->m_params[m->numParams-1].size()==0)
+							} else if (b==':' && m->m_params[m->m_numParams-1].size()==0)
 								state = 4; // rest of line is this param
 							else
-								m->m_params[m->numParams-1].push_back(b);
+								m->m_params[m->m_numParams-1].push_back(b);
 							break;
 
 						case 4:
-							m->m_params[m->numParams-1].push_back(b);
+							m->m_params[m->m_numParams-1].push_back(b);
 							break;
 					} // switch
 				}
