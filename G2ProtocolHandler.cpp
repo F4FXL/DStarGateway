@@ -41,7 +41,7 @@ m_port(0U)
 CG2ProtocolHandler::~CG2ProtocolHandler()
 {
 	delete[] m_buffer;
-	// m_portmap.clear();
+	m_portmap.clear();
 }
 
 bool CG2ProtocolHandler::open()
@@ -59,11 +59,11 @@ bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 #endif
 
 	in_addr addr = header.getYourAddress();
-	// auto found = m_portmap.find(addr.s_addr);
-	// unsigned int port = (m_portmap.end()==found) ? header.getYourPort() : found->second;
+	auto found = m_portmap.find(addr.s_addr);
+	unsigned int port = (m_portmap.end()==found) ? header.getYourPort() : found->second;
 
 	for (unsigned int i = 0U; i < 5U; i++) {
-		bool res = m_socket.write(buffer, length, addr, m_port);
+		bool res = m_socket.write(buffer, length, addr, port);
 		if (!res)
 			return false;
 	}
@@ -81,10 +81,10 @@ bool CG2ProtocolHandler::writeAMBE(const CAMBEData& data)
 #endif
 
 	in_addr addr = data.getYourAddress();
-	// auto found = m_portmap.find(addr.s_addr);
-	// unsigned int port = (m_portmap.end()==found) ? data.getYourPort() : found->second;
+	auto found = m_portmap.find(addr.s_addr);
+	unsigned int port = (m_portmap.end()==found) ? data.getYourPort() : found->second;
 
-	return m_socket.write(buffer, length, addr, m_port);
+	return m_socket.write(buffer, length, addr, port);
 }
 
 G2_TYPE CG2ProtocolHandler::read()
@@ -110,15 +110,15 @@ bool CG2ProtocolHandler::readPackets()
 	m_length = length;
 
 	// save the incoming port (this is to enable mobile hotspots)
-	// if (m_portmap.end() == m_portmap.find(m_address.s_addr)) {
-	// 	CLog::logInfo("new address %s on port %u\n", inet_ntoa(m_address), m_port);
-	// 	m_portmap[m_address.s_addr] = m_port;
-	// } else {
-	// 	if (m_portmap[m_address.s_addr] != m_port) {
-	// 		CLog::logInfo("new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, m_portmap[m_address.s_addr]);
-	// 		m_portmap[m_address.s_addr] = m_port;
-	// 	}
-	// }
+	if (m_portmap.end() == m_portmap.find(m_address.s_addr)) {
+		CLog::logInfo("new address %s on port %u\n", inet_ntoa(m_address), m_port);
+		m_portmap[m_address.s_addr] = m_port;
+	} else {
+		if (m_portmap[m_address.s_addr] != m_port) {
+			CLog::logInfo("new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, m_portmap[m_address.s_addr]);
+			m_portmap[m_address.s_addr] = m_port;
+		}
+	}
 
 	if (m_buffer[0] != 'D' || m_buffer[1] != 'S' || m_buffer[2] != 'V' || m_buffer[3] != 'T') {
 		return true;
