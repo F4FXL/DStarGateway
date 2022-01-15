@@ -16,18 +16,19 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#pragma once
 
-#include "APRSReader.h"
+#include <string>
+#include <utility>
+
+#include "HeaderData.h"
 #include "APRSFrame.h"
-#include "APRSParser.h"
 
-CAPRSReader::CAPRSReader()
+class CAPRSToDPRS
 {
+public:
+    static bool aprsToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame);
 
-}
-
-bool CAPRSReader::readAprsFrame(const std::string& aprsFrame)
-{
-    auto bla = aprsFrame;
-    return false;
-}
+private:
+    static bool messageToDPRS(std::string& dprs, std::string& text, CHeaderData& header, CAPRSFrame& frame);
+};

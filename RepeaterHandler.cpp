@@ -59,7 +59,7 @@ bool                      CRepeaterHandler::m_dtmfEnabled = true;
 
 CHeaderLogger*            CRepeaterHandler::m_headerLogger = NULL;
 
-CAPRSWriter*              CRepeaterHandler::m_aprsWriter  = NULL;
+CAPRSHandler*              CRepeaterHandler::m_aprsWriter  = NULL;
 
 CCallsignList*            CRepeaterHandler::m_restrictList = NULL;
 
@@ -226,6 +226,7 @@ m_heardTimer(1000U, 0U, 100U)		// 100ms
 	m_echo      = new CEchoUnit(this, callsign);
 	m_infoAudio = new CAudioUnit(this, callsign);
 	m_version   = new CVersionUnit(this, callsign);
+	m_aprsUnit = new CAPRSUnit(this);
 
 #ifdef USE_DRATS
 	if (dratsEnabled) {
@@ -366,7 +367,7 @@ void CRepeaterHandler::setHeaderLogger(CHeaderLogger* logger)
 	m_headerLogger = logger;
 }
 
-void CRepeaterHandler::setAPRSWriter(CAPRSWriter* writer)
+void CRepeaterHandler::setAPRSWriter(CAPRSHandler* writer)
 {
 	m_aprsWriter = writer;
 }
@@ -1416,6 +1417,9 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 	m_echo->clock(ms);
 	m_version->clock(ms);
 
+	if(m_aprsUnit != nullptr)
+		m_aprsUnit->clock(ms);
+
 	m_linkReconnectTimer.clock(ms);
 	m_watchdogTimer.clock(ms);
 	m_queryTimer.clock(ms);
@@ -2423,6 +2427,10 @@ void CRepeaterHandler::startupInt()
 			m_irc->rptrQTH(callsign, m_latitude, m_longitude, m_description1, m_description2, m_url);
 	}
 
+	if(m_aprsWriter != nullptr) {
+		m_aprsWriter->addReadAPRSCallback(this);
+	}
+
 #ifdef USE_CCS
 	m_ccsHandler = new CCCSHandler(this, m_rptCallsign, m_index + 1U, m_latitude, m_longitude, m_frequency, m_offset, m_description1, m_description2, m_url, CCS_PORT + m_index);
 #endif
@@ -3067,6 +3075,13 @@ void CRepeaterHandler::triggerInfo()
 	} else {
 		m_infoAudio->sendStatus();
 		m_infoNeeded = false;
+	}
+}
+
+void CRepeaterHandler::readAPRSFrame(CAPRSFrame& frame)
+{
+	if(m_aprsUnit != nullptr) {
+		m_aprsUnit->writeFrame(frame);
 	}
 }
 

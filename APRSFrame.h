@@ -25,12 +25,19 @@
 enum APRS_FRAME_TYPE {
     APFT_UNKNOWN = 0,
     APFT_MESSAGE,
+    APFT_POSITION,
+    APFT_NMEA,
+    APFT_STATUS,
+    APFT_OBJECT,
+    APFT_WX,
+    APFT_TELEMETRY
 };
 
 class CAPRSFrame {
 public:
     CAPRSFrame();
-    CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, APRS_FRAME_TYPE type);
+    CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, const std::string& body, APRS_FRAME_TYPE type);
+    ~CAPRSFrame();
 
     void clear();
     std::string& getSource() { return m_source; }

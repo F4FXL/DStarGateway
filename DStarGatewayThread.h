@@ -32,7 +32,7 @@
 #include "RemoteHandler.h"
 #include "CacheManager.h"
 #include "CallsignList.h"
-#include "APRSWriter.h"
+#include "APRSHandler.h"
 #include "IRCDDB.h"
 #include "Timer.h"
 #include "Defs.h"
@@ -72,7 +72,7 @@ virtual void addRepeater(const std::string& callsign, const std::string& band, c
 	virtual void setCCS(bool enabled, const std::string& host);
 #endif
 	virtual void setLog(bool enabled);
-	virtual void setAPRSWriter(CAPRSWriter* writer);
+	virtual void setAPRSWriter(CAPRSHandler* writer);
 	virtual void setInfoEnabled(bool enabled);
 	virtual void setEchoEnabled(bool enabled);
 	virtual void setDTMFEnabled(bool enabled);
@@ -83,7 +83,7 @@ virtual void addRepeater(const std::string& callsign, const std::string& band, c
 	virtual void setBlackList(CCallsignList* list);
 	virtual void setRestrictList(CCallsignList* list);
 
-	virtual CIRCDDBGatewayStatusData* getStatus() const;
+	virtual CDStarGatewayStatusData* getStatus() const;
 
 	virtual void kill();
 	
@@ -109,7 +109,7 @@ private:
 #if defined(ENABLE_NAT_TRAVERSAL)
 	CNatTraversalHandler*     m_natTraversal;
 #endif
-	CAPRSWriter*              m_aprsWriter;
+	CAPRSHandler*              m_aprsWriter;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;
 	TEXT_LANG                 m_language;

@@ -21,15 +21,20 @@
 #include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 
 #include "StringUtils.h"
 #include "Log.h"
-#include "APRSWriter.h"
+#include "APRSHandler.h"
 #include "DStarDefines.h"
 #include "Defs.h"
 #include "Log.h"
+#include "APRSFrame.h"
+#include "APRSParser.h"
+#include "APRSFormater.h"
+#include "APRSUtils.h"
 
-CAPRSWriter::CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
+CAPRSHandler::CAPRSHandler(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
 m_thread(NULL),
 m_gateway(),
 m_address(),
@@ -42,14 +47,14 @@ m_idFrameProvider(nullptr)
 	assert(!gateway.empty());
 	assert(!password.empty());
 
-	m_thread = new CAPRSWriterThread(gateway, password, address, hostname, port);
+	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port);
 
 	m_gateway = gateway;
 	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
 	boost::trim(m_gateway);
 }
 
-CAPRSWriter::~CAPRSWriter()
+CAPRSHandler::~CAPRSHandler()
 {
 	for(auto it = m_array.begin(); it != m_array.end(); it++) {
 		delete it->second;
@@ -58,7 +63,7 @@ CAPRSWriter::~CAPRSWriter()
 	m_array.clear();
 }
 
-void CAPRSWriter::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
+void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
 {
 	std::string temp = callsign;
 	temp.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
@@ -67,12 +72,12 @@ void CAPRSWriter::setPort(const std::string& callsign, const std::string& band, 
 	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, latitude, longitude, agl);
 }
 
-bool CAPRSWriter::open()
+bool CAPRSHandler::open()
 {
 	return m_thread->start();
 }
 
-void CAPRSWriter::writeHeader(const std::string& callsign, const CHeaderData& header)
+void CAPRSHandler::writeHeader(const std::string& callsign, const CHeaderData& header)
 {
 	CAPRSEntry* entry = m_array[callsign];
 	if (entry == NULL) {
@@ -87,7 +92,7 @@ void CAPRSWriter::writeHeader(const std::string& callsign, const CHeaderData& he
 	collector->writeHeader(header.getMyCall1());
 }
 
-void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
+void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 {
 	if (data.isEnd())
 		return;
@@ -117,48 +122,31 @@ void CAPRSWriter::writeData(const std::string& callsign, const CAMBEData& data)
 		return;
 	}
 
-	// Check the transmission timer
-	bool ok = entry->isOK();
-	if (!ok) {
-		collector->reset();
-		return;
-	}
+	collector->getData([=](const std::string& text)
+	{
+		CAPRSFrame frame;
+		if(!CAPRSParser::parseFrame(text, frame)) {
+			CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
+			return;
+		}
 
-	unsigned int length = collector->getData(SLOW_DATA_TYPE_GPS, buffer, 400U);
-	std::string text((char*)buffer, length);
+		// If we already have a q-construct, don't send it on
+		if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
+			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
+			return;
+		}
 
-	auto n = text.find(':');
-	if (n == std::string::npos) {
-		collector->reset();
-		return;
-	}
+		frame.getPath().push_back("qAR");
+		frame.getPath().push_back(CStringUtils::string_format("%s-%s", entry->getCallsign().c_str(), entry->getBand().c_str()));
+		
+		std::string output ;
+		CAPRSFormater::frameToString(output, frame);
 
-	std::string header = text.substr(0, n);
-	std::string body   = text.substr(n + 1U);
-
-	// If we already have a q-construct, don't send it on
-	n = header.find('q');
-	if (n != std::string::npos)
-		return;
-
-	// Remove the trailing \r
-	n = body.find('\r');
-	if (n != std::string::npos)
-		body = body.substr(0, n);
-
-	std::string output = CStringUtils::string_format("%s,qAR,%s-%s:%s", header.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(), body.c_str());
-
-	char ascii[500U];
-	::memset(ascii, 0x00, 500U);
-	for (unsigned int i = 0U; i < output.length(); i++)
-		ascii[i] = output[i];
-
-	m_thread->write(ascii);
-
-	collector->reset();
+		m_thread->write(frame);
+	});
 }
 
-void CAPRSWriter::writeStatus(const std::string& callsign, const std::string status)
+void CAPRSHandler::writeStatus(const std::string& callsign, const std::string status)
 {
 	CAPRSEntry* entry = m_array[callsign];
 	if (entry == NULL) {
@@ -169,7 +157,7 @@ void CAPRSWriter::writeStatus(const std::string& callsign, const std::string sta
 	entry->getStatus().setStatus(status);
 }
 
-void CAPRSWriter::clock(unsigned int ms)
+void CAPRSHandler::clock(unsigned int ms)
 {
 	m_thread->clock(ms);
 
@@ -189,48 +177,54 @@ void CAPRSWriter::clock(unsigned int ms)
 	}
 }
 
-void CAPRSWriter::sendStatusFrame(CAPRSEntry * entry)
+void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 {
 	assert(entry != nullptr);
 
 	if(!m_thread->isConnected())
 		return;
 
+
 	auto linkStatus = entry->getStatus();
 	std::string body = boost::trim_copy(linkStatus.getStatus());
 
 	if(body[0] != '>')
-		body = '>' + body;
+		body.insert(0, ">");
 
-	std::string output = CStringUtils::string_format("%s-%s>APD5T3,TCPIP*,qAC,%s-%sS:%s\r\n",
-														entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
-														body.c_str());
+	std::string sourCall = entry->getCallsign() + '-' + entry->getBand();
+	
+	CAPRSFrame frame(sourCall,
+					 "APD5T3",
+					 { "TCPIP*", "qAC", sourCall + "S" },
+					 body,
+					 APFT_STATUS);
 
-	m_thread->write(output.c_str());
+	m_thread->write(frame);
 
 }
 
-void CAPRSWriter::sendIdFrames()
+void CAPRSHandler::sendIdFrames()
 {
 	if(m_thread->isConnected())
 	{
 		for(auto entry : m_array) {
-			std::vector<std::string> frames;
+			std::vector<CAPRSFrame *> frames;
 			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
 				for(auto frame : frames) {
-					m_thread->write(frame.c_str());
+					m_thread->write(*frame);
+					delete frame;
 				}
 			}
 		}
 	}
 }
 
-bool CAPRSWriter::isConnected() const
+bool CAPRSHandler::isConnected() const
 {
 	return m_thread->isConnected();
 }
 
-void CAPRSWriter::close()
+void CAPRSHandler::close()
 {
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->close();
@@ -239,4 +233,9 @@ void CAPRSWriter::close()
 	}
 
 	m_thread->stop();
+}
+
+void CAPRSHandler::addReadAPRSCallback(IReadAPRSFrameCallback* cb)
+{
+	m_thread->addReadAPRSCallback(cb);
 }

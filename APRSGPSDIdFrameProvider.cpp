@@ -16,7 +16,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifdef USE_DGPS
+#ifdef USE_GPSD
 #include <cmath>
 #include <boost/algorithm/string.hpp>
 
@@ -56,7 +56,7 @@ void CAPRSGPSDIdFrameProvider::close()
     }
 }
 
-bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<std::string>& frames)
+bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
 {
     if(!m_hasConnection) {
         this->start();
@@ -169,40 +169,44 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
     boost::replace_all(lat, ",", ".");
     boost::replace_all(lon, ",", ".");
 
-    std::string output1 = CStringUtils::string_format("%s-S>APD5T1,TCPIP*,qAC,%s-GS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf",
-                                                        gateway.c_str(), gateway.c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+    std::string body = CStringUtils::string_format(";%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0lf",
+                                                        entry->getCallsign().c_str(), entry->getBand().c_str(),
                                                         tm->tm_mday, tm->tm_hour, tm->tm_min,
                                                         lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
                                                         lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
                                                         rawAltitude * 3.28);
 
-    std::string output2;
     if (bearingSet && velocitySet)
-        output2 = CStringUtils::string_format("%03.0lf/%03.0lf", rawBearing, rawVelocity * 0.539957F);
+        body.append(CStringUtils::string_format("%03.0lf/%03.0lf", rawBearing, rawVelocity * 0.539957F));
 
-    std::string output3;
-    output3 = CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str());
+    body.append(CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str()));
 
-    CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
 
-    frames.push_back(output1.append(output2).append(output3));
+    CAPRSFrame * frame = new CAPRSFrame(gateway + "-S",
+                                    "APD5T1",
+                                    { "TCPIP*", "qAC" , gateway + "-GS" },
+                                    body, APFT_OBJECT);
+
+
+    frames.push_back(frame);
 
     if (entry->getBand().length() == 1U) {
         if (altitudeSet)
-            output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0lf",
-                entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+            body = CStringUtils::string_format("%s%cD%s%c&/A=%06.0lf",
                 lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
                 lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E',
                 rawAltitude * 3.28);
         else
-            output1 = CStringUtils::string_format("%s-%s>APD5T2,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&",
-                entry->getCallsign().c_str(), entry->getBand().c_str(), entry->getCallsign().c_str(), entry->getBand().c_str(),
+            body = CStringUtils::string_format("!%s%cD%s%c&",
                 lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
                 lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E');
 
-        CLog::logDebug("APRS ==> %s%s%s", output1.c_str(), output2.c_str(), output3.c_str());
+        frame = new CAPRSFrame(gateway,
+                                    "APD5T2",
+                                    { "TCPIP*", "qAC" , gateway + "-GS" },
+                                    body, APFT_POSITION);
 
-        frames.push_back(output1.append(output2).append(output3));
+        frames.push_back(frame);
     }
 
     setTimeout(60U * 5U);//5 Minutes is plenty enough we aint an APRS tracker !

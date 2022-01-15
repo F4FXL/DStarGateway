@@ -21,6 +21,7 @@
 #define APRSCollector_H
 
 #include <vector>
+#include <functional>
 
 #include "SlowDataCollector.h"
 #include "Defs.h"
@@ -47,9 +48,13 @@ public:
 	void sync();
 
 	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
+	
+	void getData(std::function<void(const std::string&)> dataHandler);
+
+	void clock(unsigned int ms);
 
 private:
-	std::vector<CSlowDataCollector *> m_collectors;
+	std::vector<ISlowDataCollector *> m_collectors;
 };
 
 #endif

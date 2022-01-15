@@ -30,6 +30,7 @@
 #include "Log.h"
 #include "Utils.h"
 #include "APRSUtils.h"
+#include "RSMS1AMessageBuilder.h"
 
 
 const unsigned int APRS_CSUM_LENGTH = 4U;
@@ -47,103 +48,24 @@ bool CRSMS1AMessageCollector::isValidSentence(const std::string& sentence)
 
 bool CRSMS1AMessageCollector::isValidMsg(const std::string& msg)
 {
-    if(msg.empty() || !boost::starts_with(msg, "$$Msg"))
-        return false;
-
-    // CUtils::dump("RS-MS1A:", (unsigned char *)msg.c_str(), msg.length());
-    std::vector<std::string> splits;
-    boost::split(splits, msg, boost::is_any_of(","));
-
-    bool ret = splits.size() >= 4
-                && !splits[1].empty()
-                && !splits[2].empty();
-    return ret;
-
-    //TODO 2022-01-01 figure out what the heck it is about thic strange CRCs
-
-    // CUtils::dump("RS-MS1A:", (unsigned char *)gpsa.c_str(), gpsa.length() + 1U);
-    // CLog::logDebug("RS-MS1A: %s", gpsa.c_str());
-
-    // auto thirdCommaPos = CStringUtils::find_nth(gpsa, 0U, ',', 3);
-    // auto csum = calcCRC(gpsa, thirdCommaPos + 6 + 1, gpsa.length() - thirdCommaPos - 2U - 6U);
-    // auto csumStr = CStringUtils::string_format("%06X", csum);
-    // CLog::logDebug("RS-MS1A CRC: %s", csumStr.c_str());
-
-    // auto expectedCsum = gpsa.substr(5U, APRS_CSUM_LENGTH);
-    // bool res = ::strcasecmp(csumStr.c_str(), expectedCsum.c_str()) == 0;
-    // return res;
-}
-
-unsigned int CRSMS1AMessageCollector::calcCRC(const std::string& gpsa, unsigned int start, unsigned int length)
-{
-	unsigned int icomcrc = 0xFFFFU;
-    auto end = start + length;
-    if(end > gpsa.length()) {
-        end = gpsa.length();
-    }
-
-	for (unsigned int j = start; j < end; j++) {
-		unsigned char ch = (unsigned char)gpsa[j];
-
-		for (unsigned int i = 0U; i < 8U; i++) {
-			bool xorflag = (((icomcrc ^ ch) & 0x01U) == 0x01U);
-
-			icomcrc >>= 1;
-
-			if (xorflag)
-				icomcrc ^= 0x8408U;
-
-			ch >>= 1;
-		} 
-	}
-
-	return ~icomcrc & 0xFFFFU;
+    CLog::logDebug("RS-MS1A");
+    // checking validity involves parsing, so we do minumum checks here. Big chekc done in getDataInt
+    return !msg.empty() && boost::starts_with(msg, "$$Msg");
 }
 
 unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned int length)
 {
-    if(data == nullptr || length == 0U || getSentence().empty())
+    if(data == nullptr || length == 0U)
         return 0U;
 
-    auto sentence = getSentence();
-
-    std::vector<std::string> splits;
-    boost::split(splits, sentence, boost::is_any_of(","));
-
-    bool ret = splits.size() >= 4
-                && !splits[1].empty()
-                && !splits[2].empty();
-    if(!ret) {
+    std::string aprsFrame;
+    if(!getDataInt(aprsFrame))
         return 0U;
-    }
-
-    auto sender = splits[1];
-    auto recipient = CUtils::ToUpper(splits[2]);
-
-    for(unsigned int i = 0;i < 3; i++) {
-        splits.erase(splits.begin());
-    }
-
-    auto message = boost::join(splits, ",");
-    if(message.length() > 6)
-        message = message.substr(6);
-
-    auto seqNum = rand() % 0xFFFFFU;
-
-    CAPRSUtils::dstarCallsignToAPRS(sender);
-    CAPRSUtils::dstarCallsignToAPRS(recipient);
-    recipient.resize(9, ' ');
-    message.resize(std::max<int>(0 , ((int)message.length()) - 2));
-
-    //unescape commas in message body
-    boost::replace_all(message, "o,", ",");
-
-    auto aprsFrame = CStringUtils::string_format("%s-5>APDPRS,DSTAR*::%s:%s{%05X\r\n", sender.c_str(), recipient.c_str(), message.c_str(), seqNum);
     
     auto aprsFrameLen = aprsFrame.length();
 
     if(length < aprsFrameLen) {
-        CLog::logDebug("Not enough space to copy GPS-A APRS frame");
+        CLog::logDebug("Not enough space to copy RSMS1A message frame");
         return 0U;
     }
 
@@ -152,4 +74,29 @@ unsigned int CRSMS1AMessageCollector::getDataInt(unsigned char * data, unsigned 
     }
 
     return aprsFrameLen;
+}
+
+bool CRSMS1AMessageCollector::getDataInt(std::string& data)
+{
+    if(getSentence().empty())
+        return false;
+
+    std::string sender, recipient, body, sentence;
+    sentence = getSentence();
+    auto parseRes = CRSMS1AMessageBuilder::parseMessage(sender, recipient, body, sentence);
+    
+    CUtils::dump(CStringUtils::string_format("RS-MS1A Message parsed with result %s", parseRes == RSMS_OK ? "OK" : (parseRes == RSMS_ERRONEOUS_MSG ? "Error in msg body" : "failed")).c_str(),
+                                                (unsigned char *)sentence.c_str(), sentence.length());
+
+    if(parseRes == RSMS_FAIL)
+        return false;
+
+    CAPRSUtils::dstarCallsignToAPRS(sender);
+    CAPRSUtils::dstarCallsignToAPRS(recipient);
+    recipient.resize(9U, ' ');
+    
+    auto seqNum = rand() % 0xFFFFFU;
+    CStringUtils::string_format_in_place(data, "%s-5>APDPRS,DSTAR*::%s:%s{%05X", sender.c_str(), recipient.c_str(), body.c_str(), seqNum);
+    
+    return true;
 }

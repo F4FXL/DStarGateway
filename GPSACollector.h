@@ -30,6 +30,7 @@ public:
 
 protected:
     unsigned int getDataInt(unsigned char * data, unsigned int length);
+    bool getDataInt(std::string& data);
     bool isValidSentence(const std::string& sentence);
     
 private:

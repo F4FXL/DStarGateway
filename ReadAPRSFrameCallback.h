@@ -19,10 +19,13 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
-class CReadAPRSFrameCallback
+#include "APRSFrame.h"
+
+class IReadAPRSFrameCallback
 {
 public:
-	virtual ~CReadAPRSFrameCallback(){ }
-	virtual bool readAprsFrame(const std::string& aprsFrame) = 0;
+	virtual void readAPRSFrame(CAPRSFrame& aprsFrame) = 0;
 };
+

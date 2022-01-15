@@ -19,6 +19,8 @@
 #include <gtest/gtest.h>
 
 #include "../../Utils.h"
+#include "../../StringUtils.h"
+#include "../../Log.h"
 
 class Utils_swap_endian_be : public ::testing::Test {
  
@@ -31,4 +33,13 @@ TEST_F(Utils_swap_endian_be, SwapUINT32_be) {
     uint32_t res = CUtils::swap_endian_be(test);
 
     EXPECT_EQ(res, 0x12345678U);
+}
+
+
+TEST_F(Utils_swap_endian_be, blabla) {
+    std::vector<char> charsToEscape = {-17, 0, 17, 19, 128-2, -25, 26, 128-3, -1, 36, 13, 44};
+
+    for(unsigned int i = 1U; i < charsToEscape.size(); i++) {
+        CLog::logDebug("%08x - %08x", charsToEscape[i], (unsigned char)charsToEscape[i]);
+    }
 }

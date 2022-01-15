@@ -1,5 +1,4 @@
 /*
- *   Copyright (C) 2010,2012,2018 by Jonathan Naylor G4KLX
  *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -22,26 +21,26 @@
 #include <string>
 
 #include "SlowDataCollector.h"
+#include "Timer.h"
 
-class CSentenceCollector : public CSlowDataCollector
+class CSlowDataCollectorThrottle : public ISlowDataCollector
 {
 public:
-    CSentenceCollector(unsigned char slowDataType, const std::string& sentenceIdentifier, unsigned char endMarker);
-
-protected:
-    bool addData(const unsigned char * data);
-
-    virtual unsigned int getDataInt(unsigned char * data, unsigned int length) = 0;
-    virtual bool getDataInt(std::string& data) = 0;
-    static void dstarCallsignToAPRS(std::string& call);
-    std::string getSentence();
+    CSlowDataCollectorThrottle(ISlowDataCollector* collector, unsigned int timeout);
+    ~CSlowDataCollectorThrottle();
+    std::string getMyCall() const;
+    void setMyCall(const std::string& mycall);
+    bool writeData(const unsigned char* data);
+    void sync();
+    unsigned int getData(unsigned char* data, unsigned int length);
+    bool getData(std::string& data);
+    void reset();
+    unsigned char getDataType();
+    void clock(unsigned int ms);
 
 private:
-    virtual bool isValidSentence(const std::string& sentence) = 0;
-    virtual void resetInt();
-
-    std::string m_collector;
-    std::string m_sentenceIdentifier;
-    std::string m_sentence;
-    unsigned char m_endMarker;
+    ISlowDataCollector* m_collector;
+    CTimer m_timer;
+    bool m_isFirst;
+    bool m_isComplete;
 };

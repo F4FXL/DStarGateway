@@ -201,19 +201,15 @@ bool CTCPReaderWriterClient::write(const unsigned char* buffer, unsigned int len
 
 bool CTCPReaderWriterClient::writeLine(const std::string& line)
 {
-	std::string lineCopy(line);
-	if(lineCopy.size() > 0 && lineCopy.at(lineCopy.size() - 1) != '\n')
-		lineCopy.push_back('\n');
-	
-	//stupidly write one char after the other
-	size_t len = lineCopy.size();
-	bool result = true;
-	for(size_t i = 0; i < len && result; i++){
-		unsigned char c = lineCopy.at(i);
-		result = write(&c , 1);
-	}
+	if(line.empty())
+		return true;
 
-	return result;
+	bool ret = write((unsigned char *)line.c_str(), line.length());
+
+	if(line[line.length() - 1] != '\n')//make sure we send a newline
+		ret = writeLine("\n") && ret;
+
+	return ret;
 }
 
 void CTCPReaderWriterClient::close()
