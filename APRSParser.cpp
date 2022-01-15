@@ -20,7 +20,7 @@
 #include "Log.h"
 
 bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
-{
+{   
     frame.clear();
     bool ret = false;
 
@@ -44,12 +44,9 @@ bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
 
                 frame.getBody().assign(body);
 
-                setFrameType(frame);
-                if(frame.getType() == APFT_UNKNOWN) {
-                    CLog::logInfo("Invalid or unsupported APRS frame : %s", frameStr);
-                }
-                else {
-                    ret = true;
+                ret = parseInt(frame);
+                if(!ret) {
+                    frame.clear();
                 }
             }
         }
@@ -58,26 +55,106 @@ bool CAPRSParser::parseFrame(const std::string& frameStr, CAPRSFrame& frame)
     return ret;
 }
 
-void CAPRSParser::setFrameType(CAPRSFrame& frame)
+bool CAPRSParser::parseInt(CAPRSFrame& frame)
 {
     APRS_FRAME_TYPE type = APFT_UNKNOWN;
-    std::string body(frame.getBody());
+    unsigned char typeChar = frame.getBody()[0];
+    std::string body(frame.getBody().substr(1));//strip the type char for processing purposes
+    
+    if(body.empty())
+        return false;
 
-    if(!body.empty()) {
-        switch (body[0])
-        {
-            case ':':
-                if(body[10] == ':' && std::all_of(body.begin() + 1, body.begin() + 10,
-                                                [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); }))
-                    type = APFT_MESSAGE;
-                break;
-            
-            default:
-                break;
-        }
+    switch (typeChar)
+    {
+        case '!':
+            if(body[0] == '!') {
+                // This is ultimeter 200 weather station
+                return false;
+            }
+            [[fallthrough]];
+        case '=':
+        case '/':
+        case '@':
+            {
+                if(body.length() < 10) return false;//enough chars to have a chance to parse it ?
+                /* Normal or compressed location packet, with or without
+                * timestamp, with or without messaging capability
+                *
+                * ! and / have messaging, / and @ have a prepended timestamp
+                */
+                type = APFT_POSITION;
+                if(typeChar == '/' || typeChar== '@')//With a prepended timestamp, jump over it. 
+                    body = body.substr(7U);
+
+                auto posChar = body[0];
+                if(valid_sym_table_compressed(posChar)//Compressed format
+                    && body.length() >= 13){//we need at least 13 char
+                    //icom unsupported, ignore for now
+                    return false;//parse_aprs_compressed(pb, body, body_end);
+                }
+                else if(posChar >= '0' && posChar <= '9' //Normal uncompressed format
+                        && body.length() >=19){//we need at least 19 chars for it to be valid
+                    
+                    // if(ensureIsIcomCompatible(packet))
+                    //     return Parse(packet.Raw(), packet);
+                }
+            }
+            break;
+        case '$' :
+            if(body.length() > 10) {
+                type = APFT_NMEA;
+            }
+            break;
+        case ':':
+            // we have either message or telemetry labels or telemetry EQNS
+            if(body[9] == ':'
+                && std::all_of(body.begin(), body.begin() + 9, [](char c){ return c == ' ' || c == '-' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); })) {
+                type = APFT_MESSAGE;
+
+                //If reciepient is same as source and we donot have a sequence number at the end of message, Then it is telemetry
+                if(body.find(frame.getSource()) == 0U) {
+                    auto eqnsPos = body.find("EQNS.");
+                    auto parmPos = body.find("PARM.");
+                    auto seqNumPos = body.find_last_of('{');
+                    if((eqnsPos == 10U || parmPos == 10U) && seqNumPos == std::string::npos) {
+                        type = APFT_TELEMETRY;
+                    }
+                }
+            }
+            break;
+        case '>':
+            type = APFT_STATUS;
+            break;
+        case '#': /* Peet Bros U-II Weather Station */
+        case '*': /* Peet Bros U-I  Weather Station */
+        case '_': /* Weather report without position */
+            type = APFT_WX;
+            break;
+        case '{':
+            type = APFT_UNKNOWN; //
+            break;
+        case 'T':
+            if(body[0] == '#') {
+                type = APFT_TELEMETRY;
+            }
+            break;
+        default:
+            type = APFT_UNKNOWN;
+            break;
     }
-
+    
     frame.getType() = type;
-    if(type == APFT_UNKNOWN)
-        frame.clear();
+    return type != APFT_UNKNOWN;
+}
+
+bool CAPRSParser::valid_sym_table_compressed(unsigned char c)
+{
+	return (c == '/' || c == '\\' || (c >= 0x41 && c <= 0x5A)
+		    || (c >= 0x61 && c <= 0x6A)); /* [\/\\A-Za-j] */
+}
+
+bool CAPRSParser::valid_sym_table_uncompressed(unsigned char  c)
+{
+	return (c == '/' || c == '\\' || (c >= 0x41 && c <= 0x5A)
+		    || (c >= 0x30 && c <= 0x39)); /* [\/\\A-Z0-9] */
 }

@@ -31,7 +31,7 @@ CAPRSIdFrameProvider::~CAPRSIdFrameProvider()
 
 }
 
-bool CAPRSIdFrameProvider::buildAPRSFrames(const std::string& gateway, const CAPRSEntry * entry, std::vector<std::string> & frames)
+bool CAPRSIdFrameProvider::buildAPRSFrames(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *> & frames)
 {
     assert(entry != nullptr);
 

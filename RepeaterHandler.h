@@ -48,7 +48,7 @@
 #include "CCSHandler.h"
 #endif
 #include "StatusData.h"
-#include "APRSWriter.h"
+#include "APRSHandler.h"
 #include "HeardData.h"
 #include "AudioUnit.h"
 #include "EchoUnit.h"
@@ -58,11 +58,13 @@
 #include "Timer.h"
 #include "DTMF.h"
 #include "Defs.h"
+#include "ReadAPRSFrameCallback.h"
+#include "APRSUnit.h"
 
 #include <netinet/in.h>
 
 
-class CRepeaterHandler : public IRepeaterCallback, public IReflectorCallback, public ICCSCallback {
+class CRepeaterHandler : public IRepeaterCallback, public IReflectorCallback, public ICCSCallback, public IReadAPRSFrameCallback {
 public:
 	static void initialise(unsigned int maxRepeaters);
 
@@ -82,7 +84,7 @@ public:
 	static void setDPlusEnabled(bool enabled);
 	static void setDCSEnabled(bool enabled);
 	static void setHeaderLogger(CHeaderLogger* logger);
-	static void setAPRSWriter(CAPRSWriter* writer);
+	static void setAPRSWriter(CAPRSHandler* writer);
 	static void setInfoEnabled(bool enabled);
 	static void setEchoEnabled(bool enabled);
 	static void setDTMFEnabled(bool enabled);
@@ -142,6 +144,8 @@ public:
 	virtual void ccsLinkFailed(const std::string& dtmf, DIRECTION direction);
 	virtual void ccsLinkEnded(const std::string& callsign, DIRECTION direction);
 
+	virtual void readAPRSFrame(CAPRSFrame& frame);
+
 protected:
 #ifdef USE_DRATS
 	CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3);
@@ -178,7 +182,7 @@ private:
 
 	static CHeaderLogger*   m_headerLogger;
 
-	static CAPRSWriter*     m_aprsWriter;
+	static CAPRSHandler*     m_aprsWriter;
 
 	static CCallsignList*   m_whiteList;
 	static CCallsignList*   m_blackList;
@@ -274,6 +278,9 @@ private:
 
 	// Version information
 	CVersionUnit*             m_version;
+
+	// APRS to DPRS
+	CAPRSUnit*				  m_aprsUnit;
 
 #ifdef USE_DRATS
 	// D-RATS handler

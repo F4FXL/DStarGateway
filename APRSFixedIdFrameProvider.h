@@ -26,5 +26,5 @@ public:
     CAPRSFixedIdFrameProvider();
 
 protected:
-    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<std::string>& frames);
+    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
 };

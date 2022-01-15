@@ -106,6 +106,7 @@ void CAPRSEntry::clock(unsigned int ms)
 {
 	m_linkStatus.clock(ms);
 	m_timer.clock(ms);
+	m_collector->clock(ms);
 }
 
 bool CAPRSEntry::isOK()

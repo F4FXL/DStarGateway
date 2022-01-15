@@ -21,17 +21,17 @@
 
 #include "DStarGatewayStatusData.h"
 
-CIRCDDBGatewayStatusData::CIRCDDBGatewayStatusData(IRCDDB_STATUS ircDDBStatus, bool dprsStatus) :
+CDStarGatewayStatusData::CDStarGatewayStatusData(IRCDDB_STATUS ircDDBStatus, bool dprsStatus) :
 m_ircDDBStatus(ircDDBStatus),
 m_dprsStatus(dprsStatus)
 {
 }
 
-CIRCDDBGatewayStatusData::~CIRCDDBGatewayStatusData()
+CDStarGatewayStatusData::~CDStarGatewayStatusData()
 {
 }
 
-void CIRCDDBGatewayStatusData::setRepeater(unsigned int n, const std::string& callsign, LINK_STATUS linkStatus, const std::string& linkCallsign, const std::string& incoming)
+void CDStarGatewayStatusData::setRepeater(unsigned int n, const std::string& callsign, LINK_STATUS linkStatus, const std::string& linkCallsign, const std::string& incoming)
 {
 	assert(n < 4U);
 
@@ -41,50 +41,50 @@ void CIRCDDBGatewayStatusData::setRepeater(unsigned int n, const std::string& ca
 	m_incoming[n]     = incoming;
 }
 
-void CIRCDDBGatewayStatusData::setDongles(const std::string& dongles)
+void CDStarGatewayStatusData::setDongles(const std::string& dongles)
 {
 	m_dongles = dongles;
 }
 
-IRCDDB_STATUS CIRCDDBGatewayStatusData::getIrcDDBStatus() const
+IRCDDB_STATUS CDStarGatewayStatusData::getIrcDDBStatus() const
 {
 	return m_ircDDBStatus;
 }
 
-bool CIRCDDBGatewayStatusData::getDPRSStatus() const
+bool CDStarGatewayStatusData::getDPRSStatus() const
 {
 	return m_dprsStatus;
 }
 
-std::string CIRCDDBGatewayStatusData::getCallsign(unsigned int n) const
+std::string CDStarGatewayStatusData::getCallsign(unsigned int n) const
 {
 	assert(n < 4U);
 
 	return m_callsign[n];
 }
 
-LINK_STATUS CIRCDDBGatewayStatusData::getLinkStatus(unsigned int n) const
+LINK_STATUS CDStarGatewayStatusData::getLinkStatus(unsigned int n) const
 {
 	assert(n < 4U);
 
 	return m_linkStatus[n];
 }
 
-std::string CIRCDDBGatewayStatusData::getLinkCallsign(unsigned int n) const
+std::string CDStarGatewayStatusData::getLinkCallsign(unsigned int n) const
 {
 	assert(n < 4U);
 
 	return m_linkCallsign[n];
 }
 
-std::string CIRCDDBGatewayStatusData::getIncoming(unsigned int n) const
+std::string CDStarGatewayStatusData::getIncoming(unsigned int n) const
 {
 	assert(n < 4U);
 
 	return m_incoming[n];
 }
 
-std::string CIRCDDBGatewayStatusData::getDongles() const
+std::string CDStarGatewayStatusData::getDongles() const
 {
 	return m_dongles;
 }

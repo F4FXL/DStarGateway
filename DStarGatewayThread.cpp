@@ -424,10 +424,10 @@ void* CDStarGatewayThread::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		CLog::logError("Exception raised in the main thread - \"%s\"", message.c_str());
+		CLog::logFatal("Exception raised in the main thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
-		CLog::logError("Unknown exception raised in the main thread");
+		CLog::logFatal("Unknown exception raised in the main thread");
 	}
 
 	CLog::logInfo("Stopping the ircDDB Gateway thread");
@@ -638,7 +638,7 @@ void CDStarGatewayThread::setLog(bool enabled)
 	m_logEnabled = enabled;
 }
 
-void CDStarGatewayThread::setAPRSWriter(CAPRSWriter* writer)
+void CDStarGatewayThread::setAPRSWriter(CAPRSHandler* writer)
 {
 	m_aprsWriter = writer;
 }
@@ -1203,13 +1203,13 @@ void CDStarGatewayThread::writeStatus()
 	file.close();
 }
 
-CIRCDDBGatewayStatusData* CDStarGatewayThread::getStatus() const
+CDStarGatewayStatusData* CDStarGatewayThread::getStatus() const
 {
 	bool aprsStatus = false;
 	if (m_aprsWriter != NULL)
 		aprsStatus = m_aprsWriter->isConnected();
 
-	CIRCDDBGatewayStatusData* status = new CIRCDDBGatewayStatusData(m_lastStatus, aprsStatus);
+	CDStarGatewayStatusData* status = new CDStarGatewayStatusData(m_lastStatus, aprsStatus);
 
 	for (unsigned int i = 0U; i < 4U; i++) {
 		std::string callsign, linkCallsign;

@@ -1,8 +1,9 @@
 - [1. Introduction](#1-introduction)
 - [2. Current State](#2-current-state)
   - [2.1. Code sanity](#21-code-sanity)
-  - [2.2. Code Credit](#22-code-credit)
-  - [2.3. Features](#23-features)
+  - [2.2. Code Credits](#22-code-credits)
+  - [2.3. Thanks](#23-thanks)
+  - [2.4. Features](#24-features)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
   - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
@@ -34,11 +35,14 @@ The current code is working, yet ugly IMHO as it is a mix of C and C++ of variou
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
 
 Quite a few classes are more or less copy/paste from each other some sanitization by using base classes or template classes would greatly improve code maintainibility. Maybe one day ;)
-## 2.2. Code Credit
+## 2.2. Code Credits
 - Jonathan Naylor G4KLX (The original author of [ircddbGateway](https://github.com/g4klx/ircDDBGateway))
 - Thomas A. Early N7TAE (Code taken from his [smart-group](https://github.com/n7tae/smart-group-server) software)
 - Geoffrey Merck F4FXL / KC3FRA [That's me !](https://github.com/F4FXL/)
-## 2.3. Features
+## 2.3. Thanks
+- Cyrille F1MHV / DF1CHB for the testing
+- Jonathan Naylor G4KLX for all the work ahead
+## 2.4. Features
 All the features found in ircddbGateway are supposed to be working. I have mixed feelings about putting these back in or not.
 
 Features that where left out :
@@ -117,6 +121,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
+- [Improvement] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
 - [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured

@@ -17,8 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef	APRSWriter_H
-#define	APRSWriter_H
+#pragma once
 
 #include "Defs.h"
 
@@ -27,7 +26,7 @@
 
 
 #include "APRSEntry.h"
-#include "APRSWriterThread.h"
+#include "APRSHandlerThread.h"
 #include "UDPReaderWriter.h"
 #include "APRSCollector.h"
 #include "DStarDefines.h"
@@ -36,10 +35,10 @@
 #include "Timer.h"
 #include "APRSIdFrameProvider.h"
 
-class CAPRSWriter {
+class CAPRSHandler {
 public:
-	CAPRSWriter(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address);
-	~CAPRSWriter();
+	CAPRSHandler(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address);
+	~CAPRSHandler();
 
 	bool open();
 
@@ -59,8 +58,10 @@ public:
 
 	void close();
 
+	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
+
 private:
-	CAPRSWriterThread*		m_thread;
+	CAPRSHandlerThread*		m_thread;
 	std::string				m_gateway;
 	in_addr					m_address;
 	unsigned int			m_port;
@@ -70,6 +71,4 @@ private:
 	void sendIdFrames();
 	void sendStatusFrame(CAPRSEntry * entrry);
 };
-
-#endif
 

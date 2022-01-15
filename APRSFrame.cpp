@@ -22,18 +22,25 @@ CAPRSFrame::CAPRSFrame() :
 m_source(),
 m_destination(),
 m_path(),
+m_body(),
 m_type(APFT_UNKNOWN)
 {
 
 }
 
-CAPRSFrame::CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, APRS_FRAME_TYPE type) :
+CAPRSFrame::CAPRSFrame(const std::string& source, const std::string& destination, const std::vector<std::string>& path, const std::string& body, APRS_FRAME_TYPE type) :
 m_source(source),
 m_destination(destination),
 m_path(),
+m_body(body),
 m_type(type)
 {
     m_path.assign(path.begin(), path.end());
+}
+
+CAPRSFrame::~CAPRSFrame()
+{
+    m_path.clear();
 }
 
 void CAPRSFrame::clear()

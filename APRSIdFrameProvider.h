@@ -22,6 +22,7 @@
 
 #include "Timer.h"
 #include "APRSEntry.h"
+#include "APRSFrame.h"
 
 class CAPRSIdFrameProvider
 {
@@ -29,14 +30,14 @@ public:
     CAPRSIdFrameProvider(unsigned int timeOut);
     virtual ~CAPRSIdFrameProvider();
 
-    bool buildAPRSFrames(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<std::string>& frames);
+    bool buildAPRSFrames(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
     void clock(unsigned int ms) { m_timer.clock(ms); }
     bool wantsToSend();
     virtual void start() { };
     virtual void close() { };
 
 protected:
-    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<std::string>& frames) = 0;
+    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames) = 0;
 
     void setTimeout(unsigned int timeout)
     { 

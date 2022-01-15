@@ -21,18 +21,22 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
-#include "APRSWriterThread.h"
+#include "APRSHandlerThread.h"
 #include "DStarDefines.h"
 #include "Utils.h"
 #include "Defs.h"
 #include "Log.h"
 #include "Version.h"
+#include "APRSFormater.h"
+#include "APRSParser.h"
 
 // #define	DUMP_TX
 
 const unsigned int APRS_TIMEOUT = 10U;
+const unsigned int APRS_READ_TIMEOUT = 1U;
+const unsigned int APRS_KEEP_ALIVE_TIMEOUT = 60U;
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
+CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
 CThread(),
 m_username(callsign),
 m_password(password),
@@ -42,9 +46,10 @@ m_queue(20U),
 m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
+m_keepAliveTimer(1000U, APRS_KEEP_ALIVE_TIMEOUT),
 m_tries(0U),
-m_APRSReadCallback(),
-m_filter(""),
+m_APRSReadCallbacks(),
+m_filter(),
 m_clientName(FULL_PRODUCT_NAME)
 {
 	assert(!callsign.empty());
@@ -59,7 +64,7 @@ m_clientName(FULL_PRODUCT_NAME)
 	m_ssid = m_ssid.substr(LONG_CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter) :
 CThread(),
 m_username(callsign),
 m_password(password),
@@ -69,10 +74,11 @@ m_queue(20U),
 m_exit(false),
 m_connected(false),
 m_reconnectTimer(1000U),
+m_keepAliveTimer(1000U, APRS_KEEP_ALIVE_TIMEOUT),
 m_tries(0U),
-m_APRSReadCallback(),
+m_APRSReadCallbacks(),
 m_filter(filter),
-m_clientName(clientName)
+m_clientName(FULL_PRODUCT_NAME)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -86,16 +92,12 @@ m_clientName(clientName)
 	m_ssid = m_ssid.substr(LONG_CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::~CAPRSWriterThread()
+CAPRSHandlerThread::~CAPRSHandlerThread()
 {
-	std::vector<CReadAPRSFrameCallback *> callBacksCopy;
-	callBacksCopy.assign(m_APRSReadCallback.begin(), m_APRSReadCallback.end());
+	std::vector<IReadAPRSFrameCallback *> callBacksCopy;
+	callBacksCopy.assign(m_APRSReadCallbacks.begin(), m_APRSReadCallbacks.end());
 
-	m_APRSReadCallback.clear();
-
-	for(auto cb : callBacksCopy) {
-		delete cb;
-	}
+	m_APRSReadCallbacks.clear();
 
 	callBacksCopy.clear();
 
@@ -103,7 +105,7 @@ CAPRSWriterThread::~CAPRSWriterThread()
 	m_password.clear();
 }
 
-bool CAPRSWriterThread::start()
+bool CAPRSHandlerThread::start()
 {
 	Create();
 	Run();
@@ -111,7 +113,7 @@ bool CAPRSWriterThread::start()
 	return true;
 }
 
-void* CAPRSWriterThread::Entry()
+void* CAPRSHandlerThread::Entry()
 {
 	CLog::logInfo("Starting the APRS Writer thread");
 
@@ -122,15 +124,21 @@ void* CAPRSWriterThread::Entry()
 	}
 
 	try {
+		m_keepAliveTimer.start();
 		while (!m_exit) {
 			if (!m_connected) {
+				Sleep(100U);
 				if (m_reconnectTimer.isRunning() && m_reconnectTimer.hasExpired()) {
 					m_reconnectTimer.stop();
 
+					CLog::logDebug("Trying to reconnect to the APRS server");
 					m_connected = connect();
 					if (!m_connected) {
 						CLog::logInfo("Reconnect attempt to the APRS server has failed");
 						startReconnectionTimer();
+					}
+					else {
+						m_keepAliveTimer.start();
 					}
 				}
 			}
@@ -139,49 +147,43 @@ void* CAPRSWriterThread::Entry()
 				m_tries = 0U;
 
 				if(!m_queue.empty()){
-					char* p = m_queue.getData();
+					auto frameStr = m_queue.getData();
 
-					std::string text(p);
-					CLog::logInfo("APRS ==> %s", text.c_str());
+					CLog::logInfo("APRS ==> %s", frameStr.c_str());
 
-					::strcat(p, "\r\n");
-
-					bool ret = m_socket.write((unsigned char*)p, ::strlen(p));
+					bool ret = m_socket.writeLine(frameStr);
 					if (!ret) {
 						m_connected = false;
 						m_socket.close();
-						CLog::logInfo("Connection to the APRS thread has failed");
+						CLog::logInfo("Error when writing to the APRS server");
 						startReconnectionTimer();
 					}
-
-					delete[] p;
 				}
 				{
 					std::string line;
-					int length = m_socket.readLine(line, APRS_TIMEOUT);
+					int length = m_socket.readLine(line, APRS_READ_TIMEOUT);
 
-					/*if (length == 0)
-						CLog::logWarning(("No response from the APRS server after %u seconds", APRS_TIMEOUT);*/
-
-					if (length < 0) {
+					if (length < 0 || m_keepAliveTimer.hasExpired()) {
 						m_connected = false;
 						m_socket.close();
 						CLog::logError("Error when reading from the APRS server");
 						startReconnectionTimer();
 					}
-
-					if(line.length() > 0 && line[0] != '#')
-						CLog::logDebug("Received APRS Frame : %s", line.c_str());
-
-					if(length > 0 && line[0] != '#'//check if we have something and if that something is an APRS frame
-					    && m_APRSReadCallback.size() > 0U)//do we have someone wanting an APRS Frame?
-					{	
-						for(auto cb : m_APRSReadCallback) {
-							cb->readAprsFrame(line);
+					else if(length > 0 && line[0] == '#') {
+						m_keepAliveTimer.start();
+					}
+					else if(line.length() > 0 && line[0] != '#') {
+						m_keepAliveTimer.start();
+						CLog::logDebug("APRS <== %s", line.c_str());
+						CAPRSFrame readFrame;
+						if(CAPRSParser::parseFrame(line, readFrame)) {
+							for(auto cb : m_APRSReadCallbacks) {
+								CAPRSFrame f(readFrame);
+								cb->readAPRSFrame(f);
+							}
 						}
 					}
 				}
-
 			}
 		}
 
@@ -189,8 +191,8 @@ void* CAPRSWriterThread::Entry()
 			m_socket.close();
 
 		while (!m_queue.empty()) {
-			char* p = m_queue.getData();
-			delete[] p;
+			auto s = m_queue.getData();
+			s.clear();
 		}
 	}
 	catch (std::exception& e) {
@@ -206,46 +208,48 @@ void* CAPRSWriterThread::Entry()
 	return NULL;
 }
 
-void CAPRSWriterThread::addReadAPRSCallback(CReadAPRSFrameCallback * cb)
+void CAPRSHandlerThread::addReadAPRSCallback(IReadAPRSFrameCallback * cb)
 {
 	assert(cb != nullptr);
-	m_APRSReadCallback.push_back(cb);
+	m_APRSReadCallbacks.push_back(cb);
 }
 
-void CAPRSWriterThread::write(const char* data)
+void CAPRSHandlerThread::write(CAPRSFrame& frame)
 {
-	assert(data != NULL);
-
 	if (!m_connected)
 		return;
 
-	unsigned int len = ::strlen(data);
+	std::string frameString;
+	if(CAPRSFormater::frameToString(frameString, frame)) {
+		boost::trim_if(frameString, [] (char c) { return c == '\r' || c == '\n'; }); // trim all CRLF, we will add our own, just to make sure we get rid of any garbage that might come from slow data
+		CLog::logTrace("Queued APRS Frame : %s", frameString.c_str());
+		frameString.append("\r\n");
 
-	char* p = new char[len + 5U];
-	::strcpy(p, data);
-
-	m_queue.addData(p);
+		m_queue.addData(frameString);
+	}
 }
 
-bool CAPRSWriterThread::isConnected() const
+bool CAPRSHandlerThread::isConnected() const
 {
 	return m_connected;
 }
 
-void CAPRSWriterThread::stop()
+void CAPRSHandlerThread::stop()
 {
 	m_exit = true;
 
 	Wait();
 }
 
-void CAPRSWriterThread::clock(unsigned int ms)
+void CAPRSHandlerThread::clock(unsigned int ms)
 {
 	m_reconnectTimer.clock(ms);
+	m_keepAliveTimer.clock(ms);
 }
 
-bool CAPRSWriterThread::connect()
+bool CAPRSHandlerThread::connect()
 {
+	m_socket.close();
 	bool ret = m_socket.open();
 	if (!ret)
 		return false;
@@ -282,7 +286,7 @@ bool CAPRSWriterThread::connect()
 		return false;
 	}
 	if (length < 0) {
-		CLog::logInfo("Error when reading from the APRS server");
+		CLog::logInfo("Error when reading from the APRS server (connect)");
 		m_socket.close();
 		return false;
 	}
@@ -294,12 +298,14 @@ bool CAPRSWriterThread::connect()
 	return true;
 }
 
-void CAPRSWriterThread::startReconnectionTimer()
+void CAPRSHandlerThread::startReconnectionTimer()
 {
 	// Clamp at a ten minutes reconnect time
 	m_tries++;
 	if (m_tries > 10U)
 		m_tries = 10U;
+
+	CLog::logDebug("Next APRS reconnection try in %u minute", m_tries);
 
 	m_reconnectTimer.setTimeout(m_tries * 60U);
 	m_reconnectTimer.start();

@@ -32,3 +32,26 @@ void CAPRSUtils::dstarCallsignToAPRS(std::string& dstarCallsign)
 		boost::replace_all(dstarCallsign, " ", "-");//replace remaining blank with a -
 	}
 }
+
+unsigned int CAPRSUtils::calcGPSAIcomCRC(const std::string& gpsa)
+{
+	unsigned int icomcrc = 0xFFFFU;
+
+    auto length = gpsa.length();
+	for (unsigned int j = 10U; j < length; j++) {
+		unsigned char ch = (unsigned char)gpsa[j];
+
+		for (unsigned int i = 0U; i < 8U; i++) {
+			bool xorflag = (((icomcrc ^ ch) & 0x01U) == 0x01U);
+
+			icomcrc >>= 1;
+
+			if (xorflag)
+				icomcrc ^= 0x8408U;
+
+			ch >>= 1;
+		} 
+	}
+
+	return ~icomcrc & 0xFFFFU;
+}

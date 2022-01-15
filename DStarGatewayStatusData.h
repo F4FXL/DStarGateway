@@ -22,10 +22,10 @@
 
 #include "Defs.h"
 
-class CIRCDDBGatewayStatusData {
+class CDStarGatewayStatusData {
 public:
-	CIRCDDBGatewayStatusData(IRCDDB_STATUS ircDDBStatus, bool dprsStatus);
-	~CIRCDDBGatewayStatusData();
+	CDStarGatewayStatusData(IRCDDB_STATUS ircDDBStatus, bool dprsStatus);
+	~CDStarGatewayStatusData();
 
 	void setRepeater(unsigned int n, const std::string& callsign, LINK_STATUS linkStatus, const std::string& linkCallsign, const std::string& incoming);
 

@@ -25,6 +25,7 @@
 #include "GPSACollector.h"
 #include "StringUtils.h"
 #include "Log.h"
+#include "APRSUtils.h"
 
 const unsigned int APRS_CSUM_LENGTH = 4U;
 
@@ -44,46 +45,23 @@ bool CGPSACollector::isValidGPSA(const std::string& gpsa)
     if(gpsa.length() < 10U || !boost::starts_with(gpsa, "$$CRC"))
         return false;
 
-    auto csum = calcCRC(gpsa);
+    auto csum = CAPRSUtils::calcGPSAIcomCRC(gpsa);
     auto csumStr = CStringUtils::string_format("%04X", csum);
     auto expectedCsum = gpsa.substr(5U, APRS_CSUM_LENGTH);
     bool res = ::strcasecmp(csumStr.c_str(), expectedCsum.c_str()) == 0;
     return res;
 }
 
-unsigned int CGPSACollector::calcCRC(const std::string& gpsa)
-{
-	unsigned int icomcrc = 0xFFFFU;
-
-    auto length = gpsa.length();
-	for (unsigned int j = 10U; j < length; j++) {
-		unsigned char ch = (unsigned char)gpsa[j];
-
-		for (unsigned int i = 0U; i < 8U; i++) {
-			bool xorflag = (((icomcrc ^ ch) & 0x01U) == 0x01U);
-
-			icomcrc >>= 1;
-
-			if (xorflag)
-				icomcrc ^= 0x8408U;
-
-			ch >>= 1;
-		} 
-	}
-
-	return ~icomcrc & 0xFFFFU;
-}
-
 unsigned int CGPSACollector::getDataInt(unsigned char * data, unsigned int length)
 {
-    if(data == nullptr || length == 0U || getSentence().empty())
+    if(data == nullptr || length == 0U)
         return 0U;
 
-    auto aprsFrame = getSentence();
-    if(aprsFrame.length() < 11U)
+    std::string aprsFrame;
+
+    if(!getDataInt(aprsFrame))
         return 0U;
 
-    aprsFrame = aprsFrame.substr(10).append("\r\n");
     auto aprsFrameLen = aprsFrame.length();
 
     if(length < aprsFrameLen) {
@@ -96,4 +74,19 @@ unsigned int CGPSACollector::getDataInt(unsigned char * data, unsigned int lengt
     }
 
     return aprsFrameLen;
+}
+
+bool CGPSACollector::getDataInt(std::string& data)
+{
+    if(getSentence().empty())
+        return false;
+
+    data.clear();
+    auto aprsFrame = getSentence();
+    if(aprsFrame.length() < 11U)//do we have enough data beyond CRC?
+        return false;
+
+    data = aprsFrame.substr(10);
+
+    return true;
 }

@@ -36,8 +36,6 @@ public:
 		assert(length > 0U);
 
 		m_buffer = new T[length];
-
-		::memset(m_buffer, 0x00, length * sizeof(T));
 	}
 
 	~CRingBuffer()

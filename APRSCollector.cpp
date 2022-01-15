@@ -28,25 +28,19 @@
 #include "NMEASentenceCollector.h"
 #include "GPSACollector.h"
 #include "RSMS1AMessageCollector.h"
-
-const unsigned int APRS_CSUM_LENGTH = 4U;
-const unsigned int APRS_DATA_LENGTH = 300U;
-const unsigned int SLOW_DATA_BLOCK_LENGTH = 6U;
-
-const char APRS_OVERLAY = '\\';
-const char APRS_SYMBOL  = 'K';
+#include "SlowDataCollectorThrottle.h"
 
 CAPRSCollector::CAPRSCollector() :
 m_collectors()
 {
-	m_collectors.push_back(new CRSMS1AMessageCollector());
-	m_collectors.push_back(new CGPSACollector());
-	m_collectors.push_back(new CNMEASentenceCollector("$GPRMC"));
-	m_collectors.push_back(new CNMEASentenceCollector("$GPGGA"));
-	m_collectors.push_back(new CNMEASentenceCollector("$GPGLL"));
-	m_collectors.push_back(new CNMEASentenceCollector("$GPVTG"));
-	m_collectors.push_back(new CNMEASentenceCollector("$GPGSA"));
-	m_collectors.push_back(new CNMEASentenceCollector("$GPGSV"));
+	m_collectors.push_back(new CRSMS1AMessageCollector()); // we do not throttle messages, they have highest priority !
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CGPSACollector(), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPGGA"), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPGLL"), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPVTG"), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPRMC"), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPGSA"), 10U));
+	m_collectors.push_back(new CSlowDataCollectorThrottle(new CNMEASentenceCollector("$GPGSV"), 10U));
 }
 
 CAPRSCollector::~CAPRSCollector()
@@ -67,6 +61,7 @@ void CAPRSCollector::writeHeader(const std::string& callsign)
 bool CAPRSCollector::writeData(const unsigned char* data)
 {
 	bool ret = false;
+
 	for(auto collector : m_collectors) {
 		bool ret2 = collector->writeData(data);
 		ret = ret || ret2;
@@ -98,4 +93,22 @@ unsigned int CAPRSCollector::getData(unsigned char dataType, unsigned char* data
 		}
 	}
 	return 0U;
+}
+
+void CAPRSCollector::getData(std::function<void(const std::string&)> dataHandler)
+{
+	for(auto collector : m_collectors) {
+		std::string data;
+		if(collector->getData(data)) {
+			dataHandler(data);
+			collector->reset();
+		}
+	}
+}
+
+void CAPRSCollector::clock(unsigned int ms)
+{
+	for(auto collector : m_collectors) {
+		collector->clock(ms);
+	}
 }

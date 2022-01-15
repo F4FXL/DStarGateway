@@ -26,19 +26,20 @@
 #include "Timer.h"
 #include "Thread.h"
 #include "ReadAPRSFrameCallback.h"
+#include "APRSFrame.h"
 
 
-class CAPRSWriterThread : public CThread {
+class CAPRSHandlerThread : public CThread {
 public:
-	CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
-	CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName);
-	virtual ~CAPRSWriterThread();
+	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
+	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter);
+	virtual ~CAPRSHandlerThread();
 
 	bool start();
 
 	bool isConnected() const;
 
-	void write(const char* data);
+	void write(CAPRSFrame& data);
 
 	void* Entry();
 
@@ -46,19 +47,20 @@ public:
 
 	void clock(unsigned int ms);
 
-	void addReadAPRSCallback(CReadAPRSFrameCallback* cb);
+	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 
 private:
 	std::string               m_username;
 	std::string               m_password;
 	std::string	           m_ssid;
 	CTCPReaderWriterClient m_socket;
-	CRingBuffer<char*>     m_queue;
+	CRingBuffer<std::string>     m_queue;
 	bool                   m_exit;
 	bool                   m_connected;
 	CTimer                 m_reconnectTimer;
+	CTimer				   m_keepAliveTimer;
 	unsigned int           m_tries;
-	std::vector<CReadAPRSFrameCallback *>  m_APRSReadCallback;
+	std::vector<IReadAPRSFrameCallback *>  m_APRSReadCallbacks;
 	std::string               m_filter;
 	std::string               m_clientName;
 
