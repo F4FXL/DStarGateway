@@ -795,7 +795,8 @@ void CDStarGatewayThread::processIrcDDB()
 					}
 				}
 				break;
-
+			case IDRT_NATTRAVERSAL_G2:
+				break;
 			default:
 				return;
 		}

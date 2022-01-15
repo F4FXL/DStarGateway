@@ -20,7 +20,8 @@
         "ostream": "cpp",
         "sstream": "cpp",
         "stop_token": "cpp",
-        "streambuf": "cpp"
+        "streambuf": "cpp",
+        "chrono": "cpp"
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [

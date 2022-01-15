@@ -31,7 +31,8 @@ enum IRCDDB_RESPONSE_TYPE {
 	IDRT_NONE,
 	IDRT_USER,
 	IDRT_GATEWAY,
-	IDRT_REPEATER
+	IDRT_REPEATER,
+	IDRT_NATTRAVERSAL_G2
 };
 
 
@@ -111,6 +112,9 @@ public:
 
 	// Send query for a user, a false return implies a network error
 	virtual bool findUser(const std::string& userCallsign) = 0;
+	
+	// notify another repeater for NAT Traversal, a false return implies a network error
+	virtual bool notifyRepeaterNatTraversal(const std::string& repeater) = 0;
 
 	// Support for the Smart Group Server
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms) = 0;
@@ -135,8 +139,6 @@ public:
 	virtual bool receiveUser(std::string& userCallsign, std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address, std::string& timeStamp) = 0;
 
 	virtual void close() = 0;		// Implictely kills any threads in the IRC code
-
-	virtual void queryUsers() = 0;
 };
 
 typedef std::vector<CIRCDDB*> CIRCDDB_Array;

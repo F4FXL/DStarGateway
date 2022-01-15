@@ -2022,7 +2022,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 	if (m_linkStatus == LS_LINKING_CCS || m_linkStatus == LS_LINKED_CCS)
 		return;
 
-	if (callsign.substr(0,1) == "/") {
+	if (!callsign.empty() && callsign[0] == '/') {
 		if (m_irc == NULL) {
 			CLog::logInfo("%s is trying to G2 route with ircDDB disabled", user.c_str());
 			m_g2Status = G2_LOCAL;
@@ -2053,6 +2053,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		m_g2User = "CQCQCQ  ";
 
 		CRepeaterData* data = m_cache->findRepeater(m_g2Repeater);
+		m_irc->notifyRepeaterNatTraversal(m_g2Repeater);
 
 		if (data == NULL) {
 			m_g2Status = G2_REPEATER;

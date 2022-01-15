@@ -150,6 +150,7 @@ public:
 	virtual bool findGateway(const std::string & gatewayCallsign);
 	virtual bool findRepeater(const std::string & repeaterCallsign);
 	virtual bool findUser(const std::string & userCallsign);
+	virtual bool notifyRepeaterNatTraversal(const std::string& repeater);
 	virtual IRCDDB_RESPONSE_TYPE getMessageType();
 	virtual bool receiveRepeater(std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveGateway(std::string & gatewayCallsign, std::string & address);
@@ -157,7 +158,6 @@ public:
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address, std::string & timeStamp);
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 	virtual void close();
-	virtual void queryUsers();
 
 	//
 

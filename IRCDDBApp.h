@@ -92,7 +92,7 @@ private:
 	bool findServerUser();
 	unsigned int calculateUsn(const std::string& nick);
 	std::string getLastEntryTime(int tableID);
-	IRCDDBAppPrivate *d;
+	IRCDDBAppPrivate *m_d;
 	time_t m_maxTime;
 	std::future<void> m_future;
 };

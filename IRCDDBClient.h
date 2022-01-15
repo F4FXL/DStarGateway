@@ -106,6 +106,9 @@ public:
 	// Send query for a user, a false return implies a network error
 	bool findUser(const std::string& userCallsign);
 
+	// notify another repeater for NAT Traversal, a false return implies a network error
+	bool notifyRepeaterNatTraversal(const std::string& repeater);
+
 	// Support for the Smart Group Server
 	void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 
@@ -128,12 +131,12 @@ public:
 
 	bool receiveUser(std::string& userCallsign, std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address, std::string& timeStamp);
 
+    bool receiveNATTraversalG2(std::string& address);
+
 	void close();		// Implictely kills any threads in the IRC code
 
-	void queryUsers();
-
 private:
-	struct CIRCDDBClientPrivate * const d;
+	struct CIRCDDBClientPrivate * const m_d;
 	bool m_isQuadNet;
 };
 

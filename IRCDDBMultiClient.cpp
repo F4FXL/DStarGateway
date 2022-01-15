@@ -181,6 +181,16 @@ bool CIRCDDBMultiClient::findUser(const std::string & userCallsign)
 	return result;
 }
 
+bool CIRCDDBMultiClient::notifyRepeaterNatTraversal(const std::string& repeater)
+{
+	bool result = true;
+	for (unsigned int i = 0; i < m_clients.size(); i++) {
+		result = m_clients[i]->notifyRepeaterNatTraversal(repeater) && result;
+	}
+
+	return result;
+}
+
 IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 {
 	//procees the inner clients at each call
@@ -369,10 +379,4 @@ CIRCDDBMultiClientQuery_HashMap * CIRCDDBMultiClient::getQueriesHashMap(IRCDDB_R
 	default:
 		return NULL;
 	}
-}
-
-
-void CIRCDDBMultiClient::queryUsers()
-{
-	
 }
