@@ -130,6 +130,8 @@ public:
 
 	void close();		// Implictely kills any threads in the IRC code
 
+	void queryUsers();
+
 private:
 	struct CIRCDDBClientPrivate * const d;
 	bool m_isQuadNet;

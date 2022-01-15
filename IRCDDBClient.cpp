@@ -272,6 +272,7 @@ bool CIRCDDBClient::findUser(const std::string& userCallsign)
 		CLog::logDebug("CIRCDDBClient::findUser:userCall='%s' len != 8\n", userCallsign.c_str());
 		return false;
 	}
+	CLog::logTrace("IRC Find user %s", userCallsign.c_str());
 	std::string usr(userCallsign);
 	CUtils::ToUpper(usr);
 	return d->app->findUser(usr);
@@ -398,6 +399,9 @@ bool CIRCDDBClient::receiveUser(std::string& userCallsign, std::string& repeater
 	gatewayCallsign = m->getParam(2);
 	address = m->getParam(3);
 	timeStamp = m->getParam(4);
+
+	CLog::logTrace("IRC Receive User %s %s %s %s %s", userCallsign.c_str(), repeaterCallsign.c_str(), gatewayCallsign.c_str(), address.c_str(), timeStamp.c_str());
+
 	delete m;
 	return true;
 }
@@ -408,3 +412,7 @@ void CIRCDDBClient::close()		// Implictely kills any threads in the IRC code
 	d->app -> stopWork();
 }
 
+
+void CIRCDDBClient::queryUsers()
+{
+}

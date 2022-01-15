@@ -157,6 +157,7 @@ public:
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address, std::string & timeStamp);
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 	virtual void close();
+	virtual void queryUsers();
 
 	//
 

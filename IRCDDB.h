@@ -135,6 +135,8 @@ public:
 	virtual bool receiveUser(std::string& userCallsign, std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address, std::string& timeStamp) = 0;
 
 	virtual void close() = 0;		// Implictely kills any threads in the IRC code
+
+	virtual void queryUsers() = 0;
 };
 
 typedef std::vector<CIRCDDB*> CIRCDDB_Array;

@@ -244,7 +244,7 @@ IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 		}
 	}
 
-        IRCDDB_RESPONSE_TYPE result = IDRT_NONE;
+    IRCDDB_RESPONSE_TYPE result = IDRT_NONE;
 
 	m_responseQueueLock.lock();
 	if (m_responseQueue.size() != 0) result = m_responseQueue[0]->getType();
@@ -372,3 +372,7 @@ CIRCDDBMultiClientQuery_HashMap * CIRCDDBMultiClient::getQueriesHashMap(IRCDDB_R
 }
 
 
+void CIRCDDBMultiClient::queryUsers()
+{
+	
+}
