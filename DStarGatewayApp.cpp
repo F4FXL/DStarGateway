@@ -23,6 +23,11 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "DStarGatewayDefs.h"
 #include "DStarGatewayConfig.h"
@@ -41,9 +46,15 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 
-#ifndef UNIT_TESTS
+#ifdef UNIT_TESTS
+int fakemain(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
+	// install sigHandler
+	signal(SIGSEGV, __sigHandler); 
+
 	setbuf(stdout, NULL);
 	if (2 != argc) {
 		printf("usage: %s path_to_config_file\n", argv[0]);
@@ -70,7 +81,21 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-#endif
+
+void __sigHandler(int sig)
+{
+	if(sig == SIGSEGV) {
+		void *array[100];
+		size_t size;
+		// get void*'s for all entries on the stack
+		size = backtrace(array, 100);
+
+		// print out all the frames to stderr
+		fprintf(stderr, "Error: signal %d:\n", sig);
+		backtrace_symbols_fd(array, size, STDERR_FILENO);
+		exit(1);
+	}
+}
 
 CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
 {

@@ -21,6 +21,8 @@
 
 #include "DStarGatewayThread.h"
 
+void __sigHandler(int sig);
+
 class CDStarGatewayApp
 {
 private:

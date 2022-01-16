@@ -23,7 +23,7 @@ export LOG_DIR=/var/log/dstargateway/
 
 ifeq ($(ENABLE_DEBUG), 1)
 # choose this if you want debugging help
-export CPPFLAGS=-g -ggdb -W -Wall -Werror -std=c++17
+export CPPFLAGS=-g -rdynamic -ggdb -W -Wall -Werror -std=c++17
 else
 # or, you can choose this for a much smaller executable without debugging help
 CPPFLAGS=-W -O3 -Wall -Werror -std=c++17
