@@ -76,7 +76,6 @@ m_dextraPool(NULL),
 m_dplusPool(NULL),
 m_dcsPool(NULL),
 m_g2Handler(NULL),
-m_natTraversal(NULL),
 m_aprsWriter(NULL),
 m_irc(NULL),
 m_cache(),
@@ -205,11 +204,6 @@ void* CDStarGatewayThread::Entry()
 		CLog::logError("Could not open the G2 protocol handler");
 		delete m_g2Handler;
 		m_g2Handler = NULL;
-	}
-
-	if(m_g2Handler != NULL) {
-		m_natTraversal = new CNatTraversalHandler();
-		m_natTraversal->setG2Handler(m_g2Handler);
 	}
 
 	// Wait here until we have the essentials to run

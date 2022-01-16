@@ -37,7 +37,6 @@
 #include "Timer.h"
 #include "Defs.h"
 #include "Thread.h"
-#include "NatTraversalHandler.h"
 
 class CDStarGatewayThread : public CThread{
 public:
@@ -104,7 +103,6 @@ private:
 	CDPlusProtocolHandlerPool*     m_dplusPool;
 	CDCSProtocolHandlerPool*       m_dcsPool;
 	CG2ProtocolHandler*       m_g2Handler;
-	CNatTraversalHandler*     m_natTraversal;
 	CAPRSHandler*              m_aprsWriter;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;
