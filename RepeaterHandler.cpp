@@ -2109,6 +2109,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			m_g2User     = callsign;
 			m_g2Address  = data->getAddress();
 			m_g2Repeater = data->getRepeater();
+			m_irc->notifyRepeaterNatTraversal(m_g2Repeater);
 			m_g2Gateway  = data->getGateway();
 			header.setDestination(m_g2Address, G2_DV_PORT);
 			header.setRepeaters(m_g2Gateway, m_g2Repeater);
