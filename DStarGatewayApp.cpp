@@ -23,11 +23,11 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <stdio.h>
-#include <execinfo.h>
 #include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <exception>
+#ifdef DEBUG_DSTARGW
+#include <boost/stacktrace.hpp>
+#endif
 
 #include "DStarGatewayDefs.h"
 #include "DStarGatewayConfig.h"
@@ -52,8 +52,14 @@ int fakemain(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
-	// install sigHandler
-	signal(SIGSEGV, __sigHandler); 
+	std::set_terminate(CDStarGatewayApp::terminateHandler);
+
+	// TODO 2022-01-17 handle SIGTERM etc ....
+	// signal(SIGSEGV, CDStarGatewayApp::sigHandler);
+	// signal(SIGILL, CDStarGatewayApp::sigHandler);
+	// signal(SIGFPE, CDStarGatewayApp::sigHandler);
+	// signal(SIGABRT, CDStarGatewayApp::sigHandler);
+	// signal(SIGTERM, CDStarGatewayApp::sigHandler);
 
 	setbuf(stdout, NULL);
 	if (2 != argc) {
@@ -80,21 +86,6 @@ int main(int argc, char *argv[])
 	gateway.run();
 
 	return 0;
-}
-
-void __sigHandler(int sig)
-{
-	if(sig == SIGSEGV) {
-		void *array[100];
-		size_t size;
-		// get void*'s for all entries on the stack
-		size = backtrace(array, 100);
-
-		// print out all the frames to stderr
-		fprintf(stderr, "Error: signal %d:\n", sig);
-		backtrace_symbols_fd(array, size, STDERR_FILENO);
-		exit(1);
-	}
 }
 
 CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
@@ -285,3 +276,35 @@ bool CDStarGatewayApp::createThread()
 	return true;
 }
 
+void CDStarGatewayApp::sigHandler(int /*sig*/)
+{
+	// TODO 2022-01-17 handle SIGTERM etc ....
+}
+
+void CDStarGatewayApp::terminateHandler()
+{
+
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+#endif
+
+	std::exception_ptr eptr;
+	eptr = std::current_exception(); 
+
+	try {
+        if (eptr != nullptr) {
+            std::rethrow_exception(eptr);
+        }
+		else {
+			CLog::logFatal("Unhandled unkown exception occured");
+		}
+    } catch(const std::exception& e) {
+        CLog::logFatal("Unhandled exception occured %s", e.what());
+    }
+
+#ifdef DEBUG_DSTARGW
+	CLog::logFatal("%s", stackTrace.str().c_str());
+#endif
+	exit(1);
+}

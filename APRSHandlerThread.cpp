@@ -123,7 +123,9 @@ void* CAPRSHandlerThread::Entry()
 		startReconnectionTimer();
 	}
 
+#ifndef DEBUG_DSTARGW
 	try {
+#endif
 		m_keepAliveTimer.start();
 		while (!m_exit) {
 			if (!m_connected) {
@@ -194,6 +196,7 @@ void* CAPRSHandlerThread::Entry()
 			auto s = m_queue.getData();
 			s.clear();
 		}
+#ifndef DEBUG_DSTARGW
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
@@ -202,6 +205,7 @@ void* CAPRSHandlerThread::Entry()
 	catch (...) {
 		CLog::logInfo("Unknown exception raised in the APRS Writer thread");
 	}
+#endif
 
 	CLog::logInfo("Stopping the APRS Writer thread");
 

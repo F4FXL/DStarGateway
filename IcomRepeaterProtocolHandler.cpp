@@ -135,7 +135,9 @@ void* CIcomRepeaterProtocolHandler::Entry()
 {
 	CLog::logInfo("Starting the Icom Controller thread");
 
+#ifndef DEBUG_DSTARGW
 	try {
+#endif
 		while (!m_killed) {
 			sendGwyPackets();
 
@@ -145,6 +147,7 @@ void* CIcomRepeaterProtocolHandler::Entry()
 
 			m_retryTimer.clock();
 		}
+#ifndef DEBUG_DSTARGW
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
@@ -153,6 +156,7 @@ void* CIcomRepeaterProtocolHandler::Entry()
 	catch (...) {
 		CLog::logError("Unknown exception raised in the Icom Controller thread");
 	}
+#endif
 
 	CLog::logInfo("Stopping the Icom Controller thread");
 

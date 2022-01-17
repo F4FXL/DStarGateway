@@ -335,7 +335,9 @@ void* CDStarGatewayThread::Entry()
 	m_statusFileTimer.start();
 	m_statusTimer2.start();
 
+#ifndef DEBUG_DSTARGW
 	try {
+#endif
 		while (!m_killed) {
 			if (m_icomRepeaterHandler != NULL)
 				processRepeater(m_icomRepeaterHandler);
@@ -411,6 +413,7 @@ void* CDStarGatewayThread::Entry()
 
 			::std::this_thread::sleep_for(std::chrono::milliseconds(TIME_PER_TIC_MS));
 		}
+#ifndef DEBUG_DSTARGW
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
@@ -419,6 +422,7 @@ void* CDStarGatewayThread::Entry()
 	catch (...) {
 		CLog::logFatal("Unknown exception raised in the main thread");
 	}
+#endif
 
 	CLog::logInfo("Stopping the ircDDB Gateway thread");
 

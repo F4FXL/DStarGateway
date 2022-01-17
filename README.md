@@ -11,6 +11,7 @@
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
       - [3.5.0.1. Build With GPSD Support](#3501-build-with-gpsd-support)
+      - [3.5.0.2. Debug Build](#3502-debug-build)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
@@ -91,6 +92,11 @@ make
 ```
 make USE_GPS=1
 ```
+#### 3.5.0.2. Debug Build
+```
+make ENABLE_DEBUG=1
+```
+Note that this will link with libl
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
