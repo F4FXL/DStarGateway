@@ -54,11 +54,10 @@ int main(int argc, char *argv[])
 {
 	std::set_terminate(CDStarGatewayApp::terminateHandler);
 
-	// TODO 2022-01-17 handle SIGTERM etc ....
-	// signal(SIGSEGV, CDStarGatewayApp::sigHandler);
-	// signal(SIGILL, CDStarGatewayApp::sigHandler);
-	// signal(SIGFPE, CDStarGatewayApp::sigHandler);
-	// signal(SIGABRT, CDStarGatewayApp::sigHandler);
+	signal(SIGSEGV, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGILL, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGFPE, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGABRT, CDStarGatewayApp::sigHandlerFatal);
 	// signal(SIGTERM, CDStarGatewayApp::sigHandler);
 
 	setbuf(stdout, NULL);
@@ -276,9 +275,15 @@ bool CDStarGatewayApp::createThread()
 	return true;
 }
 
-void CDStarGatewayApp::sigHandler(int /*sig*/)
+void CDStarGatewayApp::sigHandlerFatal(int sig)
 {
-	// TODO 2022-01-17 handle SIGTERM etc ....
+	CLog::logFatal("Caught signal : %s", strsignal(sig));
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+#endif
+	exit(1);
 }
 
 void CDStarGatewayApp::terminateHandler()
@@ -297,14 +302,14 @@ void CDStarGatewayApp::terminateHandler()
             std::rethrow_exception(eptr);
         }
 		else {
-			CLog::logFatal("Unhandled unkown exception occured");
+			CLog::logFatal("Unhandled unknown exception occured");
 		}
     } catch(const std::exception& e) {
         CLog::logFatal("Unhandled exception occured %s", e.what());
     }
 
 #ifdef DEBUG_DSTARGW
-	CLog::logFatal("%s", stackTrace.str().c_str());
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
 #endif
 	exit(1);
 }

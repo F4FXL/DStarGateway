@@ -152,9 +152,11 @@ void* CIcomRepeaterProtocolHandler::Entry()
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logError("Exception raised in the Icom Controller thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logError("Unknown exception raised in the Icom Controller thread");
+		throw;
 	}
 #endif
 

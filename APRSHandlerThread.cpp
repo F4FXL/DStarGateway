@@ -201,9 +201,11 @@ void* CAPRSHandlerThread::Entry()
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logInfo("Exception raised in the APRS Writer thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logInfo("Unknown exception raised in the APRS Writer thread");
+		throw;
 	}
 #endif
 

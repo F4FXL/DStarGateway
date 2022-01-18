@@ -418,9 +418,11 @@ void* CDStarGatewayThread::Entry()
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logFatal("Exception raised in the main thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logFatal("Unknown exception raised in the main thread");
+		throw;
 	}
 #endif
 

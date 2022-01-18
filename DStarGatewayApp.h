@@ -37,6 +37,6 @@ public:
 	bool init();
 	void run();
 
-	static void sigHandler(int sig);
+	static void sigHandlerFatal(int sig);
 	static void terminateHandler();
 };

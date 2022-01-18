@@ -90,9 +90,11 @@ void* CDPlusAuthenticator::Entry()
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logError("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logError("Unknown exception raised in the D-Plus Authenticator thread");
+		throw;
 	}
 #endif
 
