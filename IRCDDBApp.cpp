@@ -311,7 +311,7 @@ void IRCDDBApp::userJoin(const std::string& nick, const std::string& name, const
 
 	m_d->m_userMap[lnick] = u;
 
-	if (m_d->m_initReady) {
+	/*if (m_d->m_initReady)*/ {
 		std::string::size_type hyphenPos = nick.find('-');
 
 		if ((hyphenPos >= 4) && (hyphenPos <= 6)) {
