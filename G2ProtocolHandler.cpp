@@ -111,11 +111,11 @@ bool CG2ProtocolHandler::readPackets()
 
 	// save the incoming port (this is to enable mobile hotspots)
 	if (m_portmap.end() == m_portmap.find(m_address.s_addr)) {
-		CLog::logInfo("new address %s on port %u\n", inet_ntoa(m_address), m_port);
+		CLog::logInfo("G2 new address %s on port %u\n", inet_ntoa(m_address), m_port);
 		m_portmap[m_address.s_addr] = m_port;
 	} else {
 		if (m_portmap[m_address.s_addr] != m_port) {
-			CLog::logInfo("new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, m_portmap[m_address.s_addr]);
+			CLog::logInfo("G2 new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, m_portmap[m_address.s_addr]);
 			m_portmap[m_address.s_addr] = m_port;
 		}
 	}
