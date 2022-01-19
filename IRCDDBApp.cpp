@@ -131,7 +131,7 @@ public:
 
 IRCDDBApp::IRCDDBApp(const std::string& u_chan)
 	: m_d(new IRCDDBAppPrivate)
-	, m_maxTime((time_t)time(0) - (time_t)(60 * 24 * 60 60)) // look 60 days in the past
+	, m_maxTime((time_t)time(0) - (time_t)(60 * 24 * 60 * 60)) // look 60 days in the past
 {
 	m_d->m_sendQ = NULL;
 	m_d->m_initReady = false;
