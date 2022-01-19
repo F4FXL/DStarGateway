@@ -215,12 +215,13 @@ bool CDStarGatewayApp::createThread()
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
 
 	// Setup ircddb
+	auto ircddbVersionInfo = "linux_" + PRODUCT_NAME + "-" + VERSION;
 	std::vector<CIRCDDB *> clients;
 	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, ircddbVersionInfo, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
 	if(clients.size() > 0U) {
