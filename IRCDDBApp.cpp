@@ -661,7 +661,7 @@ bool IRCDDBApp::notifyRepeaterG2NatTraversal(const std::string& repeater)
 	}
 
 	if(nick.empty()) {
-		CLog::logDebug("Unable to dind IRC nick for repeater %s", repeater.c_str());
+		CLog::logDebug("Unable to find IRC nick for repeater %s", repeater.c_str());
 		return true;
 	}
 
@@ -691,7 +691,7 @@ bool IRCDDBApp::notifyRepeaterDextraNatTraversal(const std::string& repeater, un
 	}
 
 	if(nick.empty()) {
-		CLog::logDebug("Unable to dind IRC nick for repeater %s", repeater.c_str());
+		CLog::logDebug("Unable to find IRC nick for repeater %s", repeater.c_str());
 		return true;
 	}
 
