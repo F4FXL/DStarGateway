@@ -44,6 +44,10 @@ CDCSProtocolHandlerPool::~CDCSProtocolHandlerPool()
 
 CDCSProtocolHandler *CDCSProtocolHandlerPool::getIncomingHandler()
 {
+	auto it = m_pool.find(m_basePort);
+	if(it != m_pool.end())
+		return it->second;
+		
 	return getHandler(m_basePort);
 }
 
