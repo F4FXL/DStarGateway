@@ -177,12 +177,11 @@ void CG2ProtocolHandler::close()
 
 void CG2ProtocolHandler::traverseNat(const std::string& address)
 {
-	unsigned char buffer[1];
-	::memset(buffer, 0, 1);
+	unsigned char buffer = 0x00U;
 	
 	in_addr addr = CUDPReaderWriter::lookup(address);
 
-	CLog::logInfo("Punching hole to %s", address.c_str());
+	CLog::logInfo("G2 Punching hole to %s", address.c_str());
 
-	m_socket.write(buffer, 1, addr, G2_DV_PORT);
+	m_socket.write(&buffer, 1U, addr, G2_DV_PORT);
 }
