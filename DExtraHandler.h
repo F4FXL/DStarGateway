@@ -52,7 +52,7 @@ public:
 	static void setHeaderLogger(CHeaderLogger* logger);
 	static void setMaxDongles(unsigned int maxDongles);
 
-	static void link(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, const in_addr& address);
+	static void link(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, const in_addr& address, unsigned int& localPort);
 	static void unlink(IReflectorCallback* handler, const std::string& reflector = "", bool exclude = true);
 	static void unlink();
 

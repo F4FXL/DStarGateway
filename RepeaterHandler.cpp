@@ -1381,8 +1381,9 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 				default:
 					if (m_dextraEnabled) {
 						m_linkGateway = gateway;
+						unsigned int localPort = 0U;
 						addr.s_addr = ::inet_addr(address.c_str());
-						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
+						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, addr, localPort);
 						m_linkStatus = LS_LINKING_DEXTRA;
 					} else {
 						CLog::logInfo("Require DExtra for linking to %s, but DExtra is disabled", repeater.c_str());
@@ -2321,8 +2322,11 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 
 			default:
 				if (m_dextraEnabled) {
+					unsigned int localPort = 0U;
 					m_linkStatus = LS_LINKING_DEXTRA;
-					CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+					CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+					if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDextraNatTraversal(m_linkRepeater, localPort);
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
@@ -2493,8 +2497,11 @@ void CRepeaterHandler::startupInt()
 
 				default:
 					if (m_dextraEnabled) {
+						unsigned int localPort = 0U;
 						m_linkStatus = LS_LINKING_DEXTRA;
-						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+						if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDextraNatTraversal(m_linkRepeater, localPort);
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {
