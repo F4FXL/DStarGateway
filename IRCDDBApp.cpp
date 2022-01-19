@@ -259,6 +259,9 @@ IRCDDB_RESPONSE_TYPE IRCDDBApp::getReplyMessageType()
 	if(msgType.compare("NATTRAVERSAL_G2") == 0)
 		return IDRT_NATTRAVERSAL_G2;
 
+	if(msgType.compare("NATTRAVERSAL_DEXTRA") == 0)
+		return IDRT_NATTRAVERSAL_DEXTRA;
+
 	CLog::logWarning("IRCDDBApp::getMessageType: unknown msg type: %s\n", msgType.c_str());
 
 	return IDRT_NONE;
@@ -638,7 +641,7 @@ bool IRCDDBApp::findUser(const std::string& usrCall)
 	return true;
 }
 
-bool IRCDDBApp::notifyRepeaterNatTraversal(const std::string& repeater)
+bool IRCDDBApp::notifyRepeaterG2NatTraversal(const std::string& repeater)
 {
 	auto firstSpacePos = repeater.find_first_of(' ');
 	if(firstSpacePos == std::string::npos)
@@ -663,6 +666,37 @@ bool IRCDDBApp::notifyRepeaterNatTraversal(const std::string& repeater)
 	}
 
 	IRCMessage * ircMessage = new IRCMessage(nick, "NATTRAVERSAL_G2");
+	m_d->m_sendQ->putMessage(ircMessage);
+
+	return true;
+}
+
+bool IRCDDBApp::notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myLocalPort)
+{
+	auto firstSpacePos = repeater.find_first_of(' ');
+	if(firstSpacePos == std::string::npos)
+		return true;
+	
+	auto lrepeater = repeater.substr(0, firstSpacePos);
+	CUtils::ToLower(lrepeater);
+	std::string nick;
+
+	std::lock_guard loclUserMap(m_d->m_userMapMutex);
+	for(unsigned int i = 1; i <= 4U; i++) {
+		nick = lrepeater + "-" + std::to_string(i);
+		if(m_d->m_userMap.count(nick) == 1) {
+			break;
+		}
+		nick.clear();
+	}
+
+	if(nick.empty()) {
+		CLog::logDebug("Unable to dind IRC nick for repeater %s", repeater.c_str());
+		return true;
+	}
+
+	IRCMessage * ircMessage = new IRCMessage(nick, "NATTRAVERSAL_DEXTRA");
+	ircMessage->addParam(std::to_string(myLocalPort));
 	m_d->m_sendQ->putMessage(ircMessage);
 
 	return true;
@@ -873,9 +907,16 @@ void IRCDDBApp::msgQuery(IRCMessage *m)
 		}
 	}
 	else if(m->m_params[0] == m_d->m_myNick) {
-		if(boost::starts_with(m->m_params[1], "NATTRAVERSAL_")) {
+		if(m->m_params.size() >= 2U && m->m_params[1] == "NATTRAVERSAL_G2") {
 			IRCMessage * m2 = new IRCMessage(m->m_params[1]);
 			m2->addParam(m->getPrefixHost());
+			m_d->m_replyQ.putMessage(m2);
+		}
+		else if(m->m_params.size() >= 2U && boost::starts_with(m->m_params[1], "NATTRAVERSAL_DEXTRA")) {
+			IRCMessage * m2 = new IRCMessage(m->m_params[1].substr(0, (std::string("NATTRAVERSAL_DEXTRA")).length()));
+			m2->addParam(m->getPrefixHost());
+			std::string remotePort = boost::trim_copy(boost::replace_all_copy(m->m_params[1], "NATTRAVERSAL_DEXTRA", ""));
+			m2->addParam(remotePort);
 			m_d->m_replyQ.putMessage(m2);
 		}
 	}

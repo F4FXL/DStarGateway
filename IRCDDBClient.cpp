@@ -278,9 +278,14 @@ bool CIRCDDBClient::findUser(const std::string& userCallsign)
 	return m_d->m_app->findUser(usr);
 }
 
-bool CIRCDDBClient::notifyRepeaterNatTraversal(const std::string& repeater)
+bool CIRCDDBClient::notifyRepeaterG2NatTraversal(const std::string& repeater)
 {
-	return m_d->m_app->notifyRepeaterNatTraversal(repeater);
+	return m_d->m_app->notifyRepeaterG2NatTraversal(repeater);
+}
+
+bool CIRCDDBClient::notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	return m_d->m_app->notifyRepeaterDextraNatTraversal(repeater, myPort);
 }
 
 // The following functions are for processing received messages
@@ -423,7 +428,7 @@ bool CIRCDDBClient::receiveNATTraversalG2(std::string& address)
 	IRCMessage * m = m_d->m_app->getReplyMessage();
 
 	if (m == NULL) {
-		CLog::logDebug("CIRCDDBClient::receiveUser: no message\n");
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalG2: no message\n");
 		return false;
 	}
 
@@ -440,6 +445,41 @@ bool CIRCDDBClient::receiveNATTraversalG2(std::string& address)
 	}
 
 	address = m->m_params[0];
+	delete m;
+
+	return true;
+}
+
+bool CIRCDDBClient::receiveNATTraversalDextra(std::string& address, std::string& remotePort)
+{
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
+
+	if(rt != IDRT_NATTRAVERSAL_DEXTRA) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: unexpected response type=%d\n", rt);
+		return false;
+	}
+
+	IRCMessage * m = m_d->m_app->getReplyMessage();
+
+	if (m == NULL) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: no message\n");
+		return false;
+	}
+
+	if (m->getCommand().compare("NATTRAVERSAL_DEXTRA")) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: wrong message type, expected 'NATTRAVERSAL_G2', got '%s'\n", m->getCommand().c_str());
+		delete m;
+		return false;
+	}
+
+	if (2 != m->getParamCount()) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: unexpected number of message parameters, expected 2, got %d\n", m->getParamCount());
+		delete m;
+		return false;
+	}
+
+	address = m->m_params[0];
+	remotePort = m->m_params[1];
 	delete m;
 
 	return true;

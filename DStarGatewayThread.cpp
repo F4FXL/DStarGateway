@@ -22,6 +22,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <boost/lexical_cast.hpp>
 
 #include "DStarGatewayThread.h"
 #include "DStarGatewayDefs.h"
@@ -788,8 +789,30 @@ void CDStarGatewayThread::processIrcDDB()
 					if(!res)
 						return;
 
-					CLog::logInfo("%s wants to G2 route to us, punching UDP Holes through NAT", address.c_str());
-					m_g2Handler->traverseNat(address);
+					if(m_g2Handler != nullptr) {
+						CLog::logInfo("%s wants to G2 route to us, punching UDP Holes through NAT", address.c_str());
+						m_g2Handler->traverseNat(address);
+					}
+					else {
+						CLog::logInfo("%s wants to G2 route to us, but G2 is disabled", address.c_str());
+					}
+				}
+				break;
+			case IDRT_NATTRAVERSAL_DEXTRA: {
+
+					std::string address, remotePort;
+					bool res = m_irc->receiveNATTraversalDextra(address, remotePort);
+					if(!res)
+						return;
+
+					if(m_dextraEnabled && m_dextraPool != nullptr && m_dextraPool->getIncomingHandler() != nullptr) {
+						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
+						auto remotePortInt = boost::lexical_cast<unsigned int>(remotePort);
+						m_dextraPool->getIncomingHandler()->traverseNat(address, remotePortInt);
+					}
+					else {
+						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s, but DExtra is Disabled", address.c_str(), remotePort.c_str());
+					}
 				}
 				break;
 			case IDRT_NONE:

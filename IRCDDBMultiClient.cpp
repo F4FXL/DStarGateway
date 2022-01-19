@@ -150,7 +150,7 @@ void CIRCDDBMultiClient::sendDStarGatewayInfo(const std::string subcommand, cons
 
 bool CIRCDDBMultiClient::findGateway(const std::string & gatewayCallsign)
 {
-	pushQuery(IDRT_GATEWAY, gatewayCallsign, new CIRCDDBMultiClientQuery("", "", gatewayCallsign, "", "", IDRT_GATEWAY));
+	pushQuery(IDRT_GATEWAY, gatewayCallsign, new CIRCDDBMultiClientQuery("", "", gatewayCallsign, "", "", "", IDRT_GATEWAY));
 	bool result = true;
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
 		result = m_clients[i]->findGateway(gatewayCallsign) && result;
@@ -161,7 +161,7 @@ bool CIRCDDBMultiClient::findGateway(const std::string & gatewayCallsign)
 
 bool CIRCDDBMultiClient::findRepeater(const std::string & repeaterCallsign)
 {
-	pushQuery(IDRT_REPEATER, repeaterCallsign, new CIRCDDBMultiClientQuery("", repeaterCallsign, "", "", "", IDRT_REPEATER));
+	pushQuery(IDRT_REPEATER, repeaterCallsign, new CIRCDDBMultiClientQuery("", repeaterCallsign, "", "", "", "", IDRT_REPEATER));
 	bool result = true;
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
 		result = m_clients[i]->findRepeater(repeaterCallsign) && result;
@@ -172,7 +172,7 @@ bool CIRCDDBMultiClient::findRepeater(const std::string & repeaterCallsign)
 
 bool CIRCDDBMultiClient::findUser(const std::string & userCallsign)
 {
-	pushQuery(IDRT_USER, userCallsign, new CIRCDDBMultiClientQuery(userCallsign, "", "", "", "", IDRT_USER));
+	pushQuery(IDRT_USER, userCallsign, new CIRCDDBMultiClientQuery(userCallsign, "", "", "", "", "", IDRT_USER));
 	bool result = true;
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
 		result = m_clients[i]->findUser(userCallsign) && result;
@@ -181,16 +181,29 @@ bool CIRCDDBMultiClient::findUser(const std::string & userCallsign)
 	return result;
 }
 
-bool CIRCDDBMultiClient::notifyRepeaterNatTraversal(const std::string& repeater)
+bool CIRCDDBMultiClient::notifyRepeaterG2NatTraversal(const std::string& repeater)
 {
 	// NAT traversal message does not expect a response over IRC
 	bool result = true;
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
-		result = m_clients[i]->notifyRepeaterNatTraversal(repeater) && result;
+		result = m_clients[i]->notifyRepeaterG2NatTraversal(repeater) && result;
 	}
 
 	return result;
 }
+
+bool CIRCDDBMultiClient::notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	// NAT traversal message does not expect a response over IRC
+	bool result = true;
+	for (unsigned int i = 0; i < m_clients.size(); i++) {
+		result = m_clients[i]->notifyRepeaterDextraNatTraversal(repeater, myPort) && result;
+	}
+
+	return result;
+}
+
+
 
 bool CIRCDDBMultiClient::receiveNATTraversalG2(std::string& address)
 {
@@ -203,11 +216,23 @@ bool CIRCDDBMultiClient::receiveNATTraversalG2(std::string& address)
 	return true;
 }
 
+bool CIRCDDBMultiClient::receiveNATTraversalDextra(std::string& address, std::string& remotePort)
+{
+	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_NATTRAVERSAL_DEXTRA, "CIRCDDBMultiClient::receiveNATTraversalDextra: unexpected response type");
+	if (item == NULL)
+		return false;
+
+	address = item->getAddress();
+	remotePort = item->getRemotePort();
+
+	return true;
+}
+
 IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 {
-	//procees the inner clients at each call
+	//process the inner clients at each call
 	for (unsigned int i = 0; i < m_clients.size(); i++) {
-		std::string user = "", repeater = "", gateway = "", address = "", timestamp = "", key = "";
+		std::string user = "", repeater = "", gateway = "", address = "", timestamp = "", key = "", port ="";
 
 		IRCDDB_RESPONSE_TYPE type = m_clients[i]->getMessageType();
 
@@ -234,6 +259,13 @@ IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 				if (!m_clients[i]->receiveNATTraversalG2(address))
 					type = IDRT_NATTRAVERSAL_G2;
 				key = "NAT_TRAVERSAL_G2";
+				break;
+			}
+			case IDRT_NATTRAVERSAL_DEXTRA: {
+				if (!m_clients[i]->receiveNATTraversalDextra(address, port))
+					type = IDRT_NATTRAVERSAL_DEXTRA;
+				key = "NAT_TRAVERSAL_DEXTRA";
+				break;
 			}
 			case IDRT_NONE: {
 			default:
@@ -250,12 +282,12 @@ IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 			CIRCDDBMultiClientQuery * item = popQuery(type, key);
 
 			if (item != NULL) {//is this a response to a query we've sent ?
-				item->Update(user, repeater, gateway, address, timestamp);//update item (if needed)
+				item->Update(user, repeater, gateway, address, timestamp, port);//update item (if needed)
 				canAddToQueue = (item->incrementResponseCount() >= m_clients.size()); //did all the clients respond or did we have an answer ?
 				wasQuery = true;
 			}
 			else {
-				item = new CIRCDDBMultiClientQuery(user, repeater, gateway, address, timestamp, type);
+				item = new CIRCDDBMultiClientQuery(user, repeater, gateway, address, timestamp, port, type);
 				canAddToQueue = true;
 			}
 

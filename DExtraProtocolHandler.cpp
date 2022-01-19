@@ -19,7 +19,7 @@
  */
 
 #include "DExtraProtocolHandler.h"
-
+#include "Log.h"
 #include "Utils.h"
 
 // #define	DUMP_TX
@@ -111,6 +111,17 @@ bool CDExtraProtocolHandler::writeConnect(const CConnectData& connect)
 	}
 
 	return true;
+}
+
+void CDExtraProtocolHandler::traverseNat(const std::string& address, unsigned int remotePort)
+{
+	unsigned char buffer = 0x00U;
+	
+	in_addr addr = CUDPReaderWriter::lookup(address);
+
+	CLog::logInfo("DExtra Punching hole to %s:%u", address.c_str(), remotePort);
+
+	m_socket.write(&buffer, 1U, addr, remotePort);
 }
 
 DEXTRA_TYPE CDExtraProtocolHandler::read()

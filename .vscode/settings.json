@@ -71,7 +71,8 @@
         "system_error": "cpp",
         "thread": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "iostream": "cpp"
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [
