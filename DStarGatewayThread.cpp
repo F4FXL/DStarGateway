@@ -825,7 +825,7 @@ void CDStarGatewayThread::processIrcDDB()
 						m_dplusPool->getIncomingHandler()->traverseNat(address, remotePortInt);
 					}
 					else {
-						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s, but DExtra is Disabled", address.c_str(), remotePort.c_str());
+						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s, but DPlus is Disabled", address.c_str(), remotePort.c_str());
 					}
 				}
 				break;
