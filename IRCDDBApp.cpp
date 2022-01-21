@@ -449,7 +449,7 @@ void IRCDDBApp::userChanOp(const std::string& nick, bool op)
 
 static const int numberOfTables = 2;
 
-std::string IRCDDBApp::getIPAddress(std::string& zonerp_cs)
+std::string IRCDDBApp::getIPAddressFromCall(std::string& zonerp_cs)
 {
 	unsigned int max_usn = 0;
 	std::string ipAddr;
@@ -474,13 +474,24 @@ std::string IRCDDBApp::getIPAddress(std::string& zonerp_cs)
 	return ipAddr;
 }
 
+std::string IRCDDBApp::getIPAddressFromNick(std::string& ircUser)
+{
+	std::string ipAddress;
+
+	if (m_d->m_userMap.count(ircUser) == 1) {
+		ipAddress.assign(m_d->m_userMap[ircUser].m_host);
+	}
+
+	return ipAddress;
+}
+
 bool IRCDDBApp::findGateway(const std::string& gwCall)
 {
 	std::string s = gwCall.substr(0,6);
 
 	IRCMessage *m2 = new IRCMessage("IDRT_GATEWAY");
 	m2->addParam(gwCall);
-	m2->addParam(getIPAddress(s));
+	m2->addParam(getIPAddressFromCall(s));
 	m_d->m_replyQ.putMessage(m2);
 
 	return true;
@@ -545,7 +556,7 @@ bool IRCDDBApp::findRepeater(const std::string& rptrCall)
 	IRCMessage * m2 = new IRCMessage("IDRT_REPEATER");
 	m2->addParam(rptrCall);
 	m2->addParam(zonerp_cs);
-	m2->addParam(getIPAddress(s));
+	m2->addParam(getIPAddressFromCall(s));
 	m_d->m_replyQ.putMessage(m2);
 
 	return true;
@@ -819,7 +830,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 					IRCMessage *m2 = new IRCMessage("IDRT_REPEATER");
 					m2->addParam(arearp_cs);
 					m2->addParam(zonerp_cs);
-					m2->addParam(getIPAddress(value));
+					m2->addParam(getIPAddressFromCall(value));
 					m_d->m_replyQ.putMessage(m2);
 				}
 			} else if (0==tableID && m_d->m_initReady) {
@@ -831,19 +842,24 @@ void IRCDDBApp::doUpdate(std::string& msg)
 				CUtils::ReplaceChar(userCallsign, '_', ' ');
 				CUtils::ReplaceChar(arearp_cs, '_', ' ');
 
+				std::smatch sm1;
+				std::string nick;
+				if(std::regex_search(msg, sm1, m_d->m_fromPattern))
+					nick = sm1[1];
+
 				if (1 == m_d->m_rptrMap.count(value)) {
 					CLog::logTrace("doUptate RPTR already present");
 					IRCDDBAppRptrObject o = m_d->m_rptrMap[value];
 					zonerp_cs = o.m_zonerp_cs;
 					CUtils::ReplaceChar(zonerp_cs, '_', ' ');
 					zonerp_cs.resize(7, ' ');
-					ip_addr = getIPAddress(zonerp_cs);
+					ip_addr = nick.empty() ? getIPAddressFromCall(zonerp_cs) : getIPAddressFromNick(nick);
 					zonerp_cs.push_back('G');
 				}
 				else {
 					CLog::logTrace("doUptate RPTR not present");
 					zonerp_cs = arearp_cs.substr(0, arearp_cs.length() - 1U);
-					ip_addr = getIPAddress(zonerp_cs);
+					ip_addr = nick.empty() ? getIPAddressFromCall(zonerp_cs) : getIPAddressFromNick(nick);
 					zonerp_cs.push_back('G');
 
 					if(!ip_addr.empty()) {

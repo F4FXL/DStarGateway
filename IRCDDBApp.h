@@ -90,7 +90,8 @@ protected:
 private:
 	void doUpdate(std::string& msg);
 	void doNotFound(std::string& msg, std::string& retval);
-	std::string getIPAddress(std::string& zonerp_cs);
+	std::string getIPAddressFromCall(std::string& zonerp_cs);
+	std::string getIPAddressFromNick(std::string& ircUser);
 	bool findServerUser();
 	unsigned int calculateUsn(const std::string& nick);
 	std::string getLastEntryTime(int tableID);
