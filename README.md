@@ -127,6 +127,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
+- [Improvement] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server
 - [Improvement] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
 - [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
@@ -145,9 +146,9 @@ the testing framwework used is Google Test.
 First working version
 # 6. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
-- &#9746; Better NatTraversal
+- &#9745; Better NatTraversal
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
-  - Support for all protocols (G2, DExtra, DCS, REF)
+  - Support for all protocols (G2, DExtra, DCS (?), DPlus)
   - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
 - &#9745; Send the connection status to APRS-IS as a status frame
 - &#9746; Reinstantiate DRATS
