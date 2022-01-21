@@ -87,6 +87,7 @@ public:
 	, m_datePattern("^20[0-9][0-9]-((1[0-2])|(0[1-9]))-((3[01])|([12][0-9])|(0[1-9]))$")
 	, m_timePattern("^((2[0-3])|([01][0-9])):[0-5][0-9]:[0-5][0-9]$")
 	, m_dbPattern("^[0-9A-Z_]{8}$")
+	, m_fromPattern("\\(from: (.*)\\)")
 	{
 	}
 
@@ -108,6 +109,7 @@ public:
 	std::regex m_datePattern;
 	std::regex m_timePattern;
 	std::regex m_dbPattern;
+	std::regex m_fromPattern;
 
 	bool m_initReady;
 	bool m_terminateThread;
@@ -830,12 +832,25 @@ void IRCDDBApp::doUpdate(std::string& msg)
 				CUtils::ReplaceChar(arearp_cs, '_', ' ');
 
 				if (1 == m_d->m_rptrMap.count(value)) {
+					CLog::logTrace("doUptate RPTR already prsent");
 					IRCDDBAppRptrObject o = m_d->m_rptrMap[value];
 					zonerp_cs = o.m_zonerp_cs;
 					CUtils::ReplaceChar(zonerp_cs, '_', ' ');
 					zonerp_cs.resize(7, ' ');
+					ip_addr = getIPAddress(zonerp_cs);
 					zonerp_cs.push_back('G');
-					ip_addr = getIPAddress(o.m_zonerp_cs);
+				}
+				else {
+					CLog::logTrace("doUptate RPTR not present");
+					zonerp_cs = arearp_cs.substr(0, arearp_cs.length() - 1U);
+					ip_addr = getIPAddress(zonerp_cs);
+					zonerp_cs.push_back('G');
+
+					if(!ip_addr.empty()) {
+						auto tmp = boost::replace_all_copy(zonerp_cs, " ", "_");
+						IRCDDBAppRptrObject newRptr(dt, value, tmp, m_maxTime);
+						m_d->m_rptrMap[value] = newRptr;
+					}
 				}
 
 				IRCMessage *m2 = new IRCMessage("IDRT_USER");
