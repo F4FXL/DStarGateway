@@ -288,6 +288,12 @@ IRCDDB_RESPONSE_TYPE CIRCDDBMultiClient::getMessageType()
 				key = "NAT_TRAVERSAL_DEXTRA";
 				break;
 			}
+			case IDRT_NATTRAVERSAL_DPLUS: {
+				if (!m_clients[i]->receiveNATTraversalDPlus(address, port))
+					type = IDRT_NATTRAVERSAL_DEXTRA;
+				key = "NAT_TRAVERSAL_DPLUS";
+				break;
+			}
 			case IDRT_NONE: {
 			default:
 				break;

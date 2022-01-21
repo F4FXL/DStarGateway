@@ -820,7 +820,7 @@ void CDStarGatewayThread::processIrcDDB()
 					if(!res)
 						return;
 
-					if(m_dextraEnabled && m_dextraPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
+					if(m_dplusEnabled && m_dplusPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
 						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
 						auto remotePortInt = boost::lexical_cast<unsigned int>(remotePort);
 						m_dplusPool->getIncomingHandler()->traverseNat(address, remotePortInt);
