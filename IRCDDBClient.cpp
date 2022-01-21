@@ -288,6 +288,11 @@ bool CIRCDDBClient::notifyRepeaterDextraNatTraversal(const std::string& repeater
 	return m_d->m_app->notifyRepeaterDextraNatTraversal(repeater, myPort);
 }
 
+bool CIRCDDBClient::notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	return m_d->m_app->notifyRepeaterDPlusNatTraversal(repeater, myPort);
+}
+
 // The following functions are for processing received messages
 
 // Get the waiting message type
@@ -467,13 +472,48 @@ bool CIRCDDBClient::receiveNATTraversalDextra(std::string& address, std::string&
 	}
 
 	if (m->getCommand().compare("NATTRAVERSAL_DEXTRA")) {
-		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: wrong message type, expected 'NATTRAVERSAL_G2', got '%s'\n", m->getCommand().c_str());
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: wrong message type, expected 'NATTRAVERSAL_DEXTRA', got '%s'\n", m->getCommand().c_str());
 		delete m;
 		return false;
 	}
 
 	if (2 != m->getParamCount()) {
 		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: unexpected number of message parameters, expected 2, got %d\n", m->getParamCount());
+		delete m;
+		return false;
+	}
+
+	address = m->m_params[0];
+	remotePort = m->m_params[1];
+	delete m;
+
+	return true;
+}
+
+bool CIRCDDBClient::receiveNATTraversalDPlus(std::string& address, std::string& remotePort)
+{
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
+
+	if(rt != IDRT_NATTRAVERSAL_DPLUS) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: unexpected response type=%d\n", rt);
+		return false;
+	}
+
+	IRCMessage * m = m_d->m_app->getReplyMessage();
+
+	if (m == NULL) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: no message\n");
+		return false;
+	}
+
+	if (m->getCommand().compare("NATTRAVERSAL_DPLUS")) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: wrong message type, expected 'NATTRAVERSAL_DPLUS', got '%s'\n", m->getCommand().c_str());
+		delete m;
+		return false;
+	}
+
+	if (2 != m->getParamCount()) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: unexpected number of message parameters, expected 2, got %d\n", m->getParamCount());
 		delete m;
 		return false;
 	}

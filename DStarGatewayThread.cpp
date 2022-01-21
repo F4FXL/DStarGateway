@@ -799,7 +799,6 @@ void CDStarGatewayThread::processIrcDDB()
 				}
 				break;
 			case IDRT_NATTRAVERSAL_DEXTRA: {
-
 					std::string address, remotePort;
 					bool res = m_irc->receiveNATTraversalDextra(address, remotePort);
 					if(!res)
@@ -812,6 +811,22 @@ void CDStarGatewayThread::processIrcDDB()
 					}
 					else {
 						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s, but DExtra is Disabled", address.c_str(), remotePort.c_str());
+					}
+				}
+				break;
+					case IDRT_NATTRAVERSAL_DPLUS: {
+					std::string address, remotePort;
+					bool res = m_irc->receiveNATTraversalDPlus(address, remotePort);
+					if(!res)
+						return;
+
+					if(m_dextraEnabled && m_dextraPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
+						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
+						auto remotePortInt = boost::lexical_cast<unsigned int>(remotePort);
+						m_dplusPool->getIncomingHandler()->traverseNat(address, remotePortInt);
+					}
+					else {
+						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s, but DExtra is Disabled", address.c_str(), remotePort.c_str());
 					}
 				}
 				break;

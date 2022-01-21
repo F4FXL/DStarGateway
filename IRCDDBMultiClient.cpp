@@ -203,7 +203,16 @@ bool CIRCDDBMultiClient::notifyRepeaterDextraNatTraversal(const std::string& rep
 	return result;
 }
 
+bool CIRCDDBMultiClient::notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	// NAT traversal message does not expect a response over IRC
+	bool result = true;
+	for (unsigned int i = 0; i < m_clients.size(); i++) {
+		result = m_clients[i]->notifyRepeaterDPlusNatTraversal(repeater, myPort) && result;
+	}
 
+	return result;
+}
 
 bool CIRCDDBMultiClient::receiveNATTraversalG2(std::string& address)
 {
@@ -219,6 +228,18 @@ bool CIRCDDBMultiClient::receiveNATTraversalG2(std::string& address)
 bool CIRCDDBMultiClient::receiveNATTraversalDextra(std::string& address, std::string& remotePort)
 {
 	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_NATTRAVERSAL_DEXTRA, "CIRCDDBMultiClient::receiveNATTraversalDextra: unexpected response type");
+	if (item == NULL)
+		return false;
+
+	address = item->getAddress();
+	remotePort = item->getRemotePort();
+
+	return true;
+}
+
+bool CIRCDDBMultiClient::receiveNATTraversalDPlus(std::string& address, std::string& remotePort)
+{
+	CIRCDDBMultiClientQuery * item = checkAndGetNextResponse(IDRT_NATTRAVERSAL_DPLUS, "CIRCDDBMultiClient::receiveNATTraversalDextra: unexpected response type");
 	if (item == NULL)
 		return false;
 

@@ -34,6 +34,7 @@ enum IRCDDB_RESPONSE_TYPE {
 	IDRT_REPEATER,
 	IDRT_NATTRAVERSAL_G2,
 	IDRT_NATTRAVERSAL_DEXTRA,
+	IDRT_NATTRAVERSAL_DPLUS,
 };
 
 
@@ -117,6 +118,7 @@ public:
 	// notify another repeater for NAT Traversal, a false return implies a network error
 	virtual bool notifyRepeaterG2NatTraversal(const std::string& repeater) = 0;
 	virtual bool notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myport) = 0;
+	virtual bool notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myport) = 0;
 
 	// Support for the Smart Group Server
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms) = 0;
@@ -142,6 +144,7 @@ public:
 
 	virtual bool receiveNATTraversalG2(std::string& address) = 0;
 	virtual bool receiveNATTraversalDextra(std::string& address, std::string& remotePort) = 0;
+	virtual bool receiveNATTraversalDPlus(std::string& address, std::string& remotePort) = 0;
 
 	virtual void close() = 0;		// Implictely kills any threads in the IRC code
 };

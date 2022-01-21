@@ -69,6 +69,7 @@ public:
 
 	bool notifyRepeaterG2NatTraversal(const std::string& repeater);
 	bool notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myLocalPort);
+	bool notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myLocalPort);
 
 	bool sendHeard(const std::string& myCall, const std::string& myCallExt, const std::string& yourCall, const std::string& rpt1, const std::string& rpt2, unsigned char flag1,
 		unsigned char flag2, unsigned char flag3, const std::string& destination, const std::string& tx_msg, const std::string& tx_stats);
@@ -93,6 +94,8 @@ private:
 	bool findServerUser();
 	unsigned int calculateUsn(const std::string& nick);
 	std::string getLastEntryTime(int tableID);
+	bool getNickForRepeater(const std::string& repeater, std::string& user) const;
+
 	IRCDDBAppPrivate *m_d;
 	time_t m_maxTime;
 	std::future<void> m_future;

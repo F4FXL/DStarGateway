@@ -1342,8 +1342,9 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 				case DP_DPLUS:
 					if (m_dplusEnabled) {
 						m_linkGateway = gateway;
+						unsigned int localPort = 0U;
 						addr.s_addr = ::inet_addr(address.c_str());
-						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
+						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, addr, localPort);
 						m_linkStatus = LS_LINKING_DPLUS;
 					} else {
 						CLog::logInfo("Require D-Plus for linking to %s, but D-Plus is disabled", repeater.c_str());
@@ -2287,8 +2288,11 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 		switch (data->getProtocol()) {
 			case DP_DPLUS:
 				if (m_dplusEnabled) {
+					unsigned int localPort = 0U;
 					m_linkStatus = LS_LINKING_DPLUS;
-					CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+					CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+					if(m_irc != nullptr && localPort > 0U)
+						m_irc->notifyRepeaterDPlusNatTraversal(m_linkRepeater, localPort);
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
@@ -2462,8 +2466,11 @@ void CRepeaterHandler::startupInt()
 			switch (protocol) {
 				case DP_DPLUS:
 					if (m_dplusEnabled) {
+						unsigned int localPort = 0U;
 						m_linkStatus = LS_LINKING_DPLUS;
-						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+						if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDPlusNatTraversal(m_linkRepeater, localPort);
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {

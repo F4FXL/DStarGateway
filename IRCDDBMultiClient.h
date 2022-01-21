@@ -161,6 +161,7 @@ public:
 	virtual bool findUser(const std::string & userCallsign);
 	virtual bool notifyRepeaterG2NatTraversal(const std::string& repeater);
 	virtual bool notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myPort);
+	virtual bool notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myPort);
 	virtual IRCDDB_RESPONSE_TYPE getMessageType();
 	virtual bool receiveRepeater(std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveGateway(std::string & gatewayCallsign, std::string & address);
@@ -168,6 +169,7 @@ public:
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address, std::string & timeStamp);
 	virtual bool receiveNATTraversalG2(std::string& address);
 	virtual bool receiveNATTraversalDextra(std::string& address, std::string& remotePort);
+	virtual bool receiveNATTraversalDPlus(std::string& address, std::string& remotePort);
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 	virtual void close();
 

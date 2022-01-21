@@ -357,8 +357,9 @@ void CDPlusHandler::process(CConnectData& connect)
 	}
 }
 
-void CDPlusHandler::link(IReflectorCallback* handler, const std::string& repeater, const std::string &gateway, const in_addr& address)
+void CDPlusHandler::link(IReflectorCallback* handler, const std::string& repeater, const std::string &gateway, const in_addr& address, unsigned int& localPort)
 {
+	localPort = 0U;
 	CDPlusProtocolHandler* protoHandler = m_pool->getHandler();
 	if (protoHandler == NULL)
 		return;
@@ -377,6 +378,7 @@ void CDPlusHandler::link(IReflectorCallback* handler, const std::string& repeate
 
 	if (found) {
 		CConnectData connect(CT_LINK1, address, DPLUS_PORT);
+		localPort = protoHandler->getPort();
 		protoHandler->writeConnect(connect);
 		m_stateChange = true;
 	} else {
