@@ -22,7 +22,6 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 
 #include "DStarGatewayThread.h"
 #include "DStarGatewayDefs.h"
@@ -804,9 +803,9 @@ void CDStarGatewayThread::processIrcDDB()
 					if(!res)
 						return;
 
-					if(m_dextraEnabled && m_dextraPool != nullptr && m_dextraPool->getIncomingHandler() != nullptr) {
+					auto remotePortInt = CStringUtils::stringToPort(remotePort);
+					if(m_dextraEnabled  && remotePortInt > 0U && m_dextraPool != nullptr && m_dextraPool->getIncomingHandler() != nullptr) {
 						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
-						auto remotePortInt = boost::lexical_cast<unsigned int>(remotePort);
 						m_dextraPool->getIncomingHandler()->traverseNat(address, remotePortInt);
 					}
 					else {
@@ -820,9 +819,9 @@ void CDStarGatewayThread::processIrcDDB()
 					if(!res)
 						return;
 
-					if(m_dplusEnabled && m_dplusPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
+					auto remotePortInt = CStringUtils::stringToPort(remotePort);
+					if(m_dplusEnabled && remotePortInt > 0U && m_dplusPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
 						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
-						auto remotePortInt = boost::lexical_cast<unsigned int>(remotePort);
 						m_dplusPool->getIncomingHandler()->traverseNat(address, remotePortInt);
 					}
 					else {
