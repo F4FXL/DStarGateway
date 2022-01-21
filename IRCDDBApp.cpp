@@ -832,7 +832,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 				CUtils::ReplaceChar(arearp_cs, '_', ' ');
 
 				if (1 == m_d->m_rptrMap.count(value)) {
-					CLog::logTrace("doUptate RPTR already prsent");
+					CLog::logTrace("doUptate RPTR already present");
 					IRCDDBAppRptrObject o = m_d->m_rptrMap[value];
 					zonerp_cs = o.m_zonerp_cs;
 					CUtils::ReplaceChar(zonerp_cs, '_', ' ');
