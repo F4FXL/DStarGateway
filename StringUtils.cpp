@@ -42,7 +42,7 @@ unsigned int CStringUtils::stringToPort(const std::string& s)
     unsigned int port = 0U;
     std::string ls = boost::trim_copy(s);
 
-    if(!ls.empty() && std::all_of(ls.begin(), ls.end(), [](char c){ return c > '0' && c < '9'; })) {
+    if(!ls.empty() && std::all_of(ls.begin(), ls.end(), [](char c){ return c >= '0' && c <= '9'; })) {
         auto portTemp = boost::lexical_cast<unsigned int>(ls);
         if(portTemp > 0U && portTemp <= 65535U)
             port = portTemp;

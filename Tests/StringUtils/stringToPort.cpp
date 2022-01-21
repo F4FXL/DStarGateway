@@ -54,4 +54,33 @@ namespace StringUtilsTests
 
         EXPECT_EQ(port, 12345U);
     }
+
+    TEST_F(StringUtils_stringToPort, StringWithMixedAlphaAndNumbersreturns0)
+    {
+        unsigned int port = CStringUtils::stringToPort("123abc456");
+
+        EXPECT_EQ(port, 0U);
+    }
+
+    TEST_F(StringUtils_stringToPort, TooLargeValueReturns0)
+    {
+        unsigned int port = CStringUtils::stringToPort("999999");
+
+        EXPECT_EQ(port, 0U);
+    }
+
+
+    TEST_F(StringUtils_stringToPort, TestAllNumDigits)
+    {
+        EXPECT_EQ(CStringUtils::stringToPort("10"), 10U);
+        EXPECT_EQ(CStringUtils::stringToPort("11"), 11U);
+        EXPECT_EQ(CStringUtils::stringToPort("12"), 12U);
+        EXPECT_EQ(CStringUtils::stringToPort("13"), 13U);
+        EXPECT_EQ(CStringUtils::stringToPort("14"), 14U);
+        EXPECT_EQ(CStringUtils::stringToPort("15"), 15U);
+        EXPECT_EQ(CStringUtils::stringToPort("16"), 16U);
+        EXPECT_EQ(CStringUtils::stringToPort("17"), 17U);
+        EXPECT_EQ(CStringUtils::stringToPort("18"), 18U);
+        EXPECT_EQ(CStringUtils::stringToPort("19"), 19U);
+    }
 }
