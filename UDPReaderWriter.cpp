@@ -101,7 +101,7 @@ bool CUDPReaderWriter::open()
 	return true;
 }
 
-int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port)
+int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, struct sockaddr_storage& addr)
 {
 	// Check that the readfrom() won't block
 	fd_set readFds;
@@ -122,8 +122,7 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 	if (ret == 0)
 		return 0;
 
-	sockaddr_in addr;
-	socklen_t size = sizeof(sockaddr_in);
+	socklen_t size = sizeof(addr);
 
 	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&addr, &size);
 	if (len <= 0) {
@@ -131,10 +130,20 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 		return -1;
 	}
 
-	address = addr.sin_addr;
-	port    = ntohs(addr.sin_port);
-
 	return len;
+}
+
+int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port)
+{
+	struct sockaddr_storage addr;
+	auto res = read(buffer, length, addr);
+	
+	if(res >= 0 && addr.ss_family == AF_INET) {
+		address = ((struct sockaddr_in*)&addr)->sin_addr;
+		port    = ntohs(((struct sockaddr_in*)&addr)->sin_port);
+	}
+
+	return res;
 }
 
 bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const in_addr& address, unsigned int port)
