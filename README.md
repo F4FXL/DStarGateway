@@ -148,7 +148,7 @@ First working version
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
 - &#9745; Better NatTraversal
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
-  - Support for all protocols (G2, DExtra, DCS (?), DPlus)
+  - Support for all protocols (G2, DExtra, DPlus) DCS does nto make sense as it was historically never used as protocol for linking repeaters
   - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
 - &#9745; Send the connection status to APRS-IS as a status frame
 - &#9746; Reinstantiate DRATS
