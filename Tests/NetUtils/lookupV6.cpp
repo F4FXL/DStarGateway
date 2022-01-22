@@ -24,29 +24,39 @@
 
 namespace NetUtilsTests
 {
-    class NetUtils_lookupPreferV6 : public ::testing::Test {
+    class NetUtils_lookupV6 : public ::testing::Test {
     
     };
 
-    TEST_F(NetUtils_lookupPreferV6, googleShallAlwaysSucceed)
+    TEST_F(NetUtils_lookupV6, googleShallAlwaysSucceed)
     {
         sockaddr_storage addr;
-        struct addrinfo hints;
-        ::memset(&hints, 0, sizeof(hints));
 
-        bool res = CNetUtils::lookup("google.fr", addr, hints);
+        bool res = CNetUtils::lookupV6("google.fr", addr);
 
         EXPECT_EQ(addr.ss_family, AF_INET6);
         EXPECT_TRUE(res);
     }
 
-    TEST_F(NetUtils_lookupPreferV6, erroneousAddress)
+    TEST_F(NetUtils_lookupV6, erroneousAddress)
     {
         sockaddr_storage addr;
-        struct addrinfo hints;
-        ::memset(&hints, 0, sizeof(hints));
 
-        bool res = CNetUtils::lookup("gfilufgclqsegfuligyhfcguyhfguilfguils4df64sdw46fcq6sfgvd6f6d7f67d6f7c6sd7f6s7gfv6fc7d6f76tf.fr", addr, hints);
+        bool res = CNetUtils::lookupV6("gfilufgclqsegfuligyhfcguyhfguilfguils4df64sdw46fcq6sfgvd6f6d7f67d6f7c6sd7f6s7gfv6fc7d6f76tf.fr", addr);
+
+        EXPECT_EQ(addr.ss_family, AF_INET);
+
+        auto ptr = (sockaddr_in*)(&addr);
+
+        EXPECT_EQ((uint32_t)(ptr->sin_addr.s_addr), (uint32_t)INADDR_NONE);
+        EXPECT_FALSE(res);
+    }
+
+    TEST_F(NetUtils_lookupV6, addressWithNoIPV6)
+    {
+        sockaddr_storage addr;
+
+        bool res = CNetUtils::lookupV6("ircv4.openquad.net", addr);
 
         EXPECT_EQ(addr.ss_family, AF_INET);
 

@@ -22,7 +22,16 @@
 
 #include "NetUtils.h"
 
-bool CNetUtils::lookupPreferV6(const std::string& hostname, sockaddr_storage& addr)
+bool CNetUtils::lookupV4(const std::string& hostname, sockaddr_storage& addr)
+{
+    struct addrinfo hints;
+    ::memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+
+    return lookup(hostname, addr, hints);
+}
+
+bool CNetUtils::lookupV6(const std::string& hostname, sockaddr_storage& addr)
 {
     struct addrinfo hints;
     ::memset(&hints, 0, sizeof(hints));
@@ -37,6 +46,8 @@ bool CNetUtils::lookup(const std::string& hostname, sockaddr_storage& addr, stru
 
     int err = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
     if(err != 0) {
+        ::memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;
         lookup("255.255.255.255", addr, hints);
         return false;
     }

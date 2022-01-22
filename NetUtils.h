@@ -25,6 +25,7 @@
 class CNetUtils
 {
 public:
-    static bool lookupPreferV6(const std::string& hostname, sockaddr_storage& addr);
+    static bool lookupV6(const std::string& hostname, sockaddr_storage& addr);
+    static bool lookupV4(const std::string& hostname, sockaddr_storage& addr);
     static bool lookup(const std::string& hostname, sockaddr_storage& addr, struct addrinfo& hints);
 };
