@@ -95,6 +95,7 @@ void CLogFileTarget::printLogIntRotate(const std::string& msg)
 }
 void CLogFileTarget::printLogInt(const std::string& msg)
 {
+    m_file.seekp(0, std::ios::end);
     if(m_rotate)
         printLogIntRotate(msg);
     else
