@@ -67,6 +67,10 @@ public:
 	bool findRepeater(const std::string& s);
 	bool findGateway(const std::string& s);
 
+	bool notifyRepeaterG2NatTraversal(const std::string& repeater);
+	bool notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myLocalPort);
+	bool notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myLocalPort);
+
 	bool sendHeard(const std::string& myCall, const std::string& myCallExt, const std::string& yourCall, const std::string& rpt1, const std::string& rpt2, unsigned char flag1,
 		unsigned char flag2, unsigned char flag3, const std::string& destination, const std::string& tx_msg, const std::string& tx_stats);
 
@@ -86,11 +90,14 @@ protected:
 private:
 	void doUpdate(std::string& msg);
 	void doNotFound(std::string& msg, std::string& retval);
-	std::string getIPAddress(std::string& zonerp_cs);
+	std::string getIPAddressFromCall(std::string& zonerp_cs);
+	std::string getIPAddressFromNick(std::string& ircUser);
 	bool findServerUser();
 	unsigned int calculateUsn(const std::string& nick);
 	std::string getLastEntryTime(int tableID);
-	IRCDDBAppPrivate *d;
+	bool getNickForRepeater(const std::string& repeater, std::string& user) const;
+
+	IRCDDBAppPrivate *m_d;
 	time_t m_maxTime;
 	std::future<void> m_future;
 };

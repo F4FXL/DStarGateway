@@ -72,7 +72,9 @@ void* CDPlusAuthenticator::Entry()
 
 	m_timer.start();
 
+#ifndef DEBUG_DSTARGW
 	try {
+#endif
 		while (!m_killed) {
 			if (m_timer.hasExpired()) {
 				authenticate(m_loginCallsign, OPENDSTAR_HOSTNAME, OPENDSTAR_PORT, '2', true);
@@ -83,14 +85,18 @@ void* CDPlusAuthenticator::Entry()
 
 			m_timer.clock();
 		}
+#ifndef DEBUG_DSTARGW
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logError("Exception raised in the D-Plus Authenticator thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logError("Unknown exception raised in the D-Plus Authenticator thread");
+		throw;
 	}
+#endif
 
 	CLog::logInfo("Stopping the D-Plus Authenticator thread");
 

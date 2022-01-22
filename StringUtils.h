@@ -52,4 +52,6 @@ public:
     }
 
     static size_t find_nth(const std::string& haystack, char needle, size_t nth);
+
+    static unsigned int stringToPort(const std::string& s);
 };

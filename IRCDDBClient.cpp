@@ -28,23 +28,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 struct CIRCDDBClientPrivate
 {
 	IRCClient *client;
-	IRCDDBApp *app;
+	IRCDDBApp *m_app;
 };
 
 CIRCDDBClient::CIRCDDBClient(const std::string& hostName, unsigned int port, const std::string& callsign, const std::string& password, const std::string& versionInfo, const std::string& localAddr, bool isQuadNet ) :
-d(new CIRCDDBClientPrivate),
+m_d(new CIRCDDBClientPrivate),
 m_isQuadNet(isQuadNet)
 {
 	std::string update_channel("#dstar");
-	d->app = new IRCDDBApp(update_channel);
-	d->client = new IRCClient(d->app, update_channel, hostName, port, callsign, password, versionInfo, localAddr);
+	m_d->m_app = new IRCDDBApp(update_channel);
+	m_d->client = new IRCClient(m_d->m_app, update_channel, hostName, port, callsign, password, versionInfo, localAddr);
 }
 
 CIRCDDBClient::~CIRCDDBClient()
 {
-	delete d->client;
-	delete d->app;
-	delete d;
+	delete m_d->client;
+	delete m_d->m_app;
+	delete m_d;
 }
 
 
@@ -52,33 +52,33 @@ CIRCDDBClient::~CIRCDDBClient()
 bool CIRCDDBClient::open()
 {
 	CLog::logInfo("start client and app\n");
-	d->client->startWork();
-	d->app->startWork();
+	m_d->client->startWork();
+	m_d->m_app->startWork();
 	return true;
 }
 
 
 int CIRCDDBClient::getConnectionState()
 {
-	return d->app->getConnectionState();
+	return m_d->m_app->getConnectionState();
 }
 
 
 void CIRCDDBClient::rptrQTH(const std::string& callsign, double latitude, double longitude, const std::string& desc1, const std::string& desc2, const std::string& infoURL)
 {
-	d->app->rptrQTH(callsign, latitude, longitude, desc1, desc2, infoURL);
+	m_d->m_app->rptrQTH(callsign, latitude, longitude, desc1, desc2, infoURL);
 }
 
 
 void CIRCDDBClient::rptrQRG(const std::string& callsign, double txFrequency, double duplexShift, double range, double agl)
 {
-	d->app->rptrQRG(callsign, txFrequency, duplexShift, range, agl);
+	m_d->m_app->rptrQRG(callsign, txFrequency, duplexShift, range, agl);
 }
 
 
 void CIRCDDBClient::kickWatchdog(const std::string& callsign, const std::string& wdInfo)
 {
-	d->app->kickWatchdog(callsign, wdInfo);
+	m_d->m_app->kickWatchdog(callsign, wdInfo);
 }
 
 
@@ -112,7 +112,7 @@ bool CIRCDDBClient::sendHeard( const std::string& myCall, const std::string& myC
 		return false;
 	}
 
-	return d->app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, std::string("        "), std::string(""), std::string(""));
+	return m_d->m_app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, std::string("        "), std::string(""), std::string(""));
 }
 
 void CIRCDDBClient::sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms)
@@ -123,7 +123,7 @@ void CIRCDDBClient::sendDStarGatewayInfo(const std::string subcommand, const std
 	CLog::logInfo("\n");
 
 	if(m_isQuadNet) {
-		d->app->sendDStarGatewayInfo(subcommand, parms);
+		m_d->m_app->sendDStarGatewayInfo(subcommand, parms);
 	}
 }
 
@@ -175,7 +175,7 @@ bool CIRCDDBClient::sendHeardWithTXMsg(const std::string& myCall, const std::str
 				msg.push_back('_');
 		}
 	}
-	return d->app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, dest, msg, std::string(""));
+	return m_d->m_app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, dest, msg, std::string(""));
 }
 
 
@@ -238,7 +238,7 @@ bool CIRCDDBClient::sendHeardWithTXStats( const std::string& myCall, const std::
 	}
 	stats.resize(20, '_');
 
-	return d->app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, std::string("        "), std::string(""), stats);
+	return m_d->m_app->sendHeard(myCall, myCallExt, yourCall, rpt1, rpt2, flag1, flag2, flag3, std::string("        "), std::string(""), stats);
 }
 
 // Send query for a gateway/reflector, a false return implies a network error
@@ -250,7 +250,7 @@ bool CIRCDDBClient::findGateway(const std::string& gatewayCallsign)
 	}
 	std::string gw(gatewayCallsign);
 	CUtils::ToUpper(gw);
-	return d->app->findGateway(gw);
+	return m_d->m_app->findGateway(gw);
 }
 
 
@@ -262,7 +262,7 @@ bool CIRCDDBClient::findRepeater(const std::string& repeaterCallsign)
 	}
 	std::string rptr(repeaterCallsign);
 	CUtils::ToUpper(rptr);
-	return d->app->findRepeater(rptr);
+	return m_d->m_app->findRepeater(rptr);
 }
 
 // Send query for a user, a false return implies a network error
@@ -272,9 +272,25 @@ bool CIRCDDBClient::findUser(const std::string& userCallsign)
 		CLog::logDebug("CIRCDDBClient::findUser:userCall='%s' len != 8\n", userCallsign.c_str());
 		return false;
 	}
+	CLog::logTrace("IRC Find user %s", userCallsign.c_str());
 	std::string usr(userCallsign);
 	CUtils::ToUpper(usr);
-	return d->app->findUser(usr);
+	return m_d->m_app->findUser(usr);
+}
+
+bool CIRCDDBClient::notifyRepeaterG2NatTraversal(const std::string& repeater)
+{
+	return m_d->m_app->notifyRepeaterG2NatTraversal(repeater);
+}
+
+bool CIRCDDBClient::notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	return m_d->m_app->notifyRepeaterDextraNatTraversal(repeater, myPort);
+}
+
+bool CIRCDDBClient::notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myPort)
+{
+	return m_d->m_app->notifyRepeaterDPlusNatTraversal(repeater, myPort);
 }
 
 // The following functions are for processing received messages
@@ -282,21 +298,21 @@ bool CIRCDDBClient::findUser(const std::string& userCallsign)
 // Get the waiting message type
 IRCDDB_RESPONSE_TYPE CIRCDDBClient::getMessageType()
 {
-	return d->app->getReplyMessageType();
+	return m_d->m_app->getReplyMessageType();
 }
 
 // Get a gateway message, as a result of IDRT_REPEATER returned from getMessageType()
 // A false return implies a network error
 bool CIRCDDBClient::receiveRepeater(std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address)
 {
-	IRCDDB_RESPONSE_TYPE rt = d->app->getReplyMessageType();
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
 
 	if (rt != IDRT_REPEATER) {
 		CLog::logDebug("CIRCDDBClient::receiveRepeater: unexpected response type=%d\n", rt);
 		return false;
 	}
 
-	IRCMessage *m = d->app->getReplyMessage();
+	IRCMessage *m = m_d->m_app->getReplyMessage();
 	if (m == NULL) {
 		CLog::logDebug("CIRCDDBClient::receiveRepeater: no message\n");
 		return false;
@@ -325,14 +341,14 @@ bool CIRCDDBClient::receiveRepeater(std::string& repeaterCallsign, std::string& 
 // A false return implies a network error
 bool CIRCDDBClient::receiveGateway(std::string& gatewayCallsign, std::string& address)
 {
-	IRCDDB_RESPONSE_TYPE rt = d->app->getReplyMessageType();
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
 
 	if (rt != IDRT_GATEWAY) {
 		CLog::logDebug("CIRCDDBClient::receiveGateway: unexpected response type=%d\n", rt);
 		return false;
 	}
 
-	IRCMessage *m = d->app->getReplyMessage();
+	IRCMessage *m = m_d->m_app->getReplyMessage();
 
 	if (m == NULL) {
 		CLog::logDebug("CIRCDDBClient::receiveGateway: no message\n");
@@ -367,14 +383,14 @@ bool CIRCDDBClient::receiveUser(std::string& userCallsign, std::string& repeater
 
 bool CIRCDDBClient::receiveUser(std::string& userCallsign, std::string& repeaterCallsign, std::string& gatewayCallsign, std::string& address, std::string& timeStamp)
 {
-	IRCDDB_RESPONSE_TYPE rt = d->app->getReplyMessageType();
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
 
 	if (rt != IDRT_USER) {
 		CLog::logDebug("CIRCDDBClient::receiveUser: unexpected response type=%d\n", rt);
 		return false;
 	}
 
-	IRCMessage * m = d->app->getReplyMessage();
+	IRCMessage * m = m_d->m_app->getReplyMessage();
 
 	if (m == NULL) {
 		CLog::logDebug("CIRCDDBClient::receiveUser: no message\n");
@@ -398,13 +414,119 @@ bool CIRCDDBClient::receiveUser(std::string& userCallsign, std::string& repeater
 	gatewayCallsign = m->getParam(2);
 	address = m->getParam(3);
 	timeStamp = m->getParam(4);
+
+	//CLog::logTrace("IRC Receive User %s %s %s %s %s", userCallsign.c_str(), repeaterCallsign.c_str(), gatewayCallsign.c_str(), address.c_str(), timeStamp.c_str());
+
 	delete m;
+	return true;
+}
+
+bool CIRCDDBClient::receiveNATTraversalG2(std::string& address)
+{
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
+
+	if(rt != IDRT_NATTRAVERSAL_G2) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalG2: unexpected response type=%d\n", rt);
+		return false;
+	}
+
+	IRCMessage * m = m_d->m_app->getReplyMessage();
+
+	if (m == NULL) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalG2: no message\n");
+		return false;
+	}
+
+	if (m->getCommand().compare("NATTRAVERSAL_G2")) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalG2: wrong message type, expected 'NATTRAVERSAL_G2', got '%s'\n", m->getCommand().c_str());
+		delete m;
+		return false;
+	}
+
+	if (1 != m->getParamCount()) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalG2: unexpected number of message parameters, expected 1, got %d\n", m->getParamCount());
+		delete m;
+		return false;
+	}
+
+	address = m->m_params[0];
+	delete m;
+
+	return true;
+}
+
+bool CIRCDDBClient::receiveNATTraversalDextra(std::string& address, std::string& remotePort)
+{
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
+
+	if(rt != IDRT_NATTRAVERSAL_DEXTRA) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: unexpected response type=%d\n", rt);
+		return false;
+	}
+
+	IRCMessage * m = m_d->m_app->getReplyMessage();
+
+	if (m == NULL) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: no message\n");
+		return false;
+	}
+
+	if (m->getCommand().compare("NATTRAVERSAL_DEXTRA")) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: wrong message type, expected 'NATTRAVERSAL_DEXTRA', got '%s'\n", m->getCommand().c_str());
+		delete m;
+		return false;
+	}
+
+	if (2 != m->getParamCount()) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDextra: unexpected number of message parameters, expected 2, got %d\n", m->getParamCount());
+		delete m;
+		return false;
+	}
+
+	address = m->m_params[0];
+	remotePort = m->m_params[1];
+	delete m;
+
+	return true;
+}
+
+bool CIRCDDBClient::receiveNATTraversalDPlus(std::string& address, std::string& remotePort)
+{
+	IRCDDB_RESPONSE_TYPE rt = m_d->m_app->getReplyMessageType();
+
+	if(rt != IDRT_NATTRAVERSAL_DPLUS) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: unexpected response type=%d\n", rt);
+		return false;
+	}
+
+	IRCMessage * m = m_d->m_app->getReplyMessage();
+
+	if (m == NULL) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: no message\n");
+		return false;
+	}
+
+	if (m->getCommand().compare("NATTRAVERSAL_DPLUS")) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: wrong message type, expected 'NATTRAVERSAL_DPLUS', got '%s'\n", m->getCommand().c_str());
+		delete m;
+		return false;
+	}
+
+	if (2 != m->getParamCount()) {
+		CLog::logDebug("CIRCDDBClient::receiveNATTraversalDPlus: unexpected number of message parameters, expected 2, got %d\n", m->getParamCount());
+		delete m;
+		return false;
+	}
+
+	address = m->m_params[0];
+	remotePort = m->m_params[1];
+	delete m;
+
 	return true;
 }
 
 void CIRCDDBClient::close()		// Implictely kills any threads in the IRC code
 {
-	d->client -> stopWork();
-	d->app -> stopWork();
+	m_d->client -> stopWork();
+	m_d->m_app -> stopWork();
 }
-

@@ -40,12 +40,14 @@ public:
 				const std::string& gateway,
 				const std::string& address,
 				const std::string& timestamp,
+				const std::string& remotePort,
 				IRCDDB_RESPONSE_TYPE type) :
 		m_user(user),
 		m_repeater(repeater),
 		m_gateway(gateway),
 		m_address(address),
 		m_timestamp(timestamp),
+		m_remotePort(remotePort),
 		m_type(type),
 		m_responseCount(0)
 	{
@@ -77,6 +79,11 @@ public:
 		return m_timestamp;
 	}
 
+	std::string getRemotePort() const
+	{
+		return m_remotePort;
+	}
+
 	unsigned int getResponseCount()
 	{
 		return m_responseCount;
@@ -92,7 +99,7 @@ public:
 	/*
 		Updates the entry, but only if the timestamp is newer. if an address was already specified it is kept.
 	*/
-	void Update(const std::string& user, const std::string& repeater, const std::string& gateway, const std::string& address, const std::string& timestamp)
+	void Update(const std::string& user, const std::string& repeater, const std::string& gateway, const std::string& address, const std::string& timestamp, const std::string& remotePort)
 	{
 		//wxLogMessage("Before : %s"), toString());
 		if (timestamp.empty() || timestamp.compare(m_timestamp) >= 0) {
@@ -100,6 +107,7 @@ public:
 			m_repeater = repeater;
 			m_gateway = gateway;
 			m_timestamp = timestamp;
+			m_remotePort = remotePort;
 
 			if(m_address.empty() && !address.empty())
 				m_address = address;
@@ -125,6 +133,7 @@ private:
 	std::string m_gateway;
 	std::string m_address;
 	std::string m_timestamp;
+	std::string m_remotePort;
 	IRCDDB_RESPONSE_TYPE m_type;
 	unsigned int m_responseCount;
 };
@@ -150,11 +159,17 @@ public:
 	virtual bool findGateway(const std::string & gatewayCallsign);
 	virtual bool findRepeater(const std::string & repeaterCallsign);
 	virtual bool findUser(const std::string & userCallsign);
+	virtual bool notifyRepeaterG2NatTraversal(const std::string& repeater);
+	virtual bool notifyRepeaterDextraNatTraversal(const std::string& repeater, unsigned int myPort);
+	virtual bool notifyRepeaterDPlusNatTraversal(const std::string& repeater, unsigned int myPort);
 	virtual IRCDDB_RESPONSE_TYPE getMessageType();
 	virtual bool receiveRepeater(std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveGateway(std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address);
 	virtual bool receiveUser(std::string & userCallsign, std::string & repeaterCallsign, std::string & gatewayCallsign, std::string & address, std::string & timeStamp);
+	virtual bool receiveNATTraversalG2(std::string& address);
+	virtual bool receiveNATTraversalDextra(std::string& address, std::string& remotePort);
+	virtual bool receiveNATTraversalDPlus(std::string& address, std::string& remotePort);
 	virtual void sendDStarGatewayInfo(const std::string subcommand, const std::vector<std::string> parms);
 	virtual void close();
 

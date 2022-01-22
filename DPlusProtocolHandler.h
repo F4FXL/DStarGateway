@@ -27,6 +27,7 @@
 #include "PollData.h"
 
 #include <netinet/in.h>
+#include <string>
 
 enum DPLUS_TYPE {
 	DP_NONE,
@@ -49,6 +50,7 @@ public:
 	bool writeAMBE(const CAMBEData& data);
 	bool writeConnect(const CConnectData& connect);
 	bool writePoll(const CPollData& poll);
+	void traverseNat(const std::string& address, unsigned int remotePort);
 
 	DPLUS_TYPE    read();
 	CHeaderData*  readHeader();

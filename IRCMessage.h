@@ -32,11 +32,11 @@ public:
 	IRCMessage(const std::string& command);
 	~IRCMessage();
 
-	std::string prefix;
-	std::string command;
-	std::vector<std::string> params;
+	std::string m_prefix;
+	std::string m_command;
+	std::vector<std::string> m_params;
 
-	int numParams;
+	int m_numParams;
 	std::string& getPrefixNick();
 	std::string& getPrefixName();
 	std::string& getPrefixHost();
@@ -49,6 +49,6 @@ public:
 
 private:
 	bool parsePrefix();
-	std::vector<std::string> prefixComponents;
-	bool prefixParsed;
+	std::vector<std::string> m_prefixComponents;
+	bool m_prefixParsed;
 };

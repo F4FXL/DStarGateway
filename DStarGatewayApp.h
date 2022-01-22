@@ -21,6 +21,8 @@
 
 #include "DStarGatewayThread.h"
 
+void __sigHandler(int sig);
+
 class CDStarGatewayApp
 {
 private:
@@ -34,4 +36,7 @@ public:
 
 	bool init();
 	void run();
+
+	static void sigHandlerFatal(int sig);
+	static void terminateHandler();
 };

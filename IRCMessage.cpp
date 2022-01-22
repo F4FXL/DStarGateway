@@ -24,24 +24,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 IRCMessage::IRCMessage()
 {
-	numParams = 0;
-	prefixParsed = false;
+	m_numParams = 0;
+	m_prefixParsed = false;
 }
 
 IRCMessage::IRCMessage(const std::string& toNick, const std::string& msg)
 {
-	command.assign("PRIVMSG");
-	numParams = 2;
-	params.push_back(toNick);
-	params.push_back(msg);
-	prefixParsed = false;
+	m_command.assign("PRIVMSG");
+	m_numParams = 2;
+	m_params.push_back(toNick);
+	m_params.push_back(msg);
+	m_prefixParsed = false;
 }
 
 IRCMessage::IRCMessage(const std::string& cmd)
 {
-	command = cmd;
-	numParams = 0;
-	prefixParsed = false;
+	m_command = cmd;
+	m_numParams = 0;
+	m_prefixParsed = false;
 }
 
 IRCMessage::~IRCMessage()
@@ -51,79 +51,79 @@ IRCMessage::~IRCMessage()
 
 void IRCMessage::addParam(const std::string& p)
 {
-	params.push_back(p);
-	numParams = params.size();
+	m_params.push_back(p);
+	m_numParams = m_params.size();
 }
 
 int IRCMessage::getParamCount()
 {
-	return params.size();
+	return m_params.size();
 }
 
 std::string IRCMessage::getParam(int pos)
 {
-	return params[pos];
+	return m_params[pos];
 }
 
 std::string IRCMessage::getCommand()
 {
-	return command;
+	return m_command;
 }
 
 	
 bool IRCMessage::parsePrefix()
 {
-	std::string::size_type p1 = prefix.find('!');
+	std::string::size_type p1 = m_prefix.find('!');
 	if (std::string::npos == p1)
 		return false;
-	std::string::size_type p2 = prefix.find('@');
+	std::string::size_type p2 = m_prefix.find('@');
 	if (std::string::npos == p2)
 		return false;
 
-	prefixComponents.push_back(prefix.substr(0, p1));
-	prefixComponents.push_back(prefix.substr(p1+1, p2-p1-1));
-	prefixComponents.push_back(prefix.substr(p2 + 1));
+	m_prefixComponents.push_back(m_prefix.substr(0, p1));
+	m_prefixComponents.push_back(m_prefix.substr(p1+1, p2-p1-1));
+	m_prefixComponents.push_back(m_prefix.substr(p2 + 1));
 	return true;
 }
 
 std::string& IRCMessage::getPrefixNick()
 {
-	if (!prefixParsed)
-		prefixParsed = parsePrefix();
+	if (!m_prefixParsed)
+		m_prefixParsed = parsePrefix();
 
-	return prefixParsed ? prefixComponents[0] : prefix;
+	return m_prefixParsed ? m_prefixComponents[0] : m_prefix;
 }
 
 std::string& IRCMessage::getPrefixName()
 {
-	if (!prefixParsed)
-		prefixParsed = parsePrefix();
+	if (!m_prefixParsed)
+		m_prefixParsed = parsePrefix();
   
-	return prefixParsed ? prefixComponents[1] : prefix;
+	return m_prefixParsed ? m_prefixComponents[1] : m_prefix;
 }
 
 std::string& IRCMessage::getPrefixHost()
 {
-	if (!prefixParsed)
-		prefixParsed = parsePrefix();
+	if (!m_prefixParsed)
+		m_prefixParsed = parsePrefix();
   
-	return prefixParsed ? prefixComponents[2] : prefix;
+	return m_prefixParsed ? m_prefixComponents[2] : m_prefix;
 }
 
 void IRCMessage::composeMessage(std::string& output)
 {
 	std::string o;
 
-	if (prefix.size() > 0)
-		o = std::string(":") + prefix + std::string(" ");
+	if (m_prefix.size() > 0)
+		o = std::string(":") + m_prefix + std::string(" ");
 
-	o.append(command);
+	o.append(m_command);
 
-	for (int i=0; i < numParams; i++) {
-		if (i == (numParams - 1))
-			o.append(std::string(" :") + params[i]);
+	for (int i=0; i < m_numParams; i++) {
+		if (i == (m_numParams - 1))
+			o.append(std::string(" :") + m_params[i]);
 		else
-			o.append(std::string(" ") + params[i]);
+			o.append(std::string(" ") + m_params[i]);
 	}
 
 	o.append(std::string("\r\n"));

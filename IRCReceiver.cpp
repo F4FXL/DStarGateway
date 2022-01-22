@@ -114,43 +114,43 @@ void IRCReceiver::Entry()
 					switch (state) {
 						case 0:	// command
 							if (b == ':')
-								state = 1; // prefix
+								state = 1; // m_prefix
 							else if (b != ' ') {
-								m->command.push_back(b);
+								m->m_command.push_back(b);
 								state = 2; // command
 							}
 							break;
 
-						case 1:	// prefix
+						case 1:	// m_prefix
 							if (b == ' ')
 								state = 2; // command is next
 							else
-								m->prefix.push_back(b);
+								m->m_prefix.push_back(b);
 							break;
 
 						case 2:
 							if (b == ' ') {
 								state = 3; // params are next
-								m->numParams = 1;
-								m->params.push_back(std::string(""));
+								m->m_numParams = 1;
+								m->m_params.push_back(std::string(""));
 							} else
-								m->command.push_back(b);
+								m->m_command.push_back(b);
 							break;
 
 						case 3:
 							if (b == ' ') {
-								m->numParams++;
-								if (m->numParams >= 15)
+								m->m_numParams++;
+								if (m->m_numParams >= 15)
 									state = 5; // ignore the rest
-								m->params.push_back(std::string(""));
-							} else if (b==':' && m->params[m->numParams-1].size()==0)
+								m->m_params.push_back(std::string(""));
+							} else if (b==':' && m->m_params[m->m_numParams-1].size()==0)
 								state = 4; // rest of line is this param
 							else
-								m->params[m->numParams-1].push_back(b);
+								m->m_params[m->m_numParams-1].push_back(b);
 							break;
 
 						case 4:
-							m->params[m->numParams-1].push_back(b);
+							m->m_params[m->m_numParams-1].push_back(b);
 							break;
 					} // switch
 				}

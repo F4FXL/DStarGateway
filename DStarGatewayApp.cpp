@@ -23,6 +23,11 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <signal.h>
+#include <exception>
+#ifdef DEBUG_DSTARGW
+#include <boost/stacktrace.hpp>
+#endif
 
 #include "DStarGatewayDefs.h"
 #include "DStarGatewayConfig.h"
@@ -41,9 +46,20 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 
-#ifndef UNIT_TESTS
+#ifdef UNIT_TESTS
+int fakemain(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
+	std::set_terminate(CDStarGatewayApp::terminateHandler);
+
+	signal(SIGSEGV, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGILL, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGFPE, CDStarGatewayApp::sigHandlerFatal);
+	signal(SIGABRT, CDStarGatewayApp::sigHandlerFatal);
+	// signal(SIGTERM, CDStarGatewayApp::sigHandler);
+
 	setbuf(stdout, NULL);
 	if (2 != argc) {
 		printf("usage: %s path_to_config_file\n", argv[0]);
@@ -70,7 +86,6 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-#endif
 
 CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
 {
@@ -200,12 +215,13 @@ bool CDStarGatewayApp::createThread()
 	CLog::logInfo("DD Mode enabled: %d", int(ddEnabled));
 
 	// Setup ircddb
+	auto ircddbVersionInfo = "linux_" + PRODUCT_NAME + "-" + VERSION;
 	std::vector<CIRCDDB *> clients;
 	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
 		TircDDB ircDDBConfig;
 		config.getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
-		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, FULL_PRODUCT_NAME, gatewayConfig.address, ircDDBConfig.isQuadNet);
+		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, ircddbVersionInfo, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
 	}
 	if(clients.size() > 0U) {
@@ -260,3 +276,41 @@ bool CDStarGatewayApp::createThread()
 	return true;
 }
 
+void CDStarGatewayApp::sigHandlerFatal(int sig)
+{
+	CLog::logFatal("Caught signal : %s", strsignal(sig));
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+#endif
+	exit(1);
+}
+
+void CDStarGatewayApp::terminateHandler()
+{
+
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+#endif
+
+	std::exception_ptr eptr;
+	eptr = std::current_exception(); 
+
+	try {
+        if (eptr != nullptr) {
+            std::rethrow_exception(eptr);
+        }
+		else {
+			CLog::logFatal("Unhandled unknown exception occured");
+		}
+    } catch(const std::exception& e) {
+        CLog::logFatal("Unhandled exception occured %s", e.what());
+    }
+
+#ifdef DEBUG_DSTARGW
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+#endif
+	exit(1);
+}

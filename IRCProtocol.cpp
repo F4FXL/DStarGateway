@@ -92,26 +92,26 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 
 	while (recvQ->messageAvailable()) {
 		IRCMessage *m = recvQ->getMessage();
-		if (0 == m->command.compare("004")) {
+		if (0 == m->m_command.compare("004")) {
 			if (4 == m_state) {
-				if (m->params.size() > 1) {
+				if (m->m_params.size() > 1) {
 					std::regex serverNamePattern("^grp[1-9]s[1-9].ircDDB$");
-					if (std::regex_match(m->params[1], serverNamePattern))
-						m_app->setBestServer(std::string("s-") + m->params[1].substr(0,6));
+					if (std::regex_match(m->m_params[1], serverNamePattern))
+						m_app->setBestServer(std::string("s-") + m->m_params[1].substr(0,6));
 				}
 				m_state = 5;  // next: JOIN
 				m_app->setCurrentNick(m_currentNick);
 			}
-		} else if (0 == m->command.compare("PING")) {
+		} else if (0 == m->m_command.compare("PING")) {
 			IRCMessage *m2 = new IRCMessage();
-			m2->command = std::string("PONG");
-			if (m->params.size() > 0) {
-				m2->numParams = 1;
-				m2->params.push_back(m->params[0]);
+			m2->m_command = std::string("PONG");
+			if (m->m_params.size() > 0) {
+				m2->m_numParams = 1;
+				m2->m_params.push_back(m->m_params[0]);
 			}
 			sendQ -> putMessage(m2);
-		} else if (0 == m->command.compare("JOIN")) {
-			if (m->numParams>=1 && 0==m->params[0].compare(m_channel)) {
+		} else if (0 == m->m_command.compare("JOIN")) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
 				if (0==m->getPrefixNick().compare(m_currentNick) && 6==m_state) {
 					if (m_debugChannel.size())
 						m_state = 7;  // next: join debug_channel
@@ -121,69 +121,69 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 					m_app->userJoin(m->getPrefixNick(), m->getPrefixName(), m->getPrefixHost());
 			}
 
-			if (m->numParams>=1 && 0==m->params[0].compare(m_debugChannel)) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_debugChannel)) {
 				if (0==m->getPrefixNick().compare(m_currentNick) && 8==m_state)
 					m_state = 10; // next: WHO *
 			}
-		} else if (0 == m->command.compare("PONG")) {
+		} else if (0 == m->m_command.compare("PONG")) {
 			if (12 == m_state) {
 				m_timer = m_pingTimer;
 				m_state = 11;
 			}
-		} else if (0 == m->command.compare("PART")) {
-			if (m->numParams>=1 && 0==m->params[0].compare(m_channel)) {
+		} else if (0 == m->m_command.compare("PART")) {
+			if (m->m_numParams>=1 && 0==m->m_params[0].compare(m_channel)) {
 				if (m_app != NULL)
 					m_app->userLeave(m->getPrefixNick());
 			}
-		} else if (0 == m->command.compare("KICK")) {
-			if (m->numParams>=2 && 0==m->params[0].compare(m_channel)) {
-				if (0 == m->params[1].compare(m_currentNick)) {
+		} else if (0 == m->m_command.compare("KICK")) {
+			if (m->m_numParams>=2 && 0==m->m_params[0].compare(m_channel)) {
+				if (0 == m->m_params[1].compare(m_currentNick)) {
 					// i was kicked!!
 					delete m;
 					return false;
 				} else if (m_app)
-					m_app->userLeave(m->params[1]);
+					m_app->userLeave(m->m_params[1]);
 			}
-		} else if (0 == m->command.compare("QUIT")) {
+		} else if (0 == m->m_command.compare("QUIT")) {
 			if (m_app)
 				m_app->userLeave(m->getPrefixNick());
-		} else if (0 == m->command.compare("MODE")) {
-			if (m->numParams>=3 && 0==m->params[0].compare(m_channel)) {
+		} else if (0 == m->m_command.compare("MODE")) {
+			if (m->m_numParams>=3 && 0==m->m_params[0].compare(m_channel)) {
 				if (m_app) {
-					std::string mode = m->params[1];
+					std::string mode = m->m_params[1];
 
-					for (size_t i=1; i<mode.size() && (size_t)m->numParams>=i+2; i++) {
+					for (size_t i=1; i<mode.size() && (size_t)m->m_numParams>=i+2; i++) {
 						if ('o' == mode[i]) {
 							if ('+' == mode[0])
-								m_app->userChanOp(m->params[i+1], true);
+								m_app->userChanOp(m->m_params[i+1], true);
 							else if ('-' == mode[0])
-								m_app->userChanOp(m->params[i+1], false);
+								m_app->userChanOp(m->m_params[i+1], false);
 						}
 					} // for
 				}
 			}
-		} else if (0 == m->command.compare("PRIVMSG")) {
-			if (m->numParams==2 && m_app) {
-				if (0 == m->params[0].compare(m_channel) && m_app)
+		} else if (0 == m->m_command.compare("PRIVMSG")) {
+			if (m->m_numParams==2 && m_app) {
+				if (0 == m->m_params[0].compare(m_channel) && m_app)
 					m_app->msgChannel(m);
-				else if (0 == m->params[0].compare(m_currentNick) && m_app)
+				else if (0 == m->m_params[0].compare(m_currentNick) && m_app)
 					m_app->msgQuery(m);
 			}
-		} else if (0 == m->command.compare("352")) {  // WHO list
-			if (m->numParams>=7 && 0==m->params[0].compare(m_currentNick) && 0==m->params[1].compare(m_channel)) {
+		} else if (0 == m->m_command.compare("352")) {  // WHO list
+			if (m->m_numParams>=7 && 0==m->m_params[0].compare(m_currentNick) && 0==m->m_params[1].compare(m_channel)) {
 				if (m_app) {
-					m_app->userJoin(m->params[5], m->params[2], m->params[3]);
-					m_app->userChanOp(m->params[5], 0==m->params[6].compare("H@"));
+					m_app->userJoin(m->m_params[5], m->m_params[2], m->m_params[3]);
+					m_app->userChanOp(m->m_params[5], 0==m->m_params[6].compare("H@"));
 				}
 			}
-		} else if (0 == m->command.compare("433")) { // nick collision
+		} else if (0 == m->m_command.compare("433")) { // nick collision
 			if (2 == m_state) {
 				m_state = 3;  // nick collision, choose new nick
 				m_timer = 10; // wait 5 seconds..
 			}
-		} else if (0==m->command.compare("332") || 0==m->command.compare("TOPIC")) {  // topic
-			if (2==m->numParams && m_app && 0==m->params[0].compare(m_channel))
-				m_app->setTopic(m->params[1]);
+		} else if (0==m->m_command.compare("332") || 0==m->m_command.compare("TOPIC")) {  // topic
+			if (2==m->m_numParams && m_app && 0==m->m_params[0].compare(m_channel))
+				m_app->setTopic(m->m_params[1]);
 		}
 
 		delete m;
@@ -193,15 +193,15 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 	switch (m_state) {
 		case 1:
 			m = new IRCMessage();
-			m->command = std::string("PASS");
-			m->numParams = 1;
-			m->params.push_back(m_password);
+			m->m_command = std::string("PASS");
+			m->m_numParams = 1;
+			m->m_params.push_back(m_password);
 			sendQ->putMessage(m);
 
 			m = new IRCMessage();
-			m->command = std::string("NICK");
-			m->numParams = 1;
-			m->params.push_back(m_currentNick);
+			m->m_command = std::string("NICK");
+			m->m_numParams = 1;
+			m->m_params.push_back(m_currentNick);
 			sendQ->putMessage(m);
 
 			m_timer = 10;  // wait for possible nick collision message
@@ -211,12 +211,12 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 		case 2:
 			if (0 == m_timer) {
 				m = new IRCMessage();
-				m->command = std::string("USER");
-				m->numParams = 4;
-				m->params.push_back(m_name);
-				m->params.push_back(std::string("0"));
-				m->params.push_back(std::string("*"));
-				m->params.push_back(m_versionInfo);
+				m->m_command = std::string("USER");
+				m->m_numParams = 4;
+				m->m_params.push_back(m_name);
+				m->m_params.push_back(std::string("0"));
+				m->m_params.push_back(std::string("*"));
+				m->m_params.push_back(m_versionInfo);
 				sendQ->putMessage(m);
 
 				m_timer = 30;
@@ -228,9 +228,9 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 			if (0 == m_timer) {
 				chooseNewNick();
 				m = new IRCMessage();
-				m->command = std::string("NICK");
-				m->numParams = 1;
-				m->params.push_back(m_currentNick);
+				m->m_command = std::string("NICK");
+				m->m_numParams = 1;
+				m->m_params.push_back(m_currentNick);
 				sendQ->putMessage(m);
 
 				m_timer = 10;  // wait for possible nick collision message
@@ -245,9 +245,9 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 
 		case 5:
 			m = new IRCMessage();
-			m->command = std::string("JOIN");
-			m->numParams = 1;
-			m->params.push_back(m_channel);
+			m->m_command = std::string("JOIN");
+			m->m_numParams = 1;
+			m->m_params.push_back(m_channel);
 			sendQ->putMessage(m);
 
 			m_timer = 30;
@@ -264,9 +264,9 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 				return false; // this state cannot be processed if there is no debug_channel
 
 			m = new IRCMessage();
-			m->command = std::string("JOIN");
-			m->numParams = 1;
-			m->params.push_back(m_debugChannel);
+			m->m_command = std::string("JOIN");
+			m->m_numParams = 1;
+			m->m_params.push_back(m_debugChannel);
 			sendQ->putMessage(m);
 
 			m_timer = 30;
@@ -280,10 +280,10 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 
 		case 10:
 			m = new IRCMessage();
-			m->command = std::string("WHO");
-			m->numParams = 2;
-			m->params.push_back(m_channel);
-			m->params.push_back(std::string("*"));
+			m->m_command = std::string("WHO");
+			m->m_numParams = 2;
+			m->m_params.push_back(m_channel);
+			m->m_params.push_back(std::string("*"));
 			sendQ->putMessage(m);
 
 			m_timer = m_pingTimer;
@@ -296,9 +296,9 @@ bool IRCProtocol::processQueues(IRCMessageQueue *recvQ, IRCMessageQueue *sendQ)
 		case 11:
 			if (0 == m_timer) {
 				m = new IRCMessage();
-				m->command = std::string("PING");
-				m->numParams = 1;
-				m->params.push_back(m_currentNick);
+				m->m_command = std::string("PING");
+				m->m_numParams = 1;
+				m->m_params.push_back(m_currentNick);
 				sendQ->putMessage(m);
 
 				m_timer = m_pingTimer;

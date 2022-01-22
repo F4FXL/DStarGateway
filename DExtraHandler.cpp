@@ -403,8 +403,9 @@ void CDExtraHandler::process(CConnectData& connect)
 	}
 }
 
-void CDExtraHandler::link(IReflectorCallback* handler, const std::string& repeater, const std::string &gateway, const in_addr& address)
+void CDExtraHandler::link(IReflectorCallback* handler, const std::string& repeater, const std::string &gateway, const in_addr& address, unsigned int& localPort)
 {
+	localPort = 0U;
 	CDExtraProtocolHandler* protoHandler = m_pool->getHandler();
 	if (protoHandler == NULL)
 		return;
@@ -422,6 +423,7 @@ void CDExtraHandler::link(IReflectorCallback* handler, const std::string& repeat
 	}
 
 	if (found) {
+		localPort = protoHandler->getPort();
 		CConnectData reply(repeater, gateway, CT_LINK1, address, DEXTRA_PORT);
 		protoHandler->writeConnect(reply);
 	} else {

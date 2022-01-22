@@ -18,7 +18,7 @@
  */
 
 #include "DPlusProtocolHandler.h"
-
+#include "Log.h"
 #include "DStarDefines.h"
 #include "Utils.h"
 
@@ -105,6 +105,17 @@ bool CDPlusProtocolHandler::writeConnect(const CConnectData& connect)
 #endif
 
 	return m_socket.write(buffer, length, connect.getYourAddress(), connect.getYourPort());
+}
+
+void CDPlusProtocolHandler::traverseNat(const std::string& address, unsigned int remotePort)
+{
+	unsigned char buffer = 0x00U;
+	
+	in_addr addr = CUDPReaderWriter::lookup(address);
+
+	CLog::logInfo("DPlus Punching hole to %s:%u", address.c_str(), remotePort);
+
+	m_socket.write(&buffer, 1U, addr, remotePort);
 }
 
 DPLUS_TYPE CDPlusProtocolHandler::read()

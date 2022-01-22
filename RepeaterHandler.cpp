@@ -1342,8 +1342,9 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 				case DP_DPLUS:
 					if (m_dplusEnabled) {
 						m_linkGateway = gateway;
+						unsigned int localPort = 0U;
 						addr.s_addr = ::inet_addr(address.c_str());
-						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
+						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, addr, localPort);
 						m_linkStatus = LS_LINKING_DPLUS;
 					} else {
 						CLog::logInfo("Require D-Plus for linking to %s, but D-Plus is disabled", repeater.c_str());
@@ -1381,8 +1382,9 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 				default:
 					if (m_dextraEnabled) {
 						m_linkGateway = gateway;
+						unsigned int localPort = 0U;
 						addr.s_addr = ::inet_addr(address.c_str());
-						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, addr);
+						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, addr, localPort);
 						m_linkStatus = LS_LINKING_DEXTRA;
 					} else {
 						CLog::logInfo("Require DExtra for linking to %s, but DExtra is disabled", repeater.c_str());
@@ -2026,7 +2028,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 	if (m_linkStatus == LS_LINKING_CCS || m_linkStatus == LS_LINKED_CCS)
 		return;
 
-	if (callsign.substr(0,1) == "/") {
+	if (!callsign.empty() && callsign[0] == '/') {
 		if (m_irc == NULL) {
 			CLog::logInfo("%s is trying to G2 route with ircDDB disabled", user.c_str());
 			m_g2Status = G2_LOCAL;
@@ -2057,6 +2059,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 		m_g2User = "CQCQCQ  ";
 
 		CRepeaterData* data = m_cache->findRepeater(m_g2Repeater);
+		m_irc->notifyRepeaterG2NatTraversal(m_g2Repeater);
 
 		if (data == NULL) {
 			m_g2Status = G2_REPEATER;
@@ -2108,6 +2111,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			m_g2User     = callsign;
 			m_g2Address  = data->getAddress();
 			m_g2Repeater = data->getRepeater();
+			m_irc->notifyRepeaterG2NatTraversal(m_g2Repeater);
 			m_g2Gateway  = data->getGateway();
 			header.setDestination(m_g2Address, G2_DV_PORT);
 			header.setRepeaters(m_g2Gateway, m_g2Repeater);
@@ -2284,8 +2288,11 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 		switch (data->getProtocol()) {
 			case DP_DPLUS:
 				if (m_dplusEnabled) {
+					unsigned int localPort = 0U;
 					m_linkStatus = LS_LINKING_DPLUS;
-					CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+					CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+					if(m_irc != nullptr && localPort > 0U)
+						m_irc->notifyRepeaterDPlusNatTraversal(m_linkRepeater, localPort);
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
@@ -2319,8 +2326,11 @@ void CRepeaterHandler::linkInt(const std::string& callsign)
 
 			default:
 				if (m_dextraEnabled) {
+					unsigned int localPort = 0U;
 					m_linkStatus = LS_LINKING_DEXTRA;
-					CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+					CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+					if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDextraNatTraversal(m_linkRepeater, localPort);
 					writeLinkingTo(m_linkRepeater);
 					triggerInfo();
 				} else {
@@ -2456,8 +2466,11 @@ void CRepeaterHandler::startupInt()
 			switch (protocol) {
 				case DP_DPLUS:
 					if (m_dplusEnabled) {
+						unsigned int localPort = 0U;
 						m_linkStatus = LS_LINKING_DPLUS;
-						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+						CDPlusHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+						if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDPlusNatTraversal(m_linkRepeater, localPort);
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {
@@ -2491,8 +2504,11 @@ void CRepeaterHandler::startupInt()
 
 				default:
 					if (m_dextraEnabled) {
+						unsigned int localPort = 0U;
 						m_linkStatus = LS_LINKING_DEXTRA;
-						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress());
+						CDExtraHandler::link(this, m_rptCallsign, m_linkRepeater, data->getAddress(), localPort);
+						if(m_irc != nullptr && localPort > 0U)
+							m_irc->notifyRepeaterDextraNatTraversal(m_linkRepeater, localPort);
 						writeLinkingTo(m_linkRepeater);
 						triggerInfo();
 					} else {

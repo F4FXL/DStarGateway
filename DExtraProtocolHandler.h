@@ -51,6 +51,7 @@ public:
 	bool writeAMBE(const CAMBEData& data);
 	bool writeConnect(const CConnectData& connect);
 	bool writePoll(const CPollData& poll);
+	void traverseNat(const std::string& address, unsigned int remotePort);
 
 	DEXTRA_TYPE   read();
 	CHeaderData*  readHeader();

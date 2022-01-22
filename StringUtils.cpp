@@ -16,6 +16,9 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include "StringUtils.h"
 
 size_t CStringUtils::find_nth(const std::string& haystack, char needle, size_t nth) 
@@ -32,4 +35,18 @@ size_t CStringUtils::find_nth(const std::string& haystack, char needle, size_t n
     }
 
     return std::string::npos;
+}
+
+unsigned int CStringUtils::stringToPort(const std::string& s)
+{
+    unsigned int port = 0U;
+    std::string ls = boost::trim_copy(s);
+
+    if(!ls.empty() && std::all_of(ls.begin(), ls.end(), [](char c){ return c >= '0' && c <= '9'; })) {
+        auto portTemp = boost::lexical_cast<unsigned int>(ls);
+        if(portTemp > 0U && portTemp <= 65535U)
+            port = portTemp;
+    }
+
+    return port;
 }

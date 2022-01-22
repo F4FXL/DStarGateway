@@ -76,9 +76,6 @@ m_dextraPool(NULL),
 m_dplusPool(NULL),
 m_dcsPool(NULL),
 m_g2Handler(NULL),
-#if defined(ENABLE_NAT_TRAVERSAL)
-m_natTraversal(NULL),
-#endif
 m_aprsWriter(NULL),
 m_irc(NULL),
 m_cache(),
@@ -209,13 +206,6 @@ void* CDStarGatewayThread::Entry()
 		m_g2Handler = NULL;
 	}
 
-#if defined(ENABLE_NAT_TRAVERSAL)
-	if(m_g2Handler != NULL) {
-		m_natTraversal = new CNatTraversalHandler();
-		m_natTraversal->setG2Handler(m_g2Handler);
-	}
-#endif
-
 	// Wait here until we have the essentials to run
 	while (!m_killed && (m_dextraPool == NULL || m_dplusPool == NULL || m_dcsPool == NULL || m_g2Handler == NULL || (m_icomRepeaterHandler == NULL && m_hbRepeaterHandler == NULL && m_dummyRepeaterHandler == NULL) || m_gatewayCallsign.empty()))
 		::std::this_thread::sleep_for(std::chrono::milliseconds(500UL));		// 1/2 sec
@@ -345,7 +335,9 @@ void* CDStarGatewayThread::Entry()
 	m_statusFileTimer.start();
 	m_statusTimer2.start();
 
+#ifndef DEBUG_DSTARGW
 	try {
+#endif
 		while (!m_killed) {
 			if (m_icomRepeaterHandler != NULL)
 				processRepeater(m_icomRepeaterHandler);
@@ -421,14 +413,18 @@ void* CDStarGatewayThread::Entry()
 
 			::std::this_thread::sleep_for(std::chrono::milliseconds(TIME_PER_TIC_MS));
 		}
+#ifndef DEBUG_DSTARGW
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
 		CLog::logFatal("Exception raised in the main thread - \"%s\"", message.c_str());
+		throw;
 	}
 	catch (...) {
 		CLog::logFatal("Unknown exception raised in the main thread");
+		throw;
 	}
+#endif
 
 	CLog::logInfo("Stopping the ircDDB Gateway thread");
 
@@ -733,6 +729,7 @@ void CDStarGatewayThread::processIrcDDB()
 		m_statusTimer2.start();
 	}
 
+
 	// Process incoming ircDDB messages, updating the caches
 	for (;;) {
 		IRCDDB_RESPONSE_TYPE type = m_irc->getMessageType();
@@ -747,9 +744,6 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("USER: %s %s %s %s", user.c_str(), repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateUser(user, repeater, gateway, address, timestamp, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("USER: %s NOT FOUND", user.c_str());
 					}
@@ -766,9 +760,6 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("REPEATER: %s %s %s", repeater.c_str(), gateway.c_str(), address.c_str());
 						m_cache.updateRepeater(repeater, gateway, address, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("REPEATER: %s NOT FOUND", repeater.c_str());
 					}
@@ -786,15 +777,60 @@ void CDStarGatewayThread::processIrcDDB()
 					if (!address.empty()) {
 						CLog::logDebug("GATEWAY: %s %s", gateway.c_str(), address.c_str());
 						m_cache.updateGateway(gateway, address, DP_DEXTRA, false, false);
-#if defined(ENABLE_NAT_TRAVERSAL)						
-						m_natTraversal->traverseNatG2(address);
-#endif
 					} else {
 						CLog::logDebug("GATEWAY: %s NOT FOUND", gateway.c_str());
 					}
 				}
 				break;
+			case IDRT_NATTRAVERSAL_G2: {
+					std::string address;
+					bool res = m_irc->receiveNATTraversalG2(address);
+					if(!res)
+						return;
 
+					if(m_g2Handler != nullptr) {
+						CLog::logInfo("%s wants to G2 route to us, punching UDP Holes through NAT", address.c_str());
+						m_g2Handler->traverseNat(address);
+					}
+					else {
+						CLog::logInfo("%s wants to G2 route to us, but G2 is disabled", address.c_str());
+					}
+				}
+				break;
+			case IDRT_NATTRAVERSAL_DEXTRA: {
+					std::string address, remotePort;
+					bool res = m_irc->receiveNATTraversalDextra(address, remotePort);
+					if(!res)
+						return;
+
+					auto remotePortInt = CStringUtils::stringToPort(remotePort);
+					if(m_dextraEnabled  && remotePortInt > 0U && m_dextraPool != nullptr && m_dextraPool->getIncomingHandler() != nullptr) {
+						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
+						m_dextraPool->getIncomingHandler()->traverseNat(address, remotePortInt);
+					}
+					else {
+						CLog::logInfo("%s wants to DExtra connect to us, punching UDP Holes through NAT, remote port %s, but DExtra is Disabled", address.c_str(), remotePort.c_str());
+					}
+				}
+				break;
+					case IDRT_NATTRAVERSAL_DPLUS: {
+					std::string address, remotePort;
+					bool res = m_irc->receiveNATTraversalDPlus(address, remotePort);
+					if(!res)
+						return;
+
+					auto remotePortInt = CStringUtils::stringToPort(remotePort);
+					if(m_dplusEnabled && remotePortInt > 0U && m_dplusPool != nullptr && m_dplusPool->getIncomingHandler() != nullptr) {
+						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s", address.c_str(), remotePort.c_str());
+						m_dplusPool->getIncomingHandler()->traverseNat(address, remotePortInt);
+					}
+					else {
+						CLog::logInfo("%s wants to DPlus connect to us, punching UDP Holes through NAT, remote port %s, but DPlus is Disabled", address.c_str(), remotePort.c_str());
+					}
+				}
+				break;
+			case IDRT_NONE:
+				return;
 			default:
 				return;
 		}
