@@ -1,5 +1,6 @@
 /*
  *   Copyright (c) 2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2009-2011,2013,2015,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,10 +23,21 @@
 #include <netdb.h>
 #include <sys/socket.h>
 
+
+#define GETPORT(s) (s.ss_family == AF_INET6 ? TOIPV6(s)->sin6_port : TOIPV4(s)->sin_port)
+
+enum IPMATCHTYPE {
+	IMT_ADDRESS_AND_PORT,
+	IMT_ADDRESS_ONLY
+};
+
 class CNetUtils
 {
 public:
     static bool lookupV6(const std::string& hostname, sockaddr_storage& addr);
     static bool lookupV4(const std::string& hostname, sockaddr_storage& addr);
+    static bool lookup(const std::string& hostname, sockaddr_storage& addr);
     static bool lookup(const std::string& hostname, sockaddr_storage& addr, struct addrinfo& hints);
+    static bool match(const sockaddr_storage& addr1, const sockaddr_storage& addr2, IPMATCHTYPE type);
+    static void setPort(struct sockaddr_storage& addr, in_port_t port);
 };
