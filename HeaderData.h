@@ -94,6 +94,7 @@ public:
 
 	in_addr      getYourAddress() const;
 	unsigned int getYourPort() const;
+	struct sockaddr_storage getDestination() const;
 	unsigned int getMyPort() const;
 
 	unsigned int getErrors() const;

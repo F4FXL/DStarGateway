@@ -45,7 +45,7 @@ unsigned int              CRepeaterHandler::m_maxRepeaters = 0U;
 CRepeaterHandler**        CRepeaterHandler::m_repeaters = NULL;
 
 std::string                  CRepeaterHandler::m_localAddress;
-CG2ProtocolHandler*       CRepeaterHandler::m_g2Handler = NULL;
+CG2ProtocolHandlerPool*       CRepeaterHandler::m_g2Handler = NULL;
 CIRCDDB*                  CRepeaterHandler::m_irc = NULL;
 CCacheManager*            CRepeaterHandler::m_cache = NULL;
 std::string                  CRepeaterHandler::m_gateway;
@@ -301,7 +301,7 @@ void CRepeaterHandler::add(const std::string& callsign, const std::string& band,
 	delete repeater;
 }
 
-void CRepeaterHandler::setG2Handler(CG2ProtocolHandler* handler)
+void CRepeaterHandler::setG2HandlerPool(CG2ProtocolHandlerPool* handler)
 {
 	assert(handler != NULL);
 

@@ -21,6 +21,7 @@
 #include <string.h>
 #include "UDPReaderWriter.h"
 #include "Log.h"
+#include "NetUtils.h"
 
 CUDPReaderWriter::CUDPReaderWriter(const std::string& address, unsigned int port) :
 m_address(address),
@@ -139,8 +140,8 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 	auto res = read(buffer, length, addr);
 	
 	if(res >= 0 && addr.ss_family == AF_INET) {
-		address = ((struct sockaddr_in*)&addr)->sin_addr;
-		port    = ntohs(((struct sockaddr_in*)&addr)->sin_port);
+		address = TOIPV4(addr)->sin_addr;
+		port    = ntohs(TOIPV4(addr)->sin_port);
 	}
 
 	return res;
@@ -148,14 +149,36 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 
 bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const in_addr& address, unsigned int port)
 {
-	sockaddr_in addr;
-	::memset(&addr, 0x00, sizeof(sockaddr_in));
+	struct sockaddr_storage addr;
+	::memset(&addr, 0, sizeof(sockaddr_storage));
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr   = address;
-	addr.sin_port   = htons(port);
+	addr.ss_family = AF_INET;
+	TOIPV4(addr)->sin_addr = address;
+	TOIPV4(addr)->sin_port = htons(port);
 
-	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
+	return write(buffer, length, addr);
+	// sockaddr_in addr;
+	// ::memset(&addr, 0x00, sizeof(sockaddr_in));
+
+	// addr.sin_family = AF_INET;
+	// addr.sin_addr   = address;
+	// addr.sin_port   = htons(port);
+
+	// ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
+	// if (ret < 0) {
+	// 	CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
+	// 	return false;
+	// }
+
+	// if (ret != ssize_t(length))
+	// 	return false;
+
+	// return true;
+}
+
+bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const struct sockaddr_storage& addr)
+{
+	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(addr));
 	if (ret < 0) {
 		CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
 		return false;
@@ -166,6 +189,8 @@ bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, c
 
 	return true;
 }
+
+
 
 void CUDPReaderWriter::close()
 {

@@ -23,8 +23,10 @@
 #include <netdb.h>
 #include <sys/socket.h>
 
-
+#define TOIPV6(s) ((struct sockaddr_in6*)&s)
+#define TOIPV4(s) (((struct sockaddr_in*)&s))
 #define GETPORT(s) (s.ss_family == AF_INET6 ? TOIPV6(s)->sin6_port : TOIPV4(s)->sin_port)
+#define SETPORT(s, p) (if(s.ss_family == AF_INET6)TOIPV6(s)->sin6_port = p;else TOIPV4(s)->sin_port = p;)
 
 enum IPMATCHTYPE {
 	IMT_ADDRESS_AND_PORT,

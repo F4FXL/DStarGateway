@@ -31,7 +31,7 @@
 unsigned int        CG2Handler::m_maxRoutes = 0U;
 CG2Handler**        CG2Handler::m_routes = NULL;
 
-CG2ProtocolHandler* CG2Handler::m_handler = NULL;
+CG2ProtocolHandlerPool* CG2Handler::m_handler = NULL;
 
 CHeaderLogger*      CG2Handler::m_headerLogger = NULL;
 
@@ -60,7 +60,7 @@ void CG2Handler::initialise(unsigned int maxRoutes)
 		m_routes[i] = NULL;
 }
 
-void CG2Handler::setG2ProtocolHandler(CG2ProtocolHandler* handler)
+void CG2Handler::setG2ProtocolHandlerPool(CG2ProtocolHandlerPool* handler)
 {
 	assert(handler != NULL);
 

@@ -198,7 +198,7 @@ void* CDStarGatewayThread::Entry()
 		CLog::logError("Failed to allocate incoming DCS handler\n");
 	}
 
-	m_g2Handler = new CG2ProtocolHandler(G2_DV_PORT, m_gatewayAddress);
+	m_g2Handler = new CG2ProtocolHandlerPool(G2_DV_PORT, m_gatewayAddress);
 	bool ret = m_g2Handler->open();
 	if (!ret) {
 		CLog::logError("Could not open the G2 protocol handler");
@@ -232,7 +232,7 @@ void* CDStarGatewayThread::Entry()
 	loadGateways();
 	loadAllReflectors();
 
-	CG2Handler::setG2ProtocolHandler(m_g2Handler);
+	CG2Handler::setG2ProtocolHandlerPool(m_g2Handler);
 	CG2Handler::setHeaderLogger(headerLogger);
 
 	CDExtraHandler::setCallsign(m_gatewayCallsign);
@@ -250,7 +250,7 @@ void* CDStarGatewayThread::Entry()
 	CDCSHandler::setHeaderLogger(headerLogger);
 
 	CRepeaterHandler::setLocalAddress(m_gatewayAddress);
-	CRepeaterHandler::setG2Handler(m_g2Handler);
+	CRepeaterHandler::setG2HandlerPool(m_g2Handler);
 
 	if (m_irc != NULL)
 		CRepeaterHandler::setIRC(m_irc);
@@ -284,7 +284,7 @@ void* CDStarGatewayThread::Entry()
 #ifdef USE_STARNET
 	CStarNetHandler::setCache(&m_cache);
 	CStarNetHandler::setGateway(m_gatewayCallsign);
-	CStarNetHandler::setG2Handler(m_g2Handler);
+	CStarNetHandler::setG2HandlerPool(m_g2Handler);
 
 	if (m_irc != NULL)
 		CStarNetHandler::setIRC(m_irc);

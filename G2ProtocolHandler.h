@@ -21,7 +21,6 @@
 
 #include <unordered_map>
 #include <sys/socket.h>
-#include <boost/container_hash/hash.hpp>
 
 #include "UDPReaderWriter.h"
 #include "DStarDefines.h"
@@ -35,40 +34,9 @@ enum G2_TYPE {
 	GT_AMBE
 };
 
-// struct sockaddr_storage_map {
-//     struct comp {
-//         bool operator() (const struct sockaddr_storage& a, const struct sockaddr_storage& b) const {
-//             return CNetUtils::match(a, b, IMT_ADDRESS_AND_PORT);
-//         }
-//     };
-//     struct hash {
-//         std::size_t operator() (const sockaddr_storage& a) const {
-// 			switch(a.ss_family)
-// 			{
-// 				case AF_INET: {
-// 					auto ptr4 = ((struct sockaddr_in *)&a);
-// 					size_t res = AF_INET;
-// 					boost::hash_combine(res, ptr4->sin_addr.s_addr);
-// 					boost::hash_combine(res, ptr4->sin_port);
-// 					return res;
-// 				}
-// 				case AF_INET6: {
-// 					auto ptr6 = ((struct sockaddr_in6 *)&a);
-// 					size_t res = AF_INET6;
-// 					boost::hash_combine(res, ptr6->sin6_port);
-// 					boost::hash_combine(res, ptr6->sin6_addr);
-// 					return res;
-// 				}
-// 				default:
-// 					return 0U;
-// 			}
-//         }
-//     };
-// };
-
 class CG2ProtocolHandler {
 public:
-	CG2ProtocolHandler(unsigned int port, const std::string& addr = std::string(""));
+	CG2ProtocolHandler(CUDPReaderWriter* socket, const struct sockaddr_storage& destination, unsigned int bufferSize);
 	~CG2ProtocolHandler();
 
 	bool open();
@@ -76,22 +44,24 @@ public:
 	bool writeHeader(const CHeaderData& header);
 	bool writeAMBE(const CAMBEData& data);
 
-	G2_TYPE read();
 	CHeaderData* readHeader();
 	CAMBEData*   readAMBE();
 
+	struct sockaddr_storage getDestination() { return m_address; }
+	G2_TYPE getType() { return m_type; }
+
+	bool setBuffer(unsigned char * buffer, int length);
+
 	void close();
-	void traverseNat(const std::string& address);
+
 
 private:
-	std::unordered_map<uint32_t, unsigned int> m_portmap;
 
-	CUDPReaderWriter m_socket;
+	CUDPReaderWriter * m_socket;
 	G2_TYPE          m_type;
 	unsigned char*   m_buffer;
 	unsigned int     m_length;
-	in_addr          m_address;
-	unsigned int     m_port;
+	struct sockaddr_storage m_address;
 
 	bool readPackets();
 };

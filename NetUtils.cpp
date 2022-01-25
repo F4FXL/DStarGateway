@@ -22,9 +22,6 @@
 
 #include "NetUtils.h"
 
-#define TOIPV6(s) ((struct sockaddr_in6*)&s)
-#define TOIPV4(s) (((struct sockaddr_in*)&s))
-
 bool CNetUtils::lookupV4(const std::string& hostname, sockaddr_storage& addr)
 {
     struct addrinfo hints;

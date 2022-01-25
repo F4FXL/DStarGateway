@@ -22,7 +22,7 @@
 
 #include <netinet/in.h>
 
-#include "G2ProtocolHandler.h"
+#include "G2ProtocolHandlerPool.h"
 #include "RepeaterHandler.h"
 #include "DStarDefines.h"
 #include "HeaderLogger.h"
@@ -34,7 +34,7 @@ class CG2Handler {
 public:
 	static void initialise(unsigned int maxRoutes);
 
-	static void setG2ProtocolHandler(CG2ProtocolHandler* handler);
+	static void setG2ProtocolHandlerPool(CG2ProtocolHandlerPool* handler);
 	static void setHeaderLogger(CHeaderLogger* logger);
 
 	static void process(CHeaderData& header);
@@ -54,7 +54,7 @@ private:
 	static unsigned int        m_maxRoutes;
 	static CG2Handler**        m_routes;
 
-	static CG2ProtocolHandler* m_handler;
+	static CG2ProtocolHandlerPool* m_handler;
 
 	static CHeaderLogger*      m_headerLogger;
 
