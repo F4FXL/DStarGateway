@@ -75,7 +75,7 @@ m_dummyRepeaterHandler(NULL),
 m_dextraPool(NULL),
 m_dplusPool(NULL),
 m_dcsPool(NULL),
-m_g2Handler(NULL),
+m_g2HandlerPool(NULL),
 m_aprsWriter(NULL),
 m_irc(NULL),
 m_cache(),
@@ -198,16 +198,16 @@ void* CDStarGatewayThread::Entry()
 		CLog::logError("Failed to allocate incoming DCS handler\n");
 	}
 
-	m_g2Handler = new CG2ProtocolHandlerPool(G2_DV_PORT, m_gatewayAddress);
-	bool ret = m_g2Handler->open();
+	m_g2HandlerPool = new CG2ProtocolHandlerPool(G2_DV_PORT, m_gatewayAddress);
+	bool ret = m_g2HandlerPool->open();
 	if (!ret) {
 		CLog::logError("Could not open the G2 protocol handler");
-		delete m_g2Handler;
-		m_g2Handler = NULL;
+		delete m_g2HandlerPool;
+		m_g2HandlerPool = NULL;
 	}
 
 	// Wait here until we have the essentials to run
-	while (!m_killed && (m_dextraPool == NULL || m_dplusPool == NULL || m_dcsPool == NULL || m_g2Handler == NULL || (m_icomRepeaterHandler == NULL && m_hbRepeaterHandler == NULL && m_dummyRepeaterHandler == NULL) || m_gatewayCallsign.empty()))
+	while (!m_killed && (m_dextraPool == NULL || m_dplusPool == NULL || m_dcsPool == NULL || m_g2HandlerPool == NULL || (m_icomRepeaterHandler == NULL && m_hbRepeaterHandler == NULL && m_dummyRepeaterHandler == NULL) || m_gatewayCallsign.empty()))
 		::std::this_thread::sleep_for(std::chrono::milliseconds(500UL));		// 1/2 sec
 
 	if (m_killed)
@@ -232,7 +232,7 @@ void* CDStarGatewayThread::Entry()
 	loadGateways();
 	loadAllReflectors();
 
-	CG2Handler::setG2ProtocolHandlerPool(m_g2Handler);
+	CG2Handler::setG2ProtocolHandlerPool(m_g2HandlerPool);
 	CG2Handler::setHeaderLogger(headerLogger);
 
 	CDExtraHandler::setCallsign(m_gatewayCallsign);
@@ -250,7 +250,7 @@ void* CDStarGatewayThread::Entry()
 	CDCSHandler::setHeaderLogger(headerLogger);
 
 	CRepeaterHandler::setLocalAddress(m_gatewayAddress);
-	CRepeaterHandler::setG2HandlerPool(m_g2Handler);
+	CRepeaterHandler::setG2HandlerPool(m_g2HandlerPool);
 
 	if (m_irc != NULL)
 		CRepeaterHandler::setIRC(m_irc);
@@ -284,7 +284,7 @@ void* CDStarGatewayThread::Entry()
 #ifdef USE_STARNET
 	CStarNetHandler::setCache(&m_cache);
 	CStarNetHandler::setGateway(m_gatewayCallsign);
-	CStarNetHandler::setG2HandlerPool(m_g2Handler);
+	CStarNetHandler::setG2HandlerPool(m_g2HandlerPool);
 
 	if (m_irc != NULL)
 		CStarNetHandler::setIRC(m_irc);
@@ -453,8 +453,8 @@ void* CDStarGatewayThread::Entry()
 	m_dcsPool->close();
 	delete m_dcsPool;
 
-	m_g2Handler->close();
-	delete m_g2Handler;
+	m_g2HandlerPool->close();
+	delete m_g2HandlerPool;
 
 	if (m_irc != NULL) {
 		m_irc->close();
@@ -788,9 +788,9 @@ void CDStarGatewayThread::processIrcDDB()
 					if(!res)
 						return;
 
-					if(m_g2Handler != nullptr) {
+					if(m_g2HandlerPool != nullptr) {
 						CLog::logInfo("%s wants to G2 route to us, punching UDP Holes through NAT", address.c_str());
-						m_g2Handler->traverseNat(address);
+						m_g2HandlerPool->traverseNat(address);
 					}
 					else {
 						CLog::logInfo("%s wants to G2 route to us, but G2 is disabled", address.c_str());
@@ -1096,11 +1096,11 @@ void CDStarGatewayThread::processDCS()
 void CDStarGatewayThread::processG2()
 {
 	for (;;) {
-		G2_TYPE type = m_g2Handler->read();
+		G2_TYPE type = m_g2HandlerPool->read();
 
 		switch (type) {
 			case GT_HEADER: {
-					CHeaderData* header = m_g2Handler->readHeader();
+					CHeaderData* header = m_g2HandlerPool->readHeader();
 					if (header != NULL) {
 						// CLog::logInfo("G2 header - My: %s/%s  Your: %s  Rpt1: %s  Rpt2: %s  Flags: %02X %02X %02X", header->getMyCall1().c_str(), header->getMyCall2().c_str(), header->getYourCall().c_str(), header->getRptCall1().c_str(), header->getRptCall2().c_str(), header->getFlag1(), header->getFlag2(), header->getFlag3());
 						CG2Handler::process(*header);
@@ -1110,7 +1110,7 @@ void CDStarGatewayThread::processG2()
 				break;
 
 			case GT_AMBE: {
-					CAMBEData* data = m_g2Handler->readAMBE();
+					CAMBEData* data = m_g2HandlerPool->readAMBE();
 					if (data != NULL) {
 						CG2Handler::process(*data);
 						delete data;
