@@ -127,7 +127,10 @@ void CG2ProtocolHandlerPool::traverseNat(const std::string& address)
 
 bool CG2ProtocolHandlerPool::writeHeader(const CHeaderData& header)
 {
-    auto handler = findHandler(header.getDestination(), IMT_ADDRESS_ONLY);
+    auto handler = findHandler(header.getDestination(), IMT_ADDRESS_AND_PORT);
+    if(handler == nullptr)
+        handler = findHandler(header.getDestination(), IMT_ADDRESS_ONLY);
+
     if(handler == nullptr) {
         handler = new CG2ProtocolHandler(&m_socket, header.getDestination(), G2_BUFFER_LENGTH);
         m_pool.push_back(handler);
@@ -138,7 +141,10 @@ bool CG2ProtocolHandlerPool::writeHeader(const CHeaderData& header)
 
 bool CG2ProtocolHandlerPool::writeAMBE(const CAMBEData& data)
 {
-    auto handler = findHandler(data.getDestination(), IMT_ADDRESS_ONLY);
+    auto handler = findHandler(data.getDestination(), IMT_ADDRESS_AND_PORT);
+    if(handler == nullptr)
+        handler = findHandler(data.getDestination(), IMT_ADDRESS_ONLY);
+
     if(handler == nullptr) {
         handler = new CG2ProtocolHandler(&m_socket, data.getDestination(), G2_BUFFER_LENGTH);
         m_pool.push_back(handler);
@@ -166,4 +172,19 @@ CG2ProtocolHandler * CG2ProtocolHandlerPool::findHandler(in_addr addr, unsigned 
     TOIPV4(addrStorage)->sin_port = port;
 
     return findHandler(addrStorage, matchType);
+}
+
+void CG2ProtocolHandlerPool::clock(unsigned int ms)
+{
+    for(auto it = m_pool.begin(); it != m_pool.end();) {
+        (*it)->clock(ms);
+        if((*it)->isInactive()) {
+            delete (*it);
+            it = m_pool.erase(it);
+            m_index = m_pool.end();
+        }
+        else {
+            it++;
+        }
+    }
 }

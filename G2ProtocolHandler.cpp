@@ -33,8 +33,10 @@ m_socket(socket),
 m_type(GT_NONE),
 m_buffer(nullptr),
 m_length(0U),
-m_address(destination)
+m_address(destination),
+m_inactivityTimer(1000U, 29U)
 {
+	m_inactivityTimer.start();
 	m_buffer = new unsigned char[bufferSize];
 	::memset(m_buffer, 0, bufferSize);
 }
@@ -46,6 +48,7 @@ CG2ProtocolHandler::~CG2ProtocolHandler()
 
 bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 {
+	m_inactivityTimer.start();
 	unsigned char buffer[60U];
 	unsigned int length = header.getG2Data(buffer, 60U, true);
 
@@ -68,6 +71,7 @@ bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 
 bool CG2ProtocolHandler::writeAMBE(const CAMBEData& data)
 {
+	m_inactivityTimer.start();
 	unsigned char buffer[40U];
 	unsigned int length = data.getG2Data(buffer, 40U);
 
@@ -90,6 +94,8 @@ bool CG2ProtocolHandler::setBuffer(unsigned char * buffer, int length)
 	if(length <= 0)
 		return false;
 
+	m_inactivityTimer.start();
+
 	m_length = length;
 
 	if (m_buffer[0] != 'D' || m_buffer[1] != 'S' || m_buffer[2] != 'V' || m_buffer[3] != 'T') {
@@ -110,6 +116,7 @@ bool CG2ProtocolHandler::setBuffer(unsigned char * buffer, int length)
 
 CHeaderData* CG2ProtocolHandler::readHeader()
 {
+	m_inactivityTimer.start();
 	if (m_type != GT_HEADER)
 		return nullptr;
 
@@ -128,6 +135,7 @@ CHeaderData* CG2ProtocolHandler::readHeader()
 
 CAMBEData* CG2ProtocolHandler::readAMBE()
 {
+	m_inactivityTimer.start();
 	if (m_type != GT_AMBE)
 		return NULL;
 
@@ -142,3 +150,4 @@ CAMBEData* CG2ProtocolHandler::readAMBE()
 
 	return data;
 }
+

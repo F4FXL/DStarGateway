@@ -27,6 +27,7 @@
 #include "HeaderData.h"
 #include "AMBEData.h"
 #include "NetUtils.h"
+#include "Timer.h"
 
 enum G2_TYPE {
 	GT_NONE,
@@ -52,16 +53,16 @@ public:
 
 	bool setBuffer(unsigned char * buffer, int length);
 
-	void close();
-
+	void clock(unsigned int ms) { m_inactivityTimer.clock(ms); }
+	bool isInactive() { return m_inactivityTimer.hasExpired(); }
 
 private:
-
 	CUDPReaderWriter * m_socket;
 	G2_TYPE          m_type;
 	unsigned char*   m_buffer;
 	unsigned int     m_length;
 	struct sockaddr_storage m_address;
+	CTimer m_inactivityTimer;
 
 	bool readPackets();
 };

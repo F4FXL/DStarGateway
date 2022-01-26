@@ -78,6 +78,8 @@ public:
 
     void traverseNat(const std::string& address);
 
+    void clock(unsigned int ms);
+
 private:
     bool readPackets();
     CG2ProtocolHandler * findHandler(const struct sockaddr_storage& addr, IPMATCHTYPE matchType) const;
