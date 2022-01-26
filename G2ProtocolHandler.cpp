@@ -34,7 +34,8 @@ m_type(GT_NONE),
 m_buffer(nullptr),
 m_length(0U),
 m_address(destination),
-m_inactivityTimer(1000U, 29U)
+m_inactivityTimer(1000U, 29U),
+m_id(0U)
 {
 	m_inactivityTimer.start();
 	m_buffer = new unsigned char[bufferSize];
@@ -117,7 +118,7 @@ bool CG2ProtocolHandler::setBuffer(unsigned char * buffer, int length)
 CHeaderData* CG2ProtocolHandler::readHeader()
 {
 	m_inactivityTimer.start();
-	if (m_type != GT_HEADER)
+	if (m_type != GT_HEADER || m_id != 0U)
 		return nullptr;
 
 	m_type = GT_NONE; // Header data has been consumed, reset our status
@@ -129,6 +130,8 @@ CHeaderData* CG2ProtocolHandler::readHeader()
 		delete header;
 		return nullptr;
 	}
+
+	m_id = header->getId();// remember the id so we do not read it duplicate
 
 	return header;
 }
@@ -147,6 +150,9 @@ CAMBEData* CG2ProtocolHandler::readAMBE()
 		delete data;
 		return NULL;
 	}
+
+	if(data->isEnd())
+		m_id = 0U;
 
 	return data;
 }

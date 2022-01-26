@@ -63,6 +63,7 @@ private:
 	unsigned int     m_length;
 	struct sockaddr_storage m_address;
 	CTimer m_inactivityTimer;
+	unsigned int m_id;
 
 	bool readPackets();
 };
