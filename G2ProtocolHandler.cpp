@@ -95,8 +95,6 @@ bool CG2ProtocolHandler::setBuffer(unsigned char * buffer, int length)
 	if(length <= 0)
 		return false;
 
-	m_inactivityTimer.start();
-
 	m_length = length;
 
 	if (m_buffer[0] != 'D' || m_buffer[1] != 'S' || m_buffer[2] != 'V' || m_buffer[3] != 'T') {
