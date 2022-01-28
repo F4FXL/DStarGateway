@@ -20,11 +20,14 @@
 #pragma once
 
 #include <unordered_map>
+#include <sys/socket.h>
 
 #include "UDPReaderWriter.h"
 #include "DStarDefines.h"
 #include "HeaderData.h"
 #include "AMBEData.h"
+#include "NetUtils.h"
+#include "Timer.h"
 
 enum G2_TYPE {
 	GT_NONE,
@@ -34,7 +37,7 @@ enum G2_TYPE {
 
 class CG2ProtocolHandler {
 public:
-	CG2ProtocolHandler(unsigned int port, const std::string& addr = std::string(""));
+	CG2ProtocolHandler(CUDPReaderWriter* socket, const struct sockaddr_storage& destination, unsigned int bufferSize);
 	~CG2ProtocolHandler();
 
 	bool open();
@@ -42,22 +45,25 @@ public:
 	bool writeHeader(const CHeaderData& header);
 	bool writeAMBE(const CAMBEData& data);
 
-	G2_TYPE read();
 	CHeaderData* readHeader();
 	CAMBEData*   readAMBE();
 
-	void close();
-	void traverseNat(const std::string& address);
+	struct sockaddr_storage getDestination() { return m_address; }
+	G2_TYPE getType() { return m_type; }
+
+	bool setBuffer(unsigned char * buffer, int length);
+
+	void clock(unsigned int ms) { m_inactivityTimer.clock(ms); }
+	bool isInactive() { return m_inactivityTimer.hasExpired(); }
 
 private:
-	std::unordered_map<uint32_t, unsigned int> m_portmap;
-
-	CUDPReaderWriter m_socket;
+	CUDPReaderWriter * m_socket;
 	G2_TYPE          m_type;
 	unsigned char*   m_buffer;
 	unsigned int     m_length;
-	in_addr          m_address;
-	unsigned int     m_port;
+	struct sockaddr_storage m_address;
+	CTimer m_inactivityTimer;
+	unsigned int m_id;
 
 	bool readPackets();
 };

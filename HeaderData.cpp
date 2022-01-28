@@ -23,7 +23,7 @@
 #include <cassert>
 #include <cstring>
 #include "HeaderData.h"
-
+#include "NetUtils.h"
 #include "CCITTChecksum.h"
 #include "DStarDefines.h"
 #include "Utils.h"
@@ -920,6 +920,17 @@ in_addr CHeaderData::getYourAddress() const
 unsigned int CHeaderData::getYourPort() const
 {
 	return m_yourPort;
+}
+
+struct sockaddr_storage CHeaderData::getDestination() const
+{
+	struct sockaddr_storage dest;
+	::memset(&dest, 0, sizeof(sockaddr_storage));
+	dest.ss_family = AF_INET;
+	TOIPV4(dest)->sin_addr = m_yourAddress;
+	TOIPV4(dest)->sin_port = htons(m_yourPort);
+
+	return dest;
 }
 
 unsigned int CHeaderData::getMyPort() const

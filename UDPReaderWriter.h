@@ -41,8 +41,10 @@ public:
 
 	bool open();
 
-	int  read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port);
+	int read(unsigned char* buffer, unsigned int length, struct sockaddr_storage& addr);
+	int read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port);
 	bool write(const unsigned char* buffer, unsigned int length, const in_addr& address, unsigned int port);
+	bool write(const unsigned char* buffer, unsigned int length, const struct sockaddr_storage& addr);
 
 	void close();
 

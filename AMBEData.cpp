@@ -24,6 +24,7 @@
 #include "AMBEData.h"
 #include "DStarDefines.h"
 #include "Utils.h"
+#include "NetUtils.h"
 
 CAMBEData::CAMBEData() :
 m_rptSeq(0U),
@@ -580,6 +581,17 @@ unsigned int CAMBEData::getYourPort() const
 unsigned int CAMBEData::getMyPort() const
 {
 	return m_myPort;
+}
+
+struct sockaddr_storage CAMBEData::getDestination() const
+{
+	struct sockaddr_storage dest;
+	::memset(&dest, 0, sizeof(sockaddr_storage));
+	dest.ss_family = AF_INET;
+	TOIPV4(dest)->sin_addr = m_yourAddress;
+	TOIPV4(dest)->sin_port = htons(m_yourPort);
+
+	return dest;
 }
 
 CHeaderData& CAMBEData::getHeader()

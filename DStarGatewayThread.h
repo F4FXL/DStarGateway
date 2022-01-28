@@ -28,7 +28,7 @@
 #include "RepeaterProtocolHandler.h"
 #include "DStarGatewayStatusData.h"
 #include "DCSProtocolHandlerPool.h"
-#include "G2ProtocolHandler.h"
+#include "G2ProtocolHandlerPool.h"
 #include "RemoteHandler.h"
 #include "CacheManager.h"
 #include "CallsignList.h"
@@ -102,7 +102,7 @@ private:
 	CDExtraProtocolHandlerPool*    m_dextraPool;
 	CDPlusProtocolHandlerPool*     m_dplusPool;
 	CDCSProtocolHandlerPool*       m_dcsPool;
-	CG2ProtocolHandler*       m_g2Handler;
+	CG2ProtocolHandlerPool*       m_g2HandlerPool;
 	CAPRSHandler*              m_aprsWriter;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;

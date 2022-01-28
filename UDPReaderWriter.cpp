@@ -21,6 +21,7 @@
 #include <string.h>
 #include "UDPReaderWriter.h"
 #include "Log.h"
+#include "NetUtils.h"
 
 CUDPReaderWriter::CUDPReaderWriter(const std::string& address, unsigned int port) :
 m_address(address),
@@ -101,7 +102,7 @@ bool CUDPReaderWriter::open()
 	return true;
 }
 
-int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port)
+int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, struct sockaddr_storage& addr)
 {
 	// Check that the readfrom() won't block
 	fd_set readFds;
@@ -122,8 +123,7 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 	if (ret == 0)
 		return 0;
 
-	sockaddr_in addr;
-	socklen_t size = sizeof(sockaddr_in);
+	socklen_t size = sizeof(addr);
 
 	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&addr, &size);
 	if (len <= 0) {
@@ -131,22 +131,54 @@ int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& 
 		return -1;
 	}
 
-	address = addr.sin_addr;
-	port    = ntohs(addr.sin_port);
-
 	return len;
+}
+
+int CUDPReaderWriter::read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port)
+{
+	struct sockaddr_storage addr;
+	auto res = read(buffer, length, addr);
+	
+	if(res >= 0 && addr.ss_family == AF_INET) {
+		address = TOIPV4(addr)->sin_addr;
+		port    = ntohs(TOIPV4(addr)->sin_port);
+	}
+
+	return res;
 }
 
 bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const in_addr& address, unsigned int port)
 {
-	sockaddr_in addr;
-	::memset(&addr, 0x00, sizeof(sockaddr_in));
+	struct sockaddr_storage addr;
+	::memset(&addr, 0, sizeof(sockaddr_storage));
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr   = address;
-	addr.sin_port   = htons(port);
+	addr.ss_family = AF_INET;
+	TOIPV4(addr)->sin_addr = address;
+	TOIPV4(addr)->sin_port = htons(port);
 
-	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
+	return write(buffer, length, addr);
+	// sockaddr_in addr;
+	// ::memset(&addr, 0x00, sizeof(sockaddr_in));
+
+	// addr.sin_family = AF_INET;
+	// addr.sin_addr   = address;
+	// addr.sin_port   = htons(port);
+
+	// ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
+	// if (ret < 0) {
+	// 	CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
+	// 	return false;
+	// }
+
+	// if (ret != ssize_t(length))
+	// 	return false;
+
+	// return true;
+}
+
+bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const struct sockaddr_storage& addr)
+{
+	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(addr));
 	if (ret < 0) {
 		CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
 		return false;
@@ -157,6 +189,8 @@ bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, c
 
 	return true;
 }
+
+
 
 void CUDPReaderWriter::close()
 {

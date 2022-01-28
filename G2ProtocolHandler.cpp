@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <cstring>
 
 #include "G2ProtocolHandler.h"
 #include "Utils.h"
@@ -27,30 +28,28 @@
 
 const unsigned int BUFFER_LENGTH = 255U;
 
-CG2ProtocolHandler::CG2ProtocolHandler(unsigned int port, const std::string& addr) :
-m_socket(addr, port),
+CG2ProtocolHandler::CG2ProtocolHandler(CUDPReaderWriter* socket, const struct sockaddr_storage& destination, unsigned int bufferSize) :
+m_socket(socket),
 m_type(GT_NONE),
-m_buffer(NULL),
+m_buffer(nullptr),
 m_length(0U),
-m_address(),
-m_port(0U)
+m_address(destination),
+m_inactivityTimer(1000U, 29U),
+m_id(0U)
 {
-	m_buffer = new unsigned char[BUFFER_LENGTH];
+	m_inactivityTimer.start();
+	m_buffer = new unsigned char[bufferSize];
+	::memset(m_buffer, 0, bufferSize);
 }
 
 CG2ProtocolHandler::~CG2ProtocolHandler()
 {
 	delete[] m_buffer;
-	m_portmap.clear();
-}
-
-bool CG2ProtocolHandler::open()
-{
-	return m_socket.open();
 }
 
 bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 {
+	m_inactivityTimer.start();
 	unsigned char buffer[60U];
 	unsigned int length = header.getG2Data(buffer, 60U, true);
 
@@ -58,12 +57,12 @@ bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 	CUtils::dump("Sending Header", buffer, length);
 #endif
 
-	in_addr addr = header.getYourAddress();
-	auto found = m_portmap.find(addr.s_addr);
-	unsigned int port = (m_portmap.end()==found) ? header.getYourPort() : found->second;
+	assert(CNetUtils::match(header.getDestination(), m_address, IMT_ADDRESS_ONLY));
+
+	//CLog::logTrace("Write header to %s:%u", inet_ntoa(addr), ntohs(TOIPV4(m_address)->sin_port));
 
 	for (unsigned int i = 0U; i < 5U; i++) {
-		bool res = m_socket.write(buffer, length, addr, port);
+		bool res = m_socket->write(buffer, length, m_address);
 		if (!res)
 			return false;
 	}
@@ -73,6 +72,7 @@ bool CG2ProtocolHandler::writeHeader(const CHeaderData& header)
 
 bool CG2ProtocolHandler::writeAMBE(const CAMBEData& data)
 {
+	m_inactivityTimer.start();
 	unsigned char buffer[40U];
 	unsigned int length = data.getG2Data(buffer, 40U);
 
@@ -80,58 +80,34 @@ bool CG2ProtocolHandler::writeAMBE(const CAMBEData& data)
 	CUtils::dump("Sending Data", buffer, length);
 #endif
 
-	in_addr addr = data.getYourAddress();
-	auto found = m_portmap.find(addr.s_addr);
-	unsigned int port = (m_portmap.end()==found) ? data.getYourPort() : found->second;
-
-	return m_socket.write(buffer, length, addr, port);
+	assert(CNetUtils::match(data.getDestination(), m_address, IMT_ADDRESS_ONLY));
+	//CLog::logTrace("Write ambe to %s:%u", inet_ntoa(addr), ntohs(TOIPV4(m_address)->sin_port));
+	return m_socket->write(buffer, length, m_address);
 }
 
-G2_TYPE CG2ProtocolHandler::read()
+bool CG2ProtocolHandler::setBuffer(unsigned char * buffer, int length)
 {
-	bool res = true;
+	assert(buffer != nullptr);
 
-	// Loop until we have no more data from the socket or we have data for the higher layers
-	while (res)
-		res = readPackets();
-
-	return m_type;
-}
-
-bool CG2ProtocolHandler::readPackets()
-{
 	m_type = GT_NONE;
+	::memcpy(m_buffer, buffer, length);
 
-	// No more data?
-	int length = m_socket.read(m_buffer, BUFFER_LENGTH, m_address, m_port);
-	if (length <= 0)
+	if(length <= 0)
 		return false;
-
-	if(length == 1) {
-		CLog::logDebug("G2 Nat traversal packet received");
-	}
 
 	m_length = length;
 
-	// save the incoming port (this is to enable mobile hotspots)
-	if (m_portmap.end() == m_portmap.find(m_address.s_addr)) {
-		CLog::logInfo("G2 new address %s on port %u\n", inet_ntoa(m_address), m_port);
-		m_portmap[m_address.s_addr] = m_port;
-	} else {
-		if (m_portmap[m_address.s_addr] != m_port) {
-			CLog::logInfo("G2 new port for %s is %u, was %u\n", inet_ntoa(m_address), m_port, m_portmap[m_address.s_addr]);
-			m_portmap[m_address.s_addr] = m_port;
-		}
-	}
-
 	if (m_buffer[0] != 'D' || m_buffer[1] != 'S' || m_buffer[2] != 'V' || m_buffer[3] != 'T') {
+		CLog::logTrace("DSVT");
 		return true;
 	} else {
 		// Header or data packet type?
-		if ((m_buffer[14] & 0x80) == 0x80)
+		if ((m_buffer[14] & 0x80) == 0x80) {
 			m_type = GT_HEADER;
-		else
+		}
+		else {
 			m_type = GT_AMBE;
+		}
 
 		return false;
 	}
@@ -139,49 +115,43 @@ bool CG2ProtocolHandler::readPackets()
 
 CHeaderData* CG2ProtocolHandler::readHeader()
 {
-	if (m_type != GT_HEADER)
-		return NULL;
+	m_inactivityTimer.start();
+	if (m_type != GT_HEADER || m_id != 0U)
+		return nullptr;
 
+	m_type = GT_NONE; // Header data has been consumed, reset our status
 	CHeaderData* header = new CHeaderData;
 
 	// G2 checksums are unreliable
-	bool res = header->setG2Data(m_buffer, m_length, false, m_address, m_port);
+	bool res = header->setG2Data(m_buffer, m_length, false, TOIPV4(m_address)->sin_addr,  ntohs(GETPORT(m_address)));
 	if (!res) {
 		delete header;
-		return NULL;
+		return nullptr;
 	}
+
+	m_id = header->getId();// remember the id so we do not read it duplicate
 
 	return header;
 }
 
 CAMBEData* CG2ProtocolHandler::readAMBE()
 {
+	m_inactivityTimer.start();
 	if (m_type != GT_AMBE)
 		return NULL;
 
+	m_type = GT_NONE; // Ambe data has been consumed, reset our status
 	CAMBEData* data = new CAMBEData;
 
-	bool res = data->setG2Data(m_buffer, m_length, m_address, m_port);
+	bool res = data->setG2Data(m_buffer, m_length, TOIPV4(m_address)->sin_addr, ntohs(GETPORT(m_address)));
 	if (!res) {
 		delete data;
 		return NULL;
 	}
 
+	if(data->isEnd())
+		m_id = 0U;
+
 	return data;
 }
 
-void CG2ProtocolHandler::close()
-{
-	m_socket.close();
-}
-
-void CG2ProtocolHandler::traverseNat(const std::string& address)
-{
-	unsigned char buffer = 0x00U;
-	
-	in_addr addr = CUDPReaderWriter::lookup(address);
-
-	CLog::logInfo("G2 Punching hole to %s", address.c_str());
-
-	m_socket.write(&buffer, 1U, addr, G2_DV_PORT);
-}

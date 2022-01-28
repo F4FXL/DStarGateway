@@ -28,7 +28,7 @@
 #include "DExtraProtocolHandler.h"
 #include "DPlusProtocolHandler.h"
 #include "RemoteRepeaterData.h"
-#include "G2ProtocolHandler.h"
+#include "G2ProtocolHandlerPool.h"
 #include "ReflectorCallback.h"
 #include "RepeaterCallback.h"
 #include "AnnouncementUnit.h"
@@ -75,7 +75,7 @@ public:
 #endif
 
 	static void setLocalAddress(const std::string& address);
-	static void setG2Handler(CG2ProtocolHandler* handler);
+	static void setG2HandlerPool(CG2ProtocolHandlerPool* handler);
 	static void setIRC(CIRCDDB* irc);
 	static void setCache(CCacheManager* cache);
 	static void setGateway(const std::string& gateway);
@@ -168,7 +168,7 @@ private:
 	static CRepeaterHandler** m_repeaters;
 
 	static std::string  m_localAddress;
-	static CG2ProtocolHandler* m_g2Handler;
+	static CG2ProtocolHandlerPool* m_g2HandlerPool;
 	static CCacheManager* m_cache;
 	static std::string  m_gateway;
 	static CIRCDDB*  m_irc;

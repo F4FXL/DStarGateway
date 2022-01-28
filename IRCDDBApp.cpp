@@ -848,7 +848,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 					nick = sm1[1];
 
 				if (1 == m_d->m_rptrMap.count(value)) {
-					CLog::logTrace("doUptate RPTR already present");
+					// CLog::logTrace("doUptate RPTR already present");
 					IRCDDBAppRptrObject o = m_d->m_rptrMap[value];
 					zonerp_cs = o.m_zonerp_cs;
 					CUtils::ReplaceChar(zonerp_cs, '_', ' ');
@@ -857,7 +857,7 @@ void IRCDDBApp::doUpdate(std::string& msg)
 					zonerp_cs.push_back('G');
 				}
 				else {
-					CLog::logTrace("doUptate RPTR not present");
+					// CLog::logTrace("doUptate RPTR not present");
 					zonerp_cs = arearp_cs.substr(0, arearp_cs.length() - 1U);
 					ip_addr = nick.empty() ? getIPAddressFromCall(zonerp_cs) : getIPAddressFromNick(nick);
 					zonerp_cs.push_back('G');

@@ -31,7 +31,7 @@
 unsigned int        CG2Handler::m_maxRoutes = 0U;
 CG2Handler**        CG2Handler::m_routes = NULL;
 
-CG2ProtocolHandler* CG2Handler::m_handler = NULL;
+CG2ProtocolHandlerPool* CG2Handler::m_handler = NULL;
 
 CHeaderLogger*      CG2Handler::m_headerLogger = NULL;
 
@@ -60,7 +60,7 @@ void CG2Handler::initialise(unsigned int maxRoutes)
 		m_routes[i] = NULL;
 }
 
-void CG2Handler::setG2ProtocolHandler(CG2ProtocolHandler* handler)
+void CG2Handler::setG2ProtocolHandlerPool(CG2ProtocolHandlerPool* handler)
 {
 	assert(handler != NULL);
 
@@ -101,16 +101,7 @@ void CG2Handler::process(CHeaderData& header)
 
 	in_addr address = header.getYourAddress();
 	unsigned int id = header.getId();
-
-	for (unsigned int i = 0U; i < m_maxRoutes; i++) {
-		CG2Handler* route = m_routes[i];
-		if (route != NULL) {
-			// Is this a duplicate header, ignore it
-			if (route->m_id == id)
-				return;
-		}
-	}	
-
+	
 	// Find the destination repeater
 	CRepeaterHandler* repeater = CRepeaterHandler::findDVRepeater(header.getRptCall2());
 	if (repeater == NULL) {
@@ -175,6 +166,8 @@ void CG2Handler::process(CAMBEData& data)
 
 void CG2Handler::clock(unsigned int ms)
 {
+	m_handler->clock(ms);
+
 	for (unsigned int i = 0U; i < m_maxRoutes; i++) {
 		CG2Handler* route = m_routes[i];
 		if (route != NULL) {

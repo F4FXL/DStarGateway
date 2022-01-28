@@ -45,7 +45,7 @@ unsigned int              CRepeaterHandler::m_maxRepeaters = 0U;
 CRepeaterHandler**        CRepeaterHandler::m_repeaters = NULL;
 
 std::string                  CRepeaterHandler::m_localAddress;
-CG2ProtocolHandler*       CRepeaterHandler::m_g2Handler = NULL;
+CG2ProtocolHandlerPool*       CRepeaterHandler::m_g2HandlerPool = NULL;
 CIRCDDB*                  CRepeaterHandler::m_irc = NULL;
 CCacheManager*            CRepeaterHandler::m_cache = NULL;
 std::string                  CRepeaterHandler::m_gateway;
@@ -301,11 +301,11 @@ void CRepeaterHandler::add(const std::string& callsign, const std::string& band,
 	delete repeater;
 }
 
-void CRepeaterHandler::setG2Handler(CG2ProtocolHandler* handler)
+void CRepeaterHandler::setG2HandlerPool(CG2ProtocolHandlerPool* handler)
 {
 	assert(handler != NULL);
 
-	m_g2Handler = handler;
+	m_g2HandlerPool = handler;
 }
 
 void CRepeaterHandler::setCache(CCacheManager* cache)
@@ -883,7 +883,7 @@ void CRepeaterHandler::processRepeater(CAMBEData& data)
 
 		case G2_OK:
 			data.setDestination(m_g2Address, G2_DV_PORT);
-			m_g2Handler->writeAMBE(data);
+			m_g2HandlerPool->writeAMBE(data);
 
 			if (data.isEnd()) {
 				m_repeaterId = 0x00U;
@@ -1283,7 +1283,7 @@ void CRepeaterHandler::resolveUserInt(const std::string& user, const std::string
 
 			m_g2Header->setDestination(m_g2Address, G2_DV_PORT);
 			m_g2Header->setRepeaters(m_g2Gateway, m_g2Repeater);
-			m_g2Handler->writeHeader(*m_g2Header);
+			m_g2HandlerPool->writeHeader(*m_g2Header);
 
 			delete m_g2Header;
 			m_g2Status = G2_OK;
@@ -1315,7 +1315,7 @@ void CRepeaterHandler::resolveRepeaterInt(const std::string& repeater, const std
 
 			m_g2Header->setDestination(m_g2Address, G2_DV_PORT);
 			m_g2Header->setRepeaters(m_g2Gateway, m_g2Repeater);
-			m_g2Handler->writeHeader(*m_g2Header);
+			m_g2HandlerPool->writeHeader(*m_g2Header);
 
 			delete m_g2Header;
 			m_g2Status = G2_OK;
@@ -2072,7 +2072,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			m_g2Gateway = data->getGateway();
 			header.setDestination(m_g2Address, G2_DV_PORT);
 			header.setRepeaters(m_g2Gateway, m_g2Repeater);
-			m_g2Handler->writeHeader(header);
+			m_g2HandlerPool->writeHeader(header);
 			delete data;
 		}
 	} else if (string_right(callsign, 1) != "L" && string_right(callsign, 1) != "U") {
@@ -2115,7 +2115,7 @@ void CRepeaterHandler::g2CommandHandler(const std::string& callsign, const std::
 			m_g2Gateway  = data->getGateway();
 			header.setDestination(m_g2Address, G2_DV_PORT);
 			header.setRepeaters(m_g2Gateway, m_g2Repeater);
-			m_g2Handler->writeHeader(header);
+			m_g2HandlerPool->writeHeader(header);
 
 			delete data;
 		}
