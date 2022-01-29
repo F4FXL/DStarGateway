@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../DPlusProtocolHandlerPool.h"
+#include "DPlusProtocolHandlerPool.h"
 
 namespace DPlusProtocolHandlerPoolTests
 {

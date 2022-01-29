@@ -19,8 +19,8 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
-#include "../../SlowDataEncoder.h"
-#include "../../DStarDefines.h"
+#include "SlowDataEncoder.h"
+#include "DStarDefines.h"
 
 namespace SlowDataEncoderTests
 {

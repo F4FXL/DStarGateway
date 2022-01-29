@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 
-#include "../../Utils.h"
-#include "../../StringUtils.h"
-#include "../../Log.h"
+#include "Utils.h"
+#include "StringUtils.h"
+#include "Log.h"
 
 class Utils_swap_endian_be : public ::testing::Test {
  

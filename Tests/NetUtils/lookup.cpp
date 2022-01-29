@@ -20,7 +20,7 @@
 
 #include <netdb.h>
 
-#include "../../NetUtils.h"
+#include "NetUtils.h"
 
 namespace NetUtilsTests
 {

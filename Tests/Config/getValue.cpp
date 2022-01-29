@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <string>
 
-#include "../../Config.h"
+#include "Config.h"
 
 namespace ConfigTests
 {

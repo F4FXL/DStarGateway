@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../RSMS1AMessageBuilder.h"
+#include "RSMS1AMessageBuilder.h"
 
 namespace RSMS1AMessageBuilderTests
 {

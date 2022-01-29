@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../DExtraProtocolHandlerPool.h"
+#include "DExtraProtocolHandlerPool.h"
 
 namespace DextraProtocolHandlerPoolTests
 {
