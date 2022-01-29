@@ -45,14 +45,17 @@ DEPS = $(SRCS:.cpp=.d)
 .PHONY: all
 all: dstargateway
 
-dstargateway : GitVersion.h $(OBJS) BaseCommon/BaseCommon.a
-	$(CC) $(CPPFLAGS) -o dstargateway $(OBJS) BaseCommon/BaseCommon.a $(LDFLAGS)
+dstargateway : GitVersion.h $(OBJS) APRS/APRS.a BaseCommon/BaseCommon.a
+	$(CC) $(CPPFLAGS) -o dstargateway $(OBJS) APRS/APRS.a BaseCommon/BaseCommon.a $(LDFLAGS)
 
 %.o : %.cpp
-	$(CC) -IBaseCommon/ $(CPPFLAGS) -MMD -MD -c $< -o $@
+	$(CC) -IAPRS/ -IBaseCommon/ $(CPPFLAGS) -MMD -MD -c $< -o $@
 
 BaseCommon/BaseCommon.a: FORCE
 	$(MAKE) -C BaseCommon
+
+APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C APRS
 
 GitVersion.h : FORCE 
 ifneq ("$(wildcard .git/index)","")
@@ -76,6 +79,7 @@ endif
 clean:
 	$(RM) GitVersion.h *.o *.d dstargateway
 	$(MAKE) -C Tests clean
+	$(MAKE) -C APRS clean
 	$(MAKE) -C BaseCommon clean
 
 -include $(DEPS)
