@@ -10,7 +10,7 @@ dstargateway: ../VersionInfo/GitVersion.h $(OBJS) ../APRS/APRS.a ../IRCDDB/IRCDD
 
 .PHONY clean:
 clean:
-	$(RM) *.o *.d Common.a
+	$(RM) *.o *.d dstargateway
 
 .PHONY install:
 install: dstargateway
