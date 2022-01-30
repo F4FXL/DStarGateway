@@ -38,18 +38,9 @@ export CPPFLAGS+= -DUSE_GPSD
 export LDFLAGS+= -lgps
 endif
 
-SRCS = $(wildcard *.cpp)
-OBJS = $(SRCS:.cpp=.o)
-DEPS = $(SRCS:.cpp=.d)
 
 .PHONY: all
-all: DStarGateway/dstargateway tests
-
-DStarGateway/dstargateway :  VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common/Common.a DStarBase/DStarBase.a IRCDDB/IRCDDB.a BaseCommon/BaseCommon.a
-	$(MAKE) -C DStarGateway
-
-%.o : %.cpp
-	$(CC) -IAPRS/ -IBaseCommon/ -IDStarBase/ -IIRCDDB/ -IVersionInfo/ $(CPPFLAGS) -MMD -MD -c $< -o $@
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -62,6 +53,12 @@ BaseCommon/BaseCommon.a: FORCE
 
 DStarBase/DStarBase.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DStarBase
+
+DStarGateway/dstargateway :  VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common/Common.a DStarBase/DStarBase.a IRCDDB/IRCDDB.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DStarGateway
+
+DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWRemoteControl
 
 IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C IRCDDB
