@@ -15,7 +15,7 @@ clean:
 .PHONY install:
 install: dstargateway
 # copy executable
-	@cp -f dstargateway $(BIN_DIR
+	@cp -f dstargateway $(BIN_DIR)
 
 # copy and adjust config
 	@cp -fn example.cfg $(CFG_DIR)/dstargateway.cfg
