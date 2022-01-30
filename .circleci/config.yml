@@ -20,14 +20,11 @@ jobs:
             sudo apt-get update
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
-          name: "Build App"
-          command: "make -j 3 dstargateway USE_GPSD=1"
-      - run:
-          name: "Build Tests"
-          command: "make -j 3 tests USE_GPSD=1"
+          name: "Build"
+          command: "make -j 3 ENABLE_DEBUG=1 USE_GPSD=1"
       - run:
           name: "Run Tests"
-          command: "make run-tests USE_GPSD=1"
+          command: "make run-tests"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
