@@ -25,7 +25,10 @@
                 "USE_GPSD=1",
                 "DStarGateway/dstargateway"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
@@ -38,10 +41,7 @@
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         }
     ]
