@@ -25,6 +25,19 @@
                 "USE_GPSD=1",
                 "DStarGateway/dstargateway"
             ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWRemoteControl",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWRemoteControl/dgwremotecontrol"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true

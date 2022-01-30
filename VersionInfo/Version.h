@@ -27,5 +27,6 @@
 const std::string PRODUCT_NAME("DStarGateway");
 const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
 const std::string VERSION("0.5");
+const std::string LONG_VERSION = VERSION + "-" + gitversion;
 const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
 const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
