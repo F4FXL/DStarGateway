@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Build All",
             "type": "shell",
             "command": "make",
             "args": [
@@ -12,10 +12,20 @@
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DStarGateway",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DStarGateway/dstargateway"
+            ],
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -28,7 +38,10 @@
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         }
     ]

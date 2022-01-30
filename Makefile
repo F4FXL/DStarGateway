@@ -145,3 +145,4 @@ run-tests: tests
 	@$(MAKE) -C Tests run-tests
 
 FORCE:
+	@true
