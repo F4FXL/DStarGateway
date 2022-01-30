@@ -66,7 +66,7 @@ DStarBase/DStarBase.a: BaseCommon/BaseCommon.a FORCE
 IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C IRCDDB
 
-VersionInfo/GitVersion.h:
+VersionInfo/GitVersion.h: FORCE
 	$(MAKE) -C VersionInfo
 
 .PHONY: clean
