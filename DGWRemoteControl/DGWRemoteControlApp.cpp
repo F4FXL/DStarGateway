@@ -19,9 +19,11 @@
 
 #include <string>
 #include <cstdio>
+#include <unordered_map>
+#include <vector>
 
-#include "optionparser.h"
 #include "Version.h"
+#include "ProgramArgs.h"
 
 const std::string NAME_OPTION("name");
 const std::string REPEATER_PARAM("Callsign");
@@ -31,52 +33,22 @@ const std::string REFLECTOR_PARAM("Param2");
 
 int main(int argc, const char* argv[])
 {
-    unsigned int paramsCount = 0U;
-    optionparser::OptionParser p;
-    p.exit_on_failure(false);
-    p.throw_on_failure(false);
+    std::string name;
 
-    p.add_option("--" + NAME_OPTION).default_value("").help("Gateway Name");
-    p.add_option(REPEATER_PARAM);
-    p.add_option(ACTION_PARAM);
-    p.add_option(RECONNECT_PARAM);
-    p.add_option(REFLECTOR_PARAM);
+    std::unordered_map<std::string, std::string> namedArgs;
+    std::vector<std::string> positionalArgs;
 
-    p.eat_arguments(argc, argv);
+    CProgramArgs::eatArguments(argc, argv, namedArgs, positionalArgs);
 
-    if(p.get_value(NAME_OPTION)) {
-        std::cout << p.get_value<std::string>(NAME_OPTION) << std::endl;
-        paramsCount++;
-    }
-
-    if(p.get_value(REPEATER_PARAM)) {
-        std::cout << p.get_value<std::string>(REPEATER_PARAM) << std::endl;
-        paramsCount++;
-    }
-
-    if(p.get_value(ACTION_PARAM)) {
-        std::cout << p.get_value<std::string>(ACTION_PARAM) << std::endl;
-        paramsCount++;
-    }
-
-    if(p.get_value(RECONNECT_PARAM)) {
-        std::cout << p.get_value<std::string>(RECONNECT_PARAM) << std::endl;
-        paramsCount++;
-    }
-
-    if(p.get_value(REFLECTOR_PARAM)) {
-        std::cout << p.get_value<std::string>(REFLECTOR_PARAM) << std::endl;
-        paramsCount++;
-    }
-
-    if(paramsCount < 2U) {
-		::fprintf(stderr, "\ndgwremotecontrol %s : invalid command line usage:\n\n", LONG_VERSION.c_str());
+    if(namedArgs.size() == 0U && positionalArgs.size() == 0U) {
+		::fprintf(stderr, "\ndgwremotecontrol v%s : invalid command line usage:\n\n", LONG_VERSION.c_str());
         ::fprintf(stderr, "\t\tdgwremotecontrol [--name <name>] <repeater> link <reconnect> <reflector>\n");
 		::fprintf(stderr, "\t\tdgwremotecontrol [--name <name>] <repeater> unlink\n");
 		::fprintf(stderr, "\t\tdgwremotecontrol [--name <name>] <starnet> drop <user>\n");
 		::fprintf(stderr, "\t\tdgwremotecontrol [--name <name>] <starnet> drop all\n\n");
         return 1;
     }
+
 
     return 0;
 }
