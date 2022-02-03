@@ -33,7 +33,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/DGWRemoteControl/dgwremotecontrol",
-        "args": ["--name", "blabla", "F4FXL__B", "link", "never", "DCS208_C"],
+        "args": ["--name", "blabla", "F4FXL  B", "linkk", "never", "DCS208_C"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],
