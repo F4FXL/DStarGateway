@@ -22,6 +22,8 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
+#include <unistd.h>
+
 #include "HeaderData.h"
 #include "NetUtils.h"
 #include "CCITTChecksum.h"
@@ -30,7 +32,7 @@
 
 void CHeaderData::initialise()
 {
-	srand(time(NULL));
+	srand(time(NULL) + getpid());
 }
 
 void CHeaderData::finalise()
