@@ -40,7 +40,7 @@ endif
 
 
 .PHONY: all
-all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol tests
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol #tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -89,7 +89,9 @@ newhostfiles :
 	@wget http://www.pistar.uk/downloads/DPlus_Hosts.txt -nv -O $(DATA_DIR)/DPlus_Hosts.txt
 
 .PHONY: install
-install : DStarGateway/dstargateway
+install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
+# install remote control
+	$(MAKE) -C DGWRemoteControl install
 # create user for daemon
 	@useradd --user-group -M --system dstar --shell /bin/false || true
 
