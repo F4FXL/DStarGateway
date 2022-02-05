@@ -90,7 +90,7 @@ bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::str
 		text.assign(namedArgs["text"]);
 	}
 	else if(namedArgs.count("file") == 1){
-		file.assign(namedArgs[file]);
+		file.assign(namedArgs["file"]);
 	}
 
 	return true;

@@ -57,7 +57,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/DGWTextTransmit/dgwtexttransmit",
-            "args": ["F4FXL  B", "-text", "test de julien a nouveau"],
+            "args": ["F4FXL  B", "-file", "${workspaceFolder}/Sandbox/text.txt"],//["F4FXL  B", "-text", "test de julien a nouveau"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
