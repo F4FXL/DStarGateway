@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/BaseCommon/",
+                "${workspaceFolder}/APRS/",
+                "${workspaceFolder}/Common/",
+                "${workspaceFolder}/DStarBase/",
+                "${workspaceFolder}/IRCDDB/",
+                "${workspaceFolder}/VersionInfo/",
+                "${workspaceFolder}/BaseCommon/",
+                "${workspaceFolder}/BaseCommon"
+            ],
+            "defines": [],
+            "compilerPath": "/bin/g++",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}

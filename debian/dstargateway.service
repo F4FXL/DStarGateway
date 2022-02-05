@@ -3,14 +3,16 @@ User=dstar
 Description=D-STAR Gateway Daemon
 After=network.target,network-online.target
 Wants=network-online.target
-RestartSec=5
-StartLimitIntervalSec=60
-StartLimitBurst=0
-
 
 [Service]
 Type=simple
 ExecStart=/usr/local/bin/dstargateway %CFG_DIR%/dstargateway.cfg
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=0
 
 [Install]
 WantedBy=multi-user.target
+
+

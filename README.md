@@ -1,8 +1,11 @@
 - [1. Introduction](#1-introduction)
 - [2. Current State](#2-current-state)
   - [2.1. Code sanity](#21-code-sanity)
-  - [2.2. Code Credit](#22-code-credit)
-  - [2.3. Features](#23-features)
+  - [2.2. Code Credits](#22-code-credits)
+  - [2.3. Thanks](#23-thanks)
+  - [2.4. Features](#24-features)
+    - [2.4.1. Features that where left out :](#241-features-that-where-left-out-)
+    - [2.4.2. Additional Features :](#242-additional-features-)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
   - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
@@ -10,15 +13,18 @@
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
       - [3.5.0.1. Build With GPSD Support](#3501-build-with-gpsd-support)
+      - [3.5.0.2. Debug Build](#3502-debug-build)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
+  - [4.2. Continuous Integration](#42-continuous-integration)
 - [5. Version History](#5-version-history)
-  - [5.1. Version 0.4](#51-version-04)
-  - [5.2. Version 0.3](#52-version-03)
-  - [5.3. Version 0.2](#53-version-02)
-  - [5.4. Version 0.1](#54-version-01)
+  - [5.1. Version 0.5](#51-version-05)
+  - [5.2. Version 0.4](#52-version-04)
+  - [5.3. Version 0.3](#53-version-03)
+  - [5.4. Version 0.2](#54-version-02)
+  - [5.5. Version 0.1](#55-version-01)
 - [6. Future](#6-future)
 
 
@@ -32,20 +38,28 @@ The current code is working, yet ugly IMHO as it is a mix of C and C++ of variou
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
 
 Quite a few classes are more or less copy/paste from each other some sanitization by using base classes or template classes would greatly improve code maintainibility. Maybe one day ;)
-## 2.2. Code Credit
+## 2.2. Code Credits
 - Jonathan Naylor G4KLX (The original author of [ircddbGateway](https://github.com/g4klx/ircDDBGateway))
 - Thomas A. Early N7TAE (Code taken from his [smart-group](https://github.com/n7tae/smart-group-server) software)
 - Geoffrey Merck F4FXL / KC3FRA [That's me !](https://github.com/F4FXL/)
-## 2.3. Features
-All the features found in ircddbGateway are supposed to be working. I have mixed feelings about putting these back in or not.
+## 2.3. Thanks
+- Cyrille F1MHV / DF1CHB for the testing
+- Jonathan Naylor G4KLX for all the work ahead
+## 2.4. Features
+All the features found in ircddbGateway are supposed to be working. Except the ones listed below
 
-Features that where left out :
+### 2.4.1. Features that where left out :
 - CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using VoiceTransmit.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
 - DRats : Is on the to-do list see [#6](#6)
 - CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it for good.
+
+### 2.4.2. Additional Features :
+- DPlus, DExtra and G2 NAT Traversal using ircddb network as rendez-vous server
+- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs.
+- Repeater Link status is sent to APRS-IS as a status frame
 
 # 3. Building and installing
 ## 3.1. Initial setup
@@ -70,11 +84,11 @@ git checkout develop
 ## 3.4. Prerequisites and dependencies
 Before first time building you need to install dependencies and prerequisites
 ```
-apt install build-essential libcurl4-openssl-dev libboost-dev
+sudo apt install build-essential libcurl4-openssl-dev libboost-dev
 ```
 If you are going to build with gpsd support, also install libgps-dev
 ```
-apt install libgps-dev
+sudo apt install libgps-dev
 ```
 ## 3.5. Building
 Regular building
@@ -85,10 +99,15 @@ make
 ```
 make USE_GPS=1
 ```
+#### 3.5.0.2. Debug Build
+```
+make ENABLE_DEBUG=1
+```
+Note that this will link with libl
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
-sudo make install
+sudo make install newhostfiles
 ```
 ## 3.7. Configuring
 After installing you have to edit the configuration file. If you went with default paths, the config file is located in `/usr/local/etc/dstargateway.cfg`
@@ -109,28 +128,41 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - You have tested your code thoroughly
 - Compilation produces no warnings
 - Code formating rules are observed (these are very lousy though)
+## 4.2. Continuous Integration
+I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all) I am trying to rewrite the code so that it can be put into some Behavior Driven Development scheme. This is a long haul task and I'll try do do it on the go while changing/adding stuff.
+the testing framwework used is Google Test.
+
 # 5. Version History
-## 5.1. Version 0.4
+## 5.1. Version 0.5
+- [Improvement] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
+- [Bugfix] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
+- [Improvement] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
+- [Improvement] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
+- [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
+- [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
+- [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
+## 5.2. Version 0.4
 - [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
-- [Improvement] Bring back GPSD support (https://github.com/F4FXL/DStarGateway/issues/6)
-- [Improvement] Log enhancements ([#4])(https://github.com/F4FXL/DStarGateway/issues/4)
-## 5.2. Version 0.3
+- [Improvement] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
+- [Improvement] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
+## 5.3. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.3. Version 0.2
+## 5.4. Version 0.2
 - [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.4. Version 0.1
+## 5.5. Version 0.1
 First working version
 # 6. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
-- &#9746; Better NatTraversal
+- &#9745; Better NatTraversal
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
-  - Support for all protocols (G2, DExtra, DCS, REF)
+  - Support for all protocols (G2, DExtra, DPlus) DCS does nto make sense as it was historically never used as protocol for linking repeaters
   - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
 - &#9745; Send the connection status to APRS-IS as a status frame
 - &#9746; Reinstantiate DRATS
 - &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
+- &#9746; Forward messages from RS-MS1A to APRS and vice versa
 - Everything that might come handy to make dstar the most powerful system ever :)

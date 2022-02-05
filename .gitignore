@@ -44,4 +44,5 @@ Sandbox/*
 *.out
 *.app
 dstargateway
-
+Tests/dstargateway_tests
+DGWRemoteControl/dgwremotecontrol
