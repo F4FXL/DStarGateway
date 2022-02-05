@@ -1,7 +1,6 @@
 /*
- *   Copyright (C) 2009,2014 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2014 by Jonathan Naylor G4KLX
+ *	 Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,45 +17,35 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#ifndef	VoiceStore_H
+#define	VoiceStore_H
 
+#include <vector>
 #include <string>
-#include <cstdint>
-#include <cstdio>
 
+#include "DVTOOLFileReader.h"
 #include "HeaderData.h"
 #include "AMBEData.h"
 
-enum DVTFR_TYPE {
-	DVTFR_NONE,
-	DVTFR_HEADER,
-	DVTFR_DATA
-};
 
-class CDVTOOLFileReader {
+class CVoiceStore {
 public:
-	CDVTOOLFileReader();
-	~CDVTOOLFileReader();
+	CVoiceStore(const std::vector<std::string>& filenames);
+	~CVoiceStore();
 
-	std::string  getFileName() const;
-	unsigned int getRecords() const;
+	bool open();
 
-	bool         open(const std::string& fileName);
+	CHeaderData* getHeader();
 
-	DVTFR_TYPE   read();
+	CAMBEData* getAMBE();
 
-	CHeaderData* readHeader();
-	CAMBEData*   readData();
-
-	void         close();
+	void close();
 
 private:
-	std::string    m_fileName;
-	FILE          *m_file;
-	uint32_t       m_records;
-	DVTFR_TYPE     m_type;
-	unsigned char* m_buffer;
-	unsigned int   m_length;
-	unsigned char  m_seqNo;
-	bool 		   m_closed;
+	std::vector<std::string> m_filenames;
+	CHeaderData*      m_header;
+	unsigned int      m_fileNumber;
+	CDVTOOLFileReader m_file;
 };
+
+#endif

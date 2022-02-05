@@ -23,6 +23,7 @@
 
 #include "DVTOOLFileReader.h"
 #include "DStarDefines.h"
+#include "Utils.h"
 
 static const char         DVTOOL_SIGNATURE[] = "DVTOOL";
 static const unsigned int DVTOOL_SIGNATURE_LENGTH = 6U;
@@ -48,7 +49,8 @@ m_records(0U),
 m_type(DVTFR_NONE),
 m_buffer(NULL),
 m_length(0U),
-m_seqNo(0U)
+m_seqNo(0U),
+m_closed(true)
 {
 	m_buffer = new unsigned char[BUFFER_LENGTH];
 }
@@ -95,8 +97,9 @@ bool CDVTOOLFileReader::open(const std::string& fileName)
 		return false;
 	}
 
-	m_records = ntohl(uint32);
+	m_records = CUtils::swap_endian_le(uint32);
 	m_seqNo   = 0U;
+	m_closed = false;
 
 	return true;
 }
@@ -108,7 +111,7 @@ DVTFR_TYPE CDVTOOLFileReader::read()
 	if (n != 1)
 		return DVTFR_NONE;
 
-	m_length = htons(uint16) - 15U;
+	m_length = CUtils::swap_endian_be(uint16) - 15U;
 
 	unsigned char bytes[FIXED_DATA_LENGTH];
 	n = fread(bytes, 1, DSVT_SIGNATURE_LENGTH, m_file);
@@ -180,5 +183,8 @@ CAMBEData* CDVTOOLFileReader::readData()
 
 void CDVTOOLFileReader::close()
 {
-	fclose(m_file);
+	if(!m_closed)
+		fclose(m_file);
+		
+	m_closed = true;
 }

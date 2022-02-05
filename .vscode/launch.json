@@ -53,6 +53,30 @@
         ]
         },
         {
+            "name": "(gdb) dgwvoicetransmit",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/DGWVoiceTransmit/dgwvoicetransmit",
+            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Activer l'impression en mode Pretty pour gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Définir la version désassemblage sur Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "Tests",
             "type": "cppdbg",
             "request": "launch",

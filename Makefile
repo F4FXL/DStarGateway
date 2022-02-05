@@ -40,7 +40,7 @@ endif
 
 
 .PHONY: all
-all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol #tests
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWVoiceTransmit/dgwvoicetransmit #tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -59,6 +59,9 @@ DStarGateway/dstargateway :  VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common
 
 DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWRemoteControl
+
+DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWVoiceTransmit
 
 IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C IRCDDB
@@ -90,8 +93,10 @@ newhostfiles :
 
 .PHONY: install
 install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
-# install remote control
+# install accessories
 	$(MAKE) -C DGWRemoteControl install
+	$(MAKE) -C DGWVoiceTransmit install
+	
 # create user for daemon
 	@useradd --user-group -M --system dstar --shell /bin/false || true
 

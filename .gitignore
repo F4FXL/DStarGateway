@@ -46,3 +46,4 @@ Sandbox/*
 dstargateway
 Tests/dstargateway_tests
 DGWRemoteControl/dgwremotecontrol
+DGWVoiceTransmit/dgwvoicetransmit

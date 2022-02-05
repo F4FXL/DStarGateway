@@ -1,7 +1,6 @@
 /*
- *   Copyright (C) 2009,2014 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2014 by Jonathan Naylor G4KLX
+ *	 Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,45 +17,33 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#ifndef	VoiceTransmit_H
+#define	VoiceTransmit_H
 
 #include <string>
-#include <cstdint>
-#include <cstdio>
+#include <vector>
 
+#include "UDPReaderWriter.h"
+#include "VoiceStore.h"
 #include "HeaderData.h"
 #include "AMBEData.h"
 
-enum DVTFR_TYPE {
-	DVTFR_NONE,
-	DVTFR_HEADER,
-	DVTFR_DATA
-};
+bool parseCLIArgs(int argc, char * argv[], std::string& repeater, std::vector<std::string>& vector);
 
-class CDVTOOLFileReader {
+class CVoiceTransmit {
 public:
-	CDVTOOLFileReader();
-	~CDVTOOLFileReader();
+	CVoiceTransmit(const std::string& callsign, CVoiceStore* store);
+	~CVoiceTransmit();
 
-	std::string  getFileName() const;
-	unsigned int getRecords() const;
-
-	bool         open(const std::string& fileName);
-
-	DVTFR_TYPE   read();
-
-	CHeaderData* readHeader();
-	CAMBEData*   readData();
-
-	void         close();
+	bool run();
 
 private:
-	std::string    m_fileName;
-	FILE          *m_file;
-	uint32_t       m_records;
-	DVTFR_TYPE     m_type;
-	unsigned char* m_buffer;
-	unsigned int   m_length;
-	unsigned char  m_seqNo;
-	bool 		   m_closed;
+	CUDPReaderWriter m_socket;
+	std::string         m_callsign;
+	CVoiceStore*     m_store;
+
+	bool sendHeader(CHeaderData* header);
+	bool sendData(CAMBEData* data);
 };
+
+#endif
