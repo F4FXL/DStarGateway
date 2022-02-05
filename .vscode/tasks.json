@@ -13,7 +13,10 @@
                 "USE_GPSD=1",
                 "all"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
@@ -43,6 +46,19 @@
             "problemMatcher": []
         },
         {
+            "label": "Build DGWTextTransmit",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWTextTransmit/dgwtexttransmit"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
             "label": "Build DGWVoiceTransmit",
             "type": "shell",
             "command": "make",
@@ -52,10 +68,7 @@
                 "USE_GPSD=1",
                 "DGWVoiceTransmit/dgwvoicetransmit"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
