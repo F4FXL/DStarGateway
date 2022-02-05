@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../APRSParser.h"
+#include "APRSParser.h"
 
 namespace APRSParserTests
 {

@@ -365,12 +365,12 @@ bool CRemoteProtocolHandler::sendStarNetGroup(const CRemoteStarNetGroup& data)
 
 	::memset(p, ' ', LONG_CALLSIGN_LENGTH);
 	for (unsigned int i = 0U; i < data.getCallsign().length(); i++)
-		p[i] = data.getCallsign().GetChar(i);
+		p[i] = data.getCallsign().at(i);
 	p += LONG_CALLSIGN_LENGTH;
 
 	::memset(p, ' ', LONG_CALLSIGN_LENGTH);
 	for (unsigned int i = 0U; i < data.getLogoff().length(); i++)
-		p[i] = data.getLogoff().GetChar(i);
+		p[i] = data.getLogoff().at(i);
 	p += LONG_CALLSIGN_LENGTH;
 
 	uint32_t timer = wxUINT32_SWAP_ON_BE(data.getTimer());
@@ -386,7 +386,7 @@ bool CRemoteProtocolHandler::sendStarNetGroup(const CRemoteStarNetGroup& data)
 
 		::memset(p, ' ', LONG_CALLSIGN_LENGTH);
 		for (unsigned int i = 0U; i < user.getCallsign().length(); i++)
-			p[i] = user.getCallsign().GetChar(i);
+			p[i] = user.getCallsign().at(i);
 		p += LONG_CALLSIGN_LENGTH;
 
 		timer = wxUINT32_SWAP_ON_BE(user.getTimer());

@@ -3106,19 +3106,19 @@ bool CRepeaterHandler::isCCSCommand(const std::string& command) const
 	if (command.IsSameAs("CA      ")))
 		return true;
 
-	wxChar c = command.GetChar(0U);
+	wxChar c = command.at(0U);
 	if (c != wxT('C'))
 		return false;
 
-	c = command.GetChar(1U);
+	c = command.at(1U);
 	if (c < wxT('0') || c > wxT('9'))
 		return false;
 
-	c = command.GetChar(2U);
+	c = command.at(2U);
 	if (c < wxT('0') || c > wxT('9'))
 		return false;
 
-	c = command.GetChar(3U);
+	c = command.at(3U);
 	if (c < wxT('0') || c > wxT('9'))
 		return false;
 

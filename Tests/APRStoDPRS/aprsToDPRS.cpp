@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../APRStoDPRS.h"
+#include "APRStoDPRS.h"
 
 namespace APRStoDPRSTests
 {

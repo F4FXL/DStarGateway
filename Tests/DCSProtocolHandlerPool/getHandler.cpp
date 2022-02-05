@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../DCSProtocolHandlerPool.h"
+#include "DCSProtocolHandlerPool.h"
 
 namespace DCSProtocolHandlerPoolTests
 {

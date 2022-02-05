@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../Utils.h"
+#include "Utils.h"
 
 class Utils_swap_endian : public ::testing::Test {
  

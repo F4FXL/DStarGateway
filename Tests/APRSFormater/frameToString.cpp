@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../../APRSFormater.h"
+#include "APRSFormater.h"
 
  class APRSFormater_frameToString : public ::testing::Test {
  

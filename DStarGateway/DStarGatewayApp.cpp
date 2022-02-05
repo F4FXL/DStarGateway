@@ -1,6 +1,6 @@
 /*
  *   Copyright (C) 2010,2011 by Jonathan Naylor G4KLX
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

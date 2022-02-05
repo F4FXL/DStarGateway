@@ -38,41 +38,44 @@ export CPPFLAGS+= -DUSE_GPSD
 export LDFLAGS+= -lgps
 endif
 
-SRCS = $(wildcard *.cpp)
-OBJS = $(SRCS:.cpp=.o)
-DEPS = $(SRCS:.cpp=.d)
 
 .PHONY: all
-all: dstargateway
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol #tests
 
-dstargateway : GitVersion.h $(OBJS) 
-	$(CC) $(CPPFLAGS) -o dstargateway $(OBJS) $(LDFLAGS)
+APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C APRS
 
-%.o : %.cpp
-	$(CC) $(CPPFLAGS) -MMD -MD -c $< -o $@
+Common/Common.a: VersionInfo/GitVersion.h APRS/APRS.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C Common
 
-GitVersion.h : FORCE 
-ifneq ("$(wildcard .git/index)","")
-	@echo "#pragma once" > /tmp/$@
-	@echo "#include <string>" >> /tmp/$@
-	@echo "const std::string gitversion(\"$(shell git rev-parse --short HEAD)\");" >> /tmp/$@
-else
-	@echo "#pragma once" > /tmp/$@
-	@echo "#include <string>" >> /tmp/$@
-	@echo "const std::string gitversion(\"0000000\");" >> /tmp/$@
-endif
-	@cmp -s /tmp/$@ $@; \
-	RETVAL=$$?; \
-	if [ $$RETVAL -ne 0 ]; then \
-		echo "Git version has changed"; \
-		cp -f /tmp/$@ $@; \
-	fi; \
-	rm /tmp/$@;
+BaseCommon/BaseCommon.a: FORCE
+	$(MAKE) -C BaseCommon
+
+DStarBase/DStarBase.a: BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DStarBase
+
+DStarGateway/dstargateway :  VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common/Common.a DStarBase/DStarBase.a IRCDDB/IRCDDB.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DStarGateway
+
+DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWRemoteControl
+
+IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C IRCDDB
+
+VersionInfo/GitVersion.h: FORCE
+	$(MAKE) -C VersionInfo
 
 .PHONY: clean
 clean:
-	@$(RM) GitVersion.h $(OBJS) $(DEPS) dstargateway
-	@$(MAKE) -C Tests clean
+	$(MAKE) -C Tests clean
+	$(MAKE) -C APRS clean
+	$(MAKE) -C Common clean
+	$(MAKE) -C BaseCommon clean
+	$(MAKE) -C DStarBase clean
+	$(MAKE) -C DStarGateway clean
+	$(MAKE) -C IRCDDB clean
+	$(MAKE) -C VersionInfo
 
 -include $(DEPS)
 
@@ -86,7 +89,9 @@ newhostfiles :
 	@wget http://www.pistar.uk/downloads/DPlus_Hosts.txt -nv -O $(DATA_DIR)/DPlus_Hosts.txt
 
 .PHONY: install
-install : dstargateway
+install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
+# install remote control
+	$(MAKE) -C DGWRemoteControl install
 # create user for daemon
 	@useradd --user-group -M --system dstar --shell /bin/false || true
 
@@ -101,13 +106,8 @@ install : dstargateway
 	$(MAKE) -C Data install
 	@chown -R dstar:dstar $(DATA_DIR)
 
-# copy and adjust config
-	@cp -fn example.cfg $(CFG_DIR)/dstargateway.cfg
-	@sed -i "s|path=/var/log/dstargateway/|path=$(LOG_DIR)|g" $(CFG_DIR)/dstargateway.cfg
-	@sed -i "s|data=/usr/local/share/dstargateway.d/|data=$(DATA_DIR)|g" $(CFG_DIR)/dstargateway.cfg
-
-# copy binary
-	@cp -f dstargateway $(BIN_DIR)
+#install executables
+	$(MAKE) -C DStarGateway install
 
 # SystemD service install
 	@cp -f debian/dstargateway.service /lib/systemd/system/
@@ -136,12 +136,12 @@ removehostfiles :
 	@rm -f $(DATA_DIR)/DPlus_Hosts.txt
 
 .PHONY tests:
-tests : GitVersion.h
-# force tests makefile to rebuild them with -DUNIT_TESTS, otherwise we end up with 2 mains
-	@touch DStarGatewayApp.cpp
+tests : VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common/Common.a DStarBase/DStarBase.a IRCDDB/IRCDDB.a BaseCommon/BaseCommon.a FORCE
 	@$(MAKE) -C Tests dstargateway_tests
 
 .PHONY run-tests:
+run-tests: tests
 	@$(MAKE) -C Tests run-tests
 
 FORCE:
+	@true

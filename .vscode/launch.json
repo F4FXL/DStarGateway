@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Lancer",
+            "name": "(gdb) dstargateway",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/dstargateway",
-            "args": ["${workspaceFolder}/___test.cfg"],
+            "program": "${workspaceFolder}/DStarGateway/dstargateway",
+            "args": ["${workspaceFolder}/Sandbox/___test.cfg"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -27,6 +27,30 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+        "name": "(gdb) dgwremotecontrol",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/DGWRemoteControl/dgwremotecontrol",
+        "args": ["--name", "city_center", "F4FXL  B", "link", "never", "DCS208_C"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Activer l'impression en mode Pretty pour gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Définir la version désassemblage sur Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            }
+        ]
         },
         {
             "name": "Tests",

@@ -3,7 +3,15 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/BaseCommon/",
+                "${workspaceFolder}/APRS/",
+                "${workspaceFolder}/Common/",
+                "${workspaceFolder}/DStarBase/",
+                "${workspaceFolder}/IRCDDB/",
+                "${workspaceFolder}/VersionInfo/",
+                "${workspaceFolder}/BaseCommon/",
+                "${workspaceFolder}/BaseCommon"
             ],
             "defines": [],
             "compilerPath": "/bin/g++",

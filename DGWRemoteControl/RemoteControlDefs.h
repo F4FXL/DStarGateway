@@ -1,7 +1,5 @@
 /*
- *   Copyright (C) 2010-2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2011 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,14 +16,13 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#ifndef	RemoteControlDefs_H
+#define	RemoteControlDefs_H
 
-#include <string>
+#include <wx/wx.h>
 
-#include "GitVersion.h"
+const std::string APPLICATION_NAME = wxT("Remote Control");
 
-const std::string PRODUCT_NAME("DStarGateway");
-const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
-const std::string VERSION("0.5");
-const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
-const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
+const std::string CONFIG_FILE_NAME = wxT(".Remote Control");
+
+#endif
