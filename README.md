@@ -4,6 +4,8 @@
   - [2.2. Code Credits](#22-code-credits)
   - [2.3. Thanks](#23-thanks)
   - [2.4. Features](#24-features)
+    - [2.4.1. Features that where left out :](#241-features-that-where-left-out-)
+    - [2.4.2. Additional Features :](#242-additional-features-)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
   - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
@@ -44,15 +46,20 @@ Quite a few classes are more or less copy/paste from each other some sanitizatio
 - Cyrille F1MHV / DF1CHB for the testing
 - Jonathan Naylor G4KLX for all the work ahead
 ## 2.4. Features
-All the features found in ircddbGateway are supposed to be working. I have mixed feelings about putting these back in or not.
+All the features found in ircddbGateway are supposed to be working. Except the ones listed below
 
-Features that where left out :
+### 2.4.1. Features that where left out :
 - CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using VoiceTransmit.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
 - DRats : Is on the to-do list see [#6](#6)
 - CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it for good.
+
+### 2.4.2. Additional Features :
+- DPlus, DExtra and G2 NAT Traversal using ircddb network as rendez-vous server
+- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs.
+- Repeater Link status is sent to APRS-IS as a status frame
 
 # 3. Building and installing
 ## 3.1. Initial setup
@@ -127,7 +134,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.5
-- [Improvement] Add remote control utility ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
+- [Improvement] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
 - [Bugfix] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
 - [Improvement] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
 - [Improvement] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
