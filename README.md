@@ -21,11 +21,11 @@
   - [4.2. Continuous Integration](#42-continuous-integration)
 - [5. Version History](#5-version-history)
   - [5.1. Version 0.6](#51-version-06)
-  - [5.1. Version 0.5](#51-version-05)
-  - [5.2. Version 0.4](#52-version-04)
-  - [5.3. Version 0.3](#53-version-03)
-  - [5.4. Version 0.2](#54-version-02)
-  - [5.5. Version 0.1](#55-version-01)
+  - [5.2. Version 0.5](#52-version-05)
+  - [5.3. Version 0.4](#53-version-04)
+  - [5.4. Version 0.3](#54-version-03)
+  - [5.5. Version 0.2](#55-version-02)
+  - [5.6. Version 0.1](#56-version-01)
 - [6. Future](#6-future)
 
 
@@ -135,6 +135,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
+- [Improvement] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 ## 5.2. Version 0.5
 - [Improvement] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
 - [Bugfix] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
