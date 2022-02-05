@@ -13,10 +13,7 @@
                 "USE_GPSD=1",
                 "all"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -43,6 +40,22 @@
                 "DGWRemoteControl/dgwremotecontrol"
             ],
             "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWVoiceTransmit",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWVoiceTransmit/dgwvoicetransmit"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
