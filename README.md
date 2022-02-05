@@ -20,6 +20,7 @@
   - [4.1. Work Flow](#41-work-flow)
   - [4.2. Continuous Integration](#42-continuous-integration)
 - [5. Version History](#5-version-history)
+  - [5.1. Version 0.6](#51-version-06)
   - [5.1. Version 0.5](#51-version-05)
   - [5.2. Version 0.4](#52-version-04)
   - [5.3. Version 0.3](#53-version-03)
@@ -133,7 +134,8 @@ I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FX
 the testing framwework used is Google Test.
 
 # 5. Version History
-## 5.1. Version 0.5
+## 5.1. Version 0.6
+## 5.2. Version 0.5
 - [Improvement] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
 - [Bugfix] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
 - [Improvement] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
@@ -141,17 +143,17 @@ the testing framwework used is Google Test.
 - [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
-## 5.2. Version 0.4
+## 5.3. Version 0.4
 - [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [Improvement] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [Improvement] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
-## 5.3. Version 0.3
+## 5.4. Version 0.3
 - [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.4. Version 0.2
+## 5.5. Version 0.2
 - [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.5. Version 0.1
+## 5.6. Version 0.1
 First working version
 # 6. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
