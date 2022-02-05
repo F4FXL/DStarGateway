@@ -58,4 +58,5 @@ private:
 	unsigned char* m_buffer;
 	unsigned int   m_length;
 	unsigned char  m_seqNo;
+	bool 		   m_closed;
 };
