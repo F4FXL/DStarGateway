@@ -87,4 +87,14 @@ public:
 
 		return u;
 	}
+
+		// Ersatz for macro wxINT32_SWAP_ON_LE
+	template <typename T>
+	static T swap_endian_le(T u)
+	{
+		if(!is_big_endian())
+			return swap_endian(u);
+
+		return u;
+	}
 };
