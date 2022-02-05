@@ -22,18 +22,22 @@
 #include <unordered_map>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <thread>
+#include <chrono>
 
 #include "DGWRemoteControlApp.h"
+#include "DGWRemoteControlConfig.h"
 #include "Version.h"
 #include "ProgramArgs.h"
-#include "Log.h"
 #include "DStarDefines.h"
+#include "SHA256.h"
 
 const std::string NAME_OPTION("name");
 const std::string REPEATER_PARAM("Callsign");
 const std::string ACTION_PARAM("Action");
 const std::string RECONNECT_PARAM("Param1");
 const std::string REFLECTOR_PARAM("Param2");
+const std::string CONFIG_FILENAME("dgwremotecontrol.cfg");
 
 int main(int argc, const char* argv[])
 {
@@ -48,6 +52,118 @@ int main(int argc, const char* argv[])
 		::fprintf(stderr, "\t\tdgwremotecontrol [-name <name>] <starnet> drop all\n\n");
         return 1;
     }
+
+    CDGWRemoteControlConfig config(std::string(CFG_DIR) + "/" + CONFIG_FILENAME);
+	TRemoteGateway gatewayConfig;
+
+	if(!config.load() || !config.getGateway(name, gatewayConfig)) {
+		::fprintf(stderr, "Configuration failed to load\n");
+		return 1;
+	}
+
+	std::string password(gatewayConfig.m_password);
+
+    CRemoteControlRemoteControlHandler handler(gatewayConfig.m_address, gatewayConfig.m_port);
+
+    bool ret = handler.open();
+	if (!ret) {
+		::fprintf(stderr, "dgwremotecontrol: unable to open the UDP port\n");
+		return 1;
+	}
+
+	ret = handler.login();
+	if (!ret) {
+		handler.close();
+		::fprintf(stderr, "dgwremotecontrol: unable to login to the gateway/starnetserver\n");
+		return 1;
+	}
+
+	unsigned int count = 0U;
+	while (count < 10U) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100U));
+
+		RC_TYPE type = handler.readType();
+		if (type == RCT_RANDOM)
+			break;
+
+		if (type == RCT_NONE)
+			handler.retry();
+
+		count++;
+	}
+
+	if (count >= 10U) {
+		handler.close();
+		::fprintf(stderr, "dgwremotecontrol: unable to get a response from the gateway/starnetserver\n");
+		return 1;
+	}
+
+	unsigned int rnd = handler.readRandom();
+	sendHash(&handler, password, rnd);
+
+	count = 0U;
+	while (count < 10U) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100U));
+
+		RC_TYPE type = handler.readType();
+		if (type == RCT_ACK)
+			break;
+
+		if (type == RCT_NAK) {
+			handler.close();
+			::fprintf(stderr, "dgwremotecontrol: invalid password sent to the gateway/starnetserver\n");
+			return 1;
+		}
+
+		if (type == RCT_NONE)
+			handler.retry();
+
+		count++;
+	}
+
+	if (count >= 10U) {
+		handler.close();
+		::fprintf(stderr, "dgwremotecontrol: unable to get a response from the gateway/starnetserver\n");
+		return 1;
+	}
+
+	handler.setLoggedIn(true);
+
+	if (actionText == "drop")
+		handler.logoff(repeater, user);
+	else
+		handler.link(repeater, reconnect, reflector);
+
+	count = 0U;
+	while (count < 10U) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100U));
+
+		RC_TYPE type = handler.readType();
+		if (type == RCT_ACK)
+			break;
+
+		if (type == RCT_NAK) {
+			handler.close();
+			::fprintf(stderr, "dgwremotecontrol: drop/link/unlink command rejected by the gateway/starnetserver\n");
+			return 1;
+		}
+
+		if (type == RCT_NONE)
+			handler.retry();
+
+		count++;
+	}
+
+	if (count >= 10U) {
+		handler.close();
+		::fprintf(stderr, "dgwremotecontrol: unable to get a response from the gateway/starnetserver\n");
+		return 1;
+	}
+
+	::fprintf(stdout, "dgwremotecontrol: command accepted by the gateway/starnetserver\n");
+
+	handler.logout();
+	handler.close();
 
 
     return 0;
@@ -76,7 +192,7 @@ bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& 
 
         actionText = boost::to_lower_copy(positionalArgs[1]);
         if(actionText != "link") {
-            CLog::logError("Invalid action %s. Expected link", positionalArgs[1].c_str());
+            ::fprintf(stderr, "Invalid action %s. Expected link\n", positionalArgs[1].c_str());
             ret = false;
         }
 
@@ -94,7 +210,7 @@ bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& 
         else if(reconnectText == "180")		reconnect = RECONNECT_180MINS;
         else if(reconnectText == "fixed")	reconnect = RECONNECT_FIXED;
         else {
-            CLog::logError("Invalid reconnect value %s. Valid values are 5,10,15,20,25,30,60,90,120,180,fixed", positionalArgs[2].c_str());
+            ::fprintf(stderr, "Invalid reconnect value %s. Valid values are 5,10,15,20,25,30,60,90,120,180,fixed\n", positionalArgs[2].c_str());
             ret = false;
         }
         reflector = boost::to_upper_copy(positionalArgs[3]);
@@ -105,7 +221,7 @@ bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& 
         repeater = positionalArgs[0];
         actionText = boost::to_lower_copy(positionalArgs[1]);
         if(actionText != "unlink") {
-            CLog::logError("Invalid action %s. Expected unlink", positionalArgs[1].c_str());
+            ::fprintf(stderr, "Invalid action %s. Expected unlink\n", positionalArgs[1].c_str());
             ret = false;
         }
         reconnect = RECONNECT_NEVER;
@@ -117,7 +233,7 @@ bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& 
 
         actionText = boost::to_lower_copy(positionalArgs[1]);
         if(actionText != "drop") {
-            CLog::logError("Invalid action %s. Expected drop", positionalArgs[1].c_str());
+            ::fprintf(stderr, "Invalid action %s. Expected drop\n", positionalArgs[1].c_str());
             ret = false;
         }
 
@@ -137,4 +253,25 @@ bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& 
     boost::replace_all(user, "_", " ");
 
     return ret;
+}
+
+void sendHash(CRemoteControlRemoteControlHandler* handler, const std::string& password, unsigned int rnd)
+{
+	assert(handler != NULL);
+
+	unsigned int len = password.length() + sizeof(unsigned int);
+	unsigned char*  in = new unsigned char[len];
+	unsigned char* out = new unsigned char[32U];
+
+	::memcpy(in, &rnd, sizeof(unsigned int));
+	for (unsigned int i = 0U; i < password.length(); i++)
+		in[i + sizeof(unsigned int)] = password.at(i);
+
+	CSHA256 sha256;
+	sha256.buffer(in, len, out);
+
+	handler->sendHash(out, 32U);
+
+	delete[] in;
+	delete[] out;
 }

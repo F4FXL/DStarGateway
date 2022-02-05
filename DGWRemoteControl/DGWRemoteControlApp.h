@@ -21,5 +21,7 @@
 #include <string>
 
 #include "Defs.h"
+#include "RemoteControlRemoteControlHandler.h"
 
 bool getCLIParams(int argc, const char* argv[], std::string& name, std::string& repeater, std::string& actionText, RECONNECT& reconnect, std::string& user, std::string& reflector);
+void sendHash(CRemoteControlRemoteControlHandler* handler, const std::string& password, unsigned int rnd);

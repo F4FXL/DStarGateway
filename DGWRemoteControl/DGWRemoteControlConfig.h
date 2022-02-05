@@ -20,22 +20,29 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "Config.h"
 
 typedef struct {
-	std::string callsign;
-	std::string address;
+    std::string m_name;
+	std::string m_address;
+    unsigned int m_port; 
+    std::string m_password;
 } TRemoteGateway;
 
 class CDGWRemoteControlConfig
 {
 public:
-    CDGWRemoteControlConfig(const std::string& pathName);
+    CDGWRemoteControlConfig(const std::string& fileName);
+    ~CDGWRemoteControlConfig();
     bool load();
+    bool getGateway(const std::string& name, TRemoteGateway& gateway);
 
 private:
     bool open(CConfig& config);
+    bool loadGateways(CConfig& config);
 
     std::string m_fileName;
+    std::vector<TRemoteGateway *> m_gateways;
 };
