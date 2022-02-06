@@ -45,7 +45,7 @@ Quite a few classes are more or less copy/paste from each other some sanitizatio
 - Geoffrey Merck F4FXL / KC3FRA [That's me !](https://github.com/F4FXL/)
 ## 2.3. Thanks
 - Cyrille F1MHV / DF1CHB for the testing
-- Jonathan Naylor G4KLX for all the work ahead
+- Jonathan Naylor G4KLX for all the work ahead and the rock solid code base
 ## 2.4. Features
 All the features found in ircddbGateway are supposed to be working. Except the ones listed below
 
