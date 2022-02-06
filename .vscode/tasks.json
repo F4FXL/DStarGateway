@@ -13,10 +13,7 @@
                 "USE_GPSD=1",
                 "all"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -56,6 +53,22 @@
                 "DGWTextTransmit/dgwtexttransmit"
             ],
             "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWTimeServer",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j3",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWTimeServer/dgwtimeserver"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {

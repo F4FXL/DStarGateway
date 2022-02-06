@@ -40,7 +40,7 @@ endif
 
 
 .PHONY: all
-all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWVoiceTransmit/dgwvoicetransmit #tests
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWTimeServer/dgwtimeserver DGWVoiceTransmit/dgwvoicetransmit #tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -62,6 +62,9 @@ DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DS
 
 DGWTextTransmit/dgwtexttransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWTextTransmit
+
+DGWTimeServer/dgwtimeserver: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWTimeServer
 
 DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWVoiceTransmit
@@ -99,6 +102,7 @@ install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
 # install accessories
 	$(MAKE) -C DGWRemoteControl install
 	$(MAKE) -C DGWTextTransmit install
+	$(MAKE) -C DGWTimeServer install
 	$(MAKE) -C DGWVoiceTransmit install
 	
 # create user for daemon
