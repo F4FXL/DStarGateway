@@ -23,10 +23,11 @@
 #define	Thread_H
 
 #include <thread>
+#include <string>
 
 class CThread {
 public:
-    CThread();
+    CThread(const std::string& name);
     virtual ~CThread();
     void Create();
     void Run();
@@ -39,6 +40,7 @@ protected:
 private:
     static void EntryRunner(CThread * thread);
 
+    std::string m_name;
     std::thread m_thread;
 };
 

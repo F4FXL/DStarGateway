@@ -34,6 +34,7 @@ const unsigned int OPENDSTAR_PORT = 20001U;
 const unsigned int TCP_TIMEOUT = 10U;
 
 CDPlusAuthenticator::CDPlusAuthenticator(const std::string& loginCallsign, const std::string& gatewayCallsign, const std::string& address, CCacheManager* cache) :
+CThread("DPlus"),
 m_loginCallsign(loginCallsign),
 m_gatewayCallsign(gatewayCallsign),
 m_address(address),
@@ -106,7 +107,7 @@ void* CDPlusAuthenticator::Entry()
 void CDPlusAuthenticator::stop()
 {
 	m_killed = true;
-
+	CLog::logInfo("Stopping DPpus Authenticator");
 	Wait();
 }
 

@@ -18,10 +18,12 @@
 
 #include <cassert>
 #include "Thread.h"
+#include "Log.h"
 
 using namespace std;
 
-CThread::CThread()
+CThread::CThread(const std::string& name) :
+m_name(name)
 {
 
 }
@@ -53,5 +55,7 @@ void CThread::Wait()
 
 void CThread::EntryRunner(CThread * thread)
 {
+    assert(thread != nullptr);
     thread->Entry();
+    CLog::logTrace("Exiting %s thread", thread->m_name.c_str());
 }

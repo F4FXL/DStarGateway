@@ -60,7 +60,7 @@ const std::string LOOPBACK_ADDRESS("127.0.0.1");
 const unsigned int REMOTE_DUMMY_PORT = 65016U;
 
 CDStarGatewayThread::CDStarGatewayThread(const std::string& logDir, const std::string& dataDir, const std::string& name) :
-CThread(),
+CThread("Gateway"),
 m_logDir(logDir),
 m_dataDir(dataDir),
 m_name(name),
@@ -481,10 +481,17 @@ void* CDStarGatewayThread::Entry()
 		delete m_remote;
 	}
 
+	if(m_aprsWriter != nullptr) {
+		m_aprsWriter->close();
+		delete m_aprsWriter;
+	}
+
 	if (headerLogger != NULL) {
 		headerLogger->close();
 		delete headerLogger;
 	}
+
+	CDPlusHandler::finalise();
 
 	return NULL;
 }

@@ -46,6 +46,8 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 
+CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
+
 #ifdef UNIT_TESTS
 int fakemain(int argc, char *argv[])
 #else
@@ -58,7 +60,8 @@ int main(int argc, char *argv[])
 	signal(SIGILL, CDStarGatewayApp::sigHandlerFatal);
 	signal(SIGFPE, CDStarGatewayApp::sigHandlerFatal);
 	signal(SIGABRT, CDStarGatewayApp::sigHandlerFatal);
-	// signal(SIGTERM, CDStarGatewayApp::sigHandler);
+	signal(SIGTERM, CDStarGatewayApp::sigHandler);
+	signal(SIGINT, CDStarGatewayApp::sigHandler);
 
 	setbuf(stdout, NULL);
 	if (2 != argc) {
@@ -89,6 +92,7 @@ int main(int argc, char *argv[])
 
 CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
 {
+	g_app = this;
 }
 
 CDStarGatewayApp::~CDStarGatewayApp()
@@ -276,6 +280,15 @@ bool CDStarGatewayApp::createThread()
 	return true;
 }
 
+void CDStarGatewayApp::sigHandler(int sig)
+{
+	CLog::logInfo("Caught signal : %s, shutting down gateway", strsignal(sig));
+
+	if(g_app != nullptr && g_app->m_thread != nullptr) {
+		g_app->m_thread->kill();
+	}
+}
+
 void CDStarGatewayApp::sigHandlerFatal(int sig)
 {
 	CLog::logFatal("Caught signal : %s", strsignal(sig));
@@ -289,7 +302,6 @@ void CDStarGatewayApp::sigHandlerFatal(int sig)
 
 void CDStarGatewayApp::terminateHandler()
 {
-
 #ifdef DEBUG_DSTARGW
 	std::stringstream stackTrace;
 	stackTrace <<  boost::stacktrace::stacktrace();
