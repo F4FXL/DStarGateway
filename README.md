@@ -34,7 +34,7 @@ This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4k
 
 # 2. Current State
 ## 2.1. Code sanity
-The current code is working, yet ugly IMHO as it is a mix of C and C++ of various ages. I realised that G4KLx started programming this over a decade ago, when C++11 was not yet a thing !
+The current code is working, yet it is a mix of C and C++ of various ages and there is plenty of room for rework. I realised that G4KLx started programming this over a decade ago, when C++11 was not yet a thing !
 
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
 
