@@ -135,6 +135,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
+- [Improvement] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21))
 - [Improvement] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 - [Improvement] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 ## 5.2. Version 0.5
