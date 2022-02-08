@@ -32,6 +32,7 @@ const unsigned int LOOP_DELAY    = 5UL;
 const unsigned int LOOP_TICKS    = 200U;
 
 CIcomRepeaterProtocolHandler::CIcomRepeaterProtocolHandler(const std::string& address, unsigned int port, const std::string& icomAddress, unsigned int icomPort) :
+CThread("Icom Protocol Handler"),
 m_socket(address, port),
 m_icomAddress(),
 m_icomPort(icomPort),
@@ -527,7 +528,7 @@ CAMBEData* CIcomRepeaterProtocolHandler::readBusyAMBE()
 void CIcomRepeaterProtocolHandler::close()
 {
 	m_killed = true;
-
+	CLog::logInfo("Stopping Icom Repeater protocol handler thread");
 	Wait();
 }
 
