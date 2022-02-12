@@ -13,7 +13,10 @@
                 "USE_GPSD=1",
                 "all"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
@@ -65,10 +68,7 @@
                 "USE_GPSD=1",
                 "DGWTimeServer/dgwtimeserver"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
