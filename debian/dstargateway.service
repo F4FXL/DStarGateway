@@ -5,7 +5,7 @@ After=network.target,network-online.target
 Wants=network-online.target
 
 [Service]
-Type=simple
+Type=forking
 ExecStart=/usr/local/bin/dstargateway %CFG_DIR%/dstargateway.cfg
 Restart=on-failure
 RestartSec=5
