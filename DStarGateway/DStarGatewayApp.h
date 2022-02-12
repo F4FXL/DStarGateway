@@ -21,7 +21,6 @@
 
 #include "DStarGatewayThread.h"
 
-void __sigHandler(int sig);
 
 class CDStarGatewayApp
 {
@@ -29,6 +28,7 @@ private:
 	std::string m_configFile;
 	CDStarGatewayThread *m_thread;
 	bool createThread();
+	static CDStarGatewayApp * g_app;
 
 public:
 	CDStarGatewayApp(const std::string &configFile);
@@ -38,5 +38,6 @@ public:
 	void run();
 
 	static void sigHandlerFatal(int sig);
+	static void sigHandler(int sig);
 	static void terminateHandler();
 };

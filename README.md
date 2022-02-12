@@ -34,7 +34,7 @@ This is a port of G4KLX Jonathan Naylor's [ircddbGateway](https://github.com/g4k
 
 # 2. Current State
 ## 2.1. Code sanity
-The current code is working, yet ugly IMHO as it is a mix of C and C++ of various ages. I realised that G4KLx started programming this over a decade ago, when C++11 was not yet a thing !
+The current code is working, yet it is a mix of C and C++ of various ages and there is plenty of room for rework. I realised that G4KLx started programming this over a decade ago, when C++11 was not yet a thing !
 
 The code has also been amended to no longer rely on compiler defines for paths like log or data. These can be set in configuration file.
 
@@ -45,7 +45,7 @@ Quite a few classes are more or less copy/paste from each other some sanitizatio
 - Geoffrey Merck F4FXL / KC3FRA [That's me !](https://github.com/F4FXL/)
 ## 2.3. Thanks
 - Cyrille F1MHV / DF1CHB for the testing
-- Jonathan Naylor G4KLX for all the work ahead
+- Jonathan Naylor G4KLX for all the work ahead and the rock solid code base
 ## 2.4. Features
 All the features found in ircddbGateway are supposed to be working. Except the ones listed below
 
@@ -135,6 +135,7 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
+- [Improvement] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21))
 - [Improvement] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 - [Improvement] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 ## 5.2. Version 0.5
