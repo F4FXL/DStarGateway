@@ -20,18 +20,18 @@
 #pragma once
 
 #include "DStarGatewayThread.h"
-
+#include "DStarGatewayConfig.h"
 
 class CDStarGatewayApp
 {
 private:
-	std::string m_configFile;
-	CDStarGatewayThread *m_thread;
+	CDStarGatewayConfig * m_config;
+	CDStarGatewayThread * m_thread;
 	bool createThread();
 	static CDStarGatewayApp * g_app;
 
 public:
-	CDStarGatewayApp(const std::string &configFile);
+	CDStarGatewayApp(CDStarGatewayConfig * config);
 	~CDStarGatewayApp();
 
 	bool init();

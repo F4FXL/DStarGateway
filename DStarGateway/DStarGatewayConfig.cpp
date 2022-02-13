@@ -55,6 +55,7 @@ bool CDStarGatewayConfig::load()
 #ifdef USE_GPSD
 		ret = loadGPSD(cfg) && ret;
 #endif
+		ret = loadDaemon(cfg) && ret;
 	}
 
 	if(ret) {
@@ -66,6 +67,13 @@ bool CDStarGatewayConfig::load()
 		CLog::logError("Loading Configuration from %s failed", m_fileName.c_str());
 	}
 
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDaemon(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("daemon", "daemon", m_general.daemon, false);
+	ret = cfg.getValue("daemon", "pidfile", m_general.pidFile, 0, 1024, "") && ret;
 	return ret;
 }
 
@@ -438,3 +446,8 @@ void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
 	gpsd = m_gpsd;
 }
 #endif
+
+void CDStarGatewayConfig::getGeneral(TDaemon & gen) const
+{
+	gen = m_general;
+}

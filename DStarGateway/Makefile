@@ -21,6 +21,7 @@ install: dstargateway
 	@cp -fn example.cfg $(CFG_DIR)/dstargateway.cfg
 	@sed -i "s|path=/var/log/dstargateway/|path=$(LOG_DIR)|g" $(CFG_DIR)/dstargateway.cfg
 	@sed -i "s|data=/usr/local/share/dstargateway.d/|data=$(DATA_DIR)|g" $(CFG_DIR)/dstargateway.cfg
+	@sed -i "s|daemon=false|daemon=true|g" $(CFG_DIR)/dstargateway.cfg
 
 ../APRS/APRS.a:
 ../Common/Common.a:
