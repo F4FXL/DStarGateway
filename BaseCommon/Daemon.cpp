@@ -75,6 +75,10 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile)
 		return DR_PARENT;
 	}
 
+	if (setsid() < 0) {
+        return DR_FAILURE;
+	}
+
 	/* Set new file permissions */
 	umask(0);
 
