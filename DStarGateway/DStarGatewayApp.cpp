@@ -88,11 +88,11 @@ int main(int argc, char *argv[])
 	}
 
 	TDaemon daemon;
-	config->getGeneral(daemon);
+	config->getDaemon(daemon);
 
 	if (daemon.daemon) {
 		CLog::logInfo("Configured as a daemon, detaching ...");
-		auto res = CDaemon::daemonize(daemon.pidFile, "dstar");
+		auto res = CDaemon::daemonize(daemon.pidFile, daemon.user);
 
 		switch (res)
 		{

@@ -28,6 +28,7 @@
 typedef struct {
 	bool daemon;
 	std::string pidFile;
+	std::string user;
 } TDaemon;
 
 typedef struct {
@@ -155,7 +156,7 @@ public:
 #ifdef USE_GPSD
 	void getGPSD(TGPSD & gpsd) const;
 #endif
-	void getGeneral(TDaemon & gen) const;
+	void getDaemon(TDaemon & gen) const;
 
 private:
 	bool open(CConfig & cfg);
@@ -188,7 +189,7 @@ private:
 #ifdef USE_GPSD
 	TGPSD m_gpsd;
 #endif
-	TDaemon m_general;
+	TDaemon m_daemon;
 
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;

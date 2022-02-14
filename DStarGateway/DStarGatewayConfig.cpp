@@ -72,8 +72,9 @@ bool CDStarGatewayConfig::load()
 
 bool CDStarGatewayConfig::loadDaemon(const CConfig & cfg)
 {
-	bool ret = cfg.getValue("daemon", "daemon", m_general.daemon, false);
-	ret = cfg.getValue("daemon", "pidfile", m_general.pidFile, 0, 1024, "") && ret;
+	bool ret = cfg.getValue("daemon", "daemon", m_daemon.daemon, false);
+	ret = cfg.getValue("daemon", "pidfile", m_daemon.pidFile, 0, 1024, "") && ret;
+	ret = cfg.getValue("daemon", "user", m_daemon.user, 0, 1024, "") && ret;
 	return ret;
 }
 
@@ -447,7 +448,7 @@ void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
 }
 #endif
 
-void CDStarGatewayConfig::getGeneral(TDaemon & gen) const
+void CDStarGatewayConfig::getDaemon(TDaemon & gen) const
 {
-	gen = m_general;
+	gen = m_daemon;
 }
