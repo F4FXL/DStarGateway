@@ -1,5 +1,4 @@
 [Unit]
-User=dstar
 Description=D-STAR Gateway Daemon
 After=network.target,network-online.target
 Wants=network-online.target
