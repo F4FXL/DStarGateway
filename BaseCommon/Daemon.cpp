@@ -27,8 +27,9 @@
 #include <cstdio>
 #include <cstring>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <pwd.h>
+#include <sys/file.h>
 
 #include "Daemon.h"
 #include "Log.h"
@@ -36,16 +37,63 @@
 int CDaemon::m_pid_fd = -1;
 std::string CDaemon::m_pidFileName("");
 
-DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile)
+DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::string& userName)
 {
+	// get user
+	struct passwd* user = nullptr;
+	if(!userName.empty()) {
+		user = getpwnam(userName.c_str());
+		if(user == nullptr) {
+			CLog::logFatal("Failed to get %s user", userName.c_str());
+			return DR_FAILURE;
+		}
+	}
+
+	// Create PID file if needed
+	if (!pidFile.empty()) {	
+		auto tempFd = tryGetLock(pidFile);
+		if (tempFd < 0) {
+			CLog::logFatal("Failed to acquire lock on pidfile %s : %s", pidFile.c_str(), strerror(errno));
+			return DR_PIDFILE_FAILED;
+		}
+		releaseLock(tempFd, "");
+
+		if(user != nullptr) {
+			int res = chown(pidFile.c_str(), user->pw_uid, user->pw_gid);
+			if(res != 0) {
+				CLog::logFatal("Failed to set ownership of pidfile to user %s : %s", userName.c_str(), strerror(errno));
+				return DR_FAILURE;
+			}
+		}
+	}
+
+	// change process ownership
+	if(user != nullptr) {
+		if(setgid(user->pw_gid) != 0) {
+			CLog::logFatal("Failed to set %s GID : %s", userName.c_str(), strerror(errno));
+			return DR_FAILURE;
+		}
+
+		if(setuid(user->pw_uid) != 0) {
+			CLog::logFatal("Failed to set %s UID : %s", userName.c_str(), strerror(errno));
+			return DR_FAILURE;
+		}
+
+		// Double check it worked (AKA Paranoia)
+		if (::setuid(0) != -1){
+			CLog::logFatal("It's possible to regain root - something is wrong!, exiting");
+			return DR_FAILURE;
+		}
+	}
+
 	pid_t pid = 0;
-	int fd;
 
 	/* Fork off the parent process */
 	pid = fork();
 
 	/* An error occurred */
 	if (pid < 0) {
+		CLog::logFatal("Forking failed, exiting");
 		return DR_FAILURE;
 	}
 
@@ -54,54 +102,56 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile)
 		return DR_PARENT;
 	}
 
-	/* On success: The child process becomes session leader */
+	// On success: The child process becomes session leader
 	if (setsid() < 0) {
+		CLog::logFatal("Failed to set session id, exiting");
         return DR_FAILURE;
 	}
 
 	/* Ignore signal sent from child to parent process */
 	signal(SIGCHLD, SIG_IGN);
 
-	/* Fork off for the second time*/
+#ifdef DOUBLE FORK
+	// Fork off for the second time. Some litterature says it is best to fork 2 times so that the process never can open a terminal.
+	// However it messes up systemd, event when unit is set as forking
 	pid = fork();
 
-	/* An error occurred */
+	// An error occurred
 	if (pid < 0) {
+		CLog::logFatal("Second forking failed, exiting");
 		return DR_FAILURE;
 	}
 
-	/* Success: Let the parent terminate */
+	// Success: Let the parent terminate
 	if (pid > 0) {
 		return DR_PARENT;
 	}
+#endif
 
-	if (setsid() < 0) {
-        return DR_FAILURE;
-	}
-
-	/* Set new file permissions */
+	// Set new file permissions
 	umask(0);
 
 	/* Change the working directory to the root directory */
 	/* or another appropriated directory */
-	chdir("/");
+	if(chdir("/") != 0) {
+		CLog::logFatal("Faild to cd, exiting");
+		return DR_FAILURE;
+	}
 
-	/* Close all open file descriptors */
-	for (fd = sysconf(_SC_OPEN_MAX); fd > 0; fd--) {
+	// Close all open file descriptors
+	for (int fd = sysconf(_SC_OPEN_MAX); fd > 0; fd--) {
 		close(fd);
 	}
 
-	/* Reopen stdin (fd = 0), stdout (fd = 1), stderr (fd = 2) */
+	// Reopen stdin (fd = 0), stdout (fd = 1), stderr (fd = 2)
 	stdin = fopen("/dev/null", "r");
 	stdout = fopen("/dev/null", "w+");
 	stderr = fopen("/dev/null", "w+");
 
-	/* Try to write PID of daemon to lockfile */
+	// Try to write PID of daemon to lockfile
 	if (!pidFile.empty())
 	{
-        CLog::logInfo("pidfile");
-		
-		m_pid_fd = open(pidFile.c_str(), O_RDWR|O_CREAT, 0640);
+		m_pid_fd = tryGetLock(pidFile);
 		if (m_pid_fd < 0) {
 			/* Can't open lockfile */
 			return DR_PIDFILE_FAILED;
@@ -125,12 +175,34 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile)
 
 void CDaemon::finalize()
 {
-    if(m_pid_fd != -1) {
-        lockf(m_pid_fd, F_ULOCK, 0);
-		close(m_pid_fd);
-    }
+    releaseLock(m_pid_fd, m_pidFileName);
 
     if(!m_pidFileName.empty()) {
         unlink(m_pidFileName.c_str());
     }
+}
+
+int CDaemon::tryGetLock( const std::string& file )
+{
+    mode_t m = umask( 0 );
+    int fd = open( file.c_str(), O_RDWR|O_CREAT, 0640 );
+    umask( m );
+    if( fd >= 0 && flock( fd, LOCK_EX | LOCK_NB ) < 0 ) {
+        close( fd );
+        fd = -1;
+    }
+    return fd;
+}
+
+/*! Release the lock obtained with tryGetLock( lockName ).
+ *
+ *  @param fd File descriptor of lock returned by tryGetLock( lockName ).
+ *  @param lockName Name of file used as lock (i.e. '/var/lock/myLock').
+ */
+void CDaemon::releaseLock(int fd, const std::string& file)
+{
+    if( fd < 0 )
+        return;
+    remove(file.c_str());
+    close(fd);
 }

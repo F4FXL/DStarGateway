@@ -29,10 +29,13 @@ enum DAEMONIZE_RESULT
 class CDaemon
 {
 public:
-    static DAEMONIZE_RESULT daemonize(const std::string& pidFile);
+    static DAEMONIZE_RESULT daemonize(const std::string& pidFile, const std::string& user);
     static void finalize();
 
 private:
+    static int tryGetLock(const std::string& file );
+    static void releaseLock(int fd, const std::string& file );
+
     static int m_pid_fd;
     static std::string m_pidFileName;
 };
