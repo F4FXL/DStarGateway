@@ -111,7 +111,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 	/* Ignore signal sent from child to parent process */
 	signal(SIGCHLD, SIG_IGN);
 
-#ifdef DOUBLE FORK
+#ifdef DOUBLE_FORK
 	// Fork off for the second time. Some litterature says it is best to fork 2 times so that the process never can open a terminal.
 	// However it messes up systemd, event when unit is set as forking
 	pid = fork();
@@ -194,11 +194,7 @@ int CDaemon::tryGetLock( const std::string& file )
     return fd;
 }
 
-/*! Release the lock obtained with tryGetLock( lockName ).
- *
- *  @param fd File descriptor of lock returned by tryGetLock( lockName ).
- *  @param lockName Name of file used as lock (i.e. '/var/lock/myLock').
- */
+
 void CDaemon::releaseLock(int fd, const std::string& file)
 {
     if( fd < 0 )
