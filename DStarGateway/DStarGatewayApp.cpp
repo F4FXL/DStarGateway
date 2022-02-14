@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
 	if (daemon.daemon) {
 		CLog::logInfo("Configured as a daemon, detaching ...");
-		auto res = CDaemon::daemonize(daemon.pidFile);
+		auto res = CDaemon::daemonize(daemon.pidFile, "dstar");
 
 		switch (res)
 		{
@@ -101,12 +101,11 @@ int main(int argc, char *argv[])
 			case DR_CHILD:
 				break;
 			case DR_PIDFILE_FAILED:
-				break;
 			case DR_FAILURE:
-				[[fallthrough]];
 			default:
-				CLog::logFatal("Fork failed, exiting");
+				CLog::logFatal("Failed to run as daemon");
 				delete config;
+				CLog::finalise();
 				return 1;
 		}
 	}
