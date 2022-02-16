@@ -58,7 +58,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 		}
 		releaseLock(tempFd, "");
 
-		if(user != nullptr) {
+		if(user != nullptr && getuid() == 0) {
 			int res = chown(pidFile.c_str(), user->pw_uid, user->pw_gid);
 			if(res != 0) {
 				CLog::logFatal("Failed to set ownership of pidfile to user %s : %s", userName.c_str(), strerror(errno));
@@ -68,7 +68,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 	}
 
 	// change process ownership
-	if(user != nullptr) {
+	if(user != nullptr && getuid() == 0) {
 		if(setgid(user->pw_gid) != 0) {
 			CLog::logFatal("Failed to set %s GID : %s", userName.c_str(), strerror(errno));
 			return DR_FAILURE;
