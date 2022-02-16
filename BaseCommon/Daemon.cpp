@@ -138,6 +138,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 		return DR_FAILURE;
 	}
 
+#ifdef CLOSE_FILE_DESC
 	// Close all open file descriptors
 	for (int fd = sysconf(_SC_OPEN_MAX); fd > 0; fd--) {
 		close(fd);
@@ -147,6 +148,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 	stdin = fopen("/dev/null", "r");
 	stdout = fopen("/dev/null", "w+");
 	stderr = fopen("/dev/null", "w+");
+#endif
 
 	// Try to write PID of daemon to lockfile
 	if (!pidFile.empty())
