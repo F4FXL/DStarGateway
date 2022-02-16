@@ -321,8 +321,6 @@ void CDStarGatewayApp::sigHandler(int sig)
 	if(g_app != nullptr && g_app->m_thread != nullptr) {
 		g_app->m_thread->kill();
 	}
-
-	CDaemon::finalize();
 }
 
 void CDStarGatewayApp::sigHandlerFatal(int sig)
