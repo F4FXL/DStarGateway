@@ -41,7 +41,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 {
 	// get user
 	struct passwd* user = nullptr;
-	if(!userName.empty()) {
+	if(!userName.empty() && getuid() == 0) {
 		user = getpwnam(userName.c_str());
 		if(user == nullptr) {
 			CLog::logFatal("Failed to get %s user", userName.c_str());
@@ -58,7 +58,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 		}
 		releaseLock(tempFd, "");
 
-		if(user != nullptr && getuid() == 0) {
+		if(user != nullptr) {
 			int res = chown(pidFile.c_str(), user->pw_uid, user->pw_gid);
 			if(res != 0) {
 				CLog::logFatal("Failed to set ownership of pidfile to user %s : %s", userName.c_str(), strerror(errno));
@@ -68,7 +68,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 	}
 
 	// change process ownership
-	if(user != nullptr && getuid() == 0) {
+	if(user != nullptr) {
 		if(setgid(user->pw_gid) != 0) {
 			CLog::logFatal("Failed to set %s GID : %s", userName.c_str(), strerror(errno));
 			return DR_FAILURE;
@@ -80,7 +80,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
 		}
 
 		// Double check it worked (AKA Paranoia)
-		if (::setuid(0) != -1){
+		if (setuid(0) != -1){
 			CLog::logFatal("It's possible to regain root - something is wrong!, exiting");
 			return DR_FAILURE;
 		}
