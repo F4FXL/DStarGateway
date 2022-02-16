@@ -142,8 +142,6 @@ m_thread(NULL)
 
 CDStarGatewayApp::~CDStarGatewayApp()
 {
-	delete m_config;
-	delete m_thread;
 }
 
 bool CDStarGatewayApp::init()
@@ -326,12 +324,14 @@ void CDStarGatewayApp::sigHandler(int sig)
 void CDStarGatewayApp::sigHandlerFatal(int sig)
 {
 	CLog::logFatal("Caught signal : %s", strsignal(sig));
+	fprintf(stderr, "Caught signal : %s\n", strsignal(sig));
 #ifdef DEBUG_DSTARGW
 	std::stringstream stackTrace;
 	stackTrace <<  boost::stacktrace::stacktrace();
 	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+	fprintf(stderr, "Stack Trace : \n%s\n", stackTrace.str().c_str());
 #endif
-	exit(1);
+	exit(3);
 }
 
 void CDStarGatewayApp::terminateHandler()
@@ -350,13 +350,15 @@ void CDStarGatewayApp::terminateHandler()
         }
 		else {
 			CLog::logFatal("Unhandled unknown exception occured");
+			fprintf(stderr, "Unknown ex\n");
 		}
     } catch(const std::exception& e) {
         CLog::logFatal("Unhandled exception occured %s", e.what());
+		fprintf(stderr, "Unhandled ex %s\n", e.what());
     }
 
 #ifdef DEBUG_DSTARGW
 	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
 #endif
-	exit(1);
+	exit(2);
 }
