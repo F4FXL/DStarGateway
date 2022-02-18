@@ -120,17 +120,8 @@ install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
 	$(MAKE) -C Data install
 	@chown -R dstar:dstar $(DATA_DIR)
 
-#install executables
+# install services executables
 	$(MAKE) -C DStarGateway install
-
-# SystemD service install
-	@cp -f debian/dstargateway.service /lib/systemd/system/
-	@sed -i "s|%CFG_DIR%|$(CFG_DIR)|g" /lib/systemd/system/dstargateway.service
-	systemctl enable dstargateway.service
-	@systemctl daemon-reload
-	@echo "\n\n"
-	@echo "Install complete, edit $(CFG_DIR)dstargateway.cfg and start the daemon with 'systemctl start dstargateway.service'"
-	@echo "\n\n"
 
 .PHONY: uninstall
 uninstall :
