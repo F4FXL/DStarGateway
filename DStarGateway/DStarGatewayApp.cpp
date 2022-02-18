@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	gateway.run();
 
 	if(daemon.daemon) {
-		CDaemon::finalize();
+		CDaemon::finalise();
 	}
 
 	return 0;

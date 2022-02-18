@@ -175,7 +175,7 @@ DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::strin
     return DR_CHILD;
 }
 
-void CDaemon::finalize()
+void CDaemon::finalise()
 {
     releaseLock(m_pid_fd, m_pidFileName);
 
