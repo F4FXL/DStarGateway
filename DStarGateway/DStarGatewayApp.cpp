@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
 	if (daemon.daemon) {
 		CLog::logInfo("Configured as a daemon, detaching ...");
-		auto res = CDaemon::daemonize(daemon.pidFile, daemon.user);
+		auto res = CDaemon::daemonise(daemon.pidFile, daemon.user);
 
 		switch (res)
 		{

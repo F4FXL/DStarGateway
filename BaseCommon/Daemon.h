@@ -29,7 +29,7 @@ enum DAEMONIZE_RESULT
 class CDaemon
 {
 public:
-    static DAEMONIZE_RESULT daemonize(const std::string& pidFile, const std::string& user);
+    static DAEMONIZE_RESULT daemonise(const std::string& pidFile, const std::string& user);
     static void finalise();
 
 private:

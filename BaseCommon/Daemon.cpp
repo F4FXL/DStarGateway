@@ -37,7 +37,7 @@
 int CDaemon::m_pid_fd = -1;
 std::string CDaemon::m_pidFileName("");
 
-DAEMONIZE_RESULT CDaemon::daemonize(const std::string& pidFile, const std::string& userName)
+DAEMONIZE_RESULT CDaemon::daemonise(const std::string& pidFile, const std::string& userName)
 {
 	// get user
 	struct passwd* user = nullptr;
