@@ -226,13 +226,13 @@ bool CAPRSHandler::isConnected() const
 
 void CAPRSHandler::close()
 {
+	m_thread->stop();
+	
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->close();
 		delete m_idFrameProvider;
 		m_idFrameProvider = nullptr;
 	}
-
-	m_thread->stop();
 }
 
 void CAPRSHandler::addReadAPRSCallback(IReadAPRSFrameCallback* cb)
