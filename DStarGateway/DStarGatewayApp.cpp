@@ -50,6 +50,9 @@
 #include "Daemon.h"
 
 CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
+const std::string BANNER_1 = CStringUtils::string_format("%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
+const std::string BANNER_2 = "DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n";
+const std::string BANNER_3 = "This is free software, and you are welcome to distribute it under certain conditions that are discussed in the LICENSE file.\n\n";
 
 #ifdef UNIT_TESTS
 int fakemain(int argc, char *argv[])
@@ -73,9 +76,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
-	printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
-	printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
+	std::cout << std::endl << BANNER_1 << BANNER_2 << BANNER_3;
 
 	if ('-' == argv[1][0]) {
 		return 0;
@@ -116,6 +117,13 @@ int main(int argc, char *argv[])
 	CLog::finalise();
 	if(logConf.m_displayLevel	!= LOG_NONE && !daemon.daemon) CLog::addTarget(new CLogConsoleTarget(logConf.m_displayLevel));
 	if(logConf.m_fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(logConf.m_fileLevel, logConf.logDir, logConf.m_fileRotate));
+
+	//write banner in log file if we are dameon
+	if(daemon.daemon) {
+		CLog::logInfo(BANNER_1);
+		CLog::logInfo(BANNER_2);
+		CLog::logInfo(BANNER_3);
+	}
 
 	CDStarGatewayApp gateway(config);
 	
