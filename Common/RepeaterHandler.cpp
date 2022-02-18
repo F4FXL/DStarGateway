@@ -438,11 +438,6 @@ void CRepeaterHandler::finalise()
 		m_repeaters[i] = NULL;
 	}
 
-	if (m_aprsWriter != NULL) {
-		m_aprsWriter->close();
-		delete m_aprsWriter;
-	}
-
 	delete[] m_repeaters;
 }
 

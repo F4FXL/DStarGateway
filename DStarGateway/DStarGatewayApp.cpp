@@ -25,6 +25,8 @@
 #include <vector>
 #include <signal.h>
 #include <exception>
+#include <cassert>
+#include <unistd.h>
 #ifdef DEBUG_DSTARGW
 #include <boost/stacktrace.hpp>
 #endif
@@ -45,8 +47,12 @@
 #include "LogConsoleTarget.h"
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
+#include "Daemon.h"
 
 CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
+const std::string BANNER_1 = CStringUtils::string_format("%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
+const std::string BANNER_2 = "DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n";
+const std::string BANNER_3 = "This is free software, and you are welcome to distribute it under certain conditions that are discussed in the LICENSE file.\n\n";
 
 #ifdef UNIT_TESTS
 int fakemain(int argc, char *argv[])
@@ -70,16 +76,56 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	std::cout << std::endl << BANNER_1 << BANNER_2 << BANNER_3;
+
 	if ('-' == argv[1][0]) {
-		printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
-		printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
-		printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
 		return 0;
 	}
 
-	std::string cfgFile(argv[1]);
+	CDStarGatewayConfig * config = new CDStarGatewayConfig(std::string((argv[1])));
+	if(!config->load()) {
+		CLog::logFatal("Invalid configuration, aborting");
+		return false;
+	}
 
-	CDStarGatewayApp gateway(cfgFile);
+	TDaemon daemon;
+	config->getDaemon(daemon);
+
+	if (daemon.daemon) {
+		CLog::logInfo("Configured as a daemon, detaching ...");
+		auto res = CDaemon::daemonise(daemon.pidFile, daemon.user);
+
+		switch (res)
+		{
+			case DR_PARENT:
+				return 0;
+			case DR_CHILD:
+				break;
+			case DR_PIDFILE_FAILED:
+			case DR_FAILURE:
+			default:
+				CLog::logFatal("Failed to run as daemon");
+				delete config;
+				CLog::finalise();
+				return 1;
+		}
+	}
+
+	// Setup Log
+	TLog logConf;
+	config->getLog(logConf);
+	CLog::finalise();
+	if(logConf.m_displayLevel	!= LOG_NONE && !daemon.daemon) CLog::addTarget(new CLogConsoleTarget(logConf.m_displayLevel));
+	if(logConf.m_fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(logConf.m_fileLevel, logConf.logDir, logConf.m_fileRotate));
+
+	//write banner in log file if we are dameon
+	if(daemon.daemon) {
+		CLog::logInfo(BANNER_1);
+		CLog::logInfo(BANNER_2);
+		CLog::logInfo(BANNER_3);
+	}
+
+	CDStarGatewayApp gateway(config);
 	
 	if (!gateway.init()) {
 		return 1;
@@ -87,11 +133,18 @@ int main(int argc, char *argv[])
 
 	gateway.run();
 
+	if(daemon.daemon) {
+		CDaemon::finalise();
+	}
+
 	return 0;
 }
 
-CDStarGatewayApp::CDStarGatewayApp(const std::string &configFile) : m_configFile(configFile), m_thread(NULL)
+CDStarGatewayApp::CDStarGatewayApp(CDStarGatewayConfig * config) :
+m_config(config),
+m_thread(NULL)
 {
+	assert(config != nullptr);
 	g_app = this;
 }
 
@@ -102,7 +155,6 @@ CDStarGatewayApp::~CDStarGatewayApp()
 bool CDStarGatewayApp::init()
 {
 	return createThread();
-	//2021-12-31 F4FXL This is ugly, if we failed to create the thread we do not clean up ... :(
 }
 
 void CDStarGatewayApp::run()
@@ -115,30 +167,18 @@ void CDStarGatewayApp::run()
 
 bool CDStarGatewayApp::createThread()
 {
-	printf("\n%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
-	printf("DStarGateway comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n");
-	printf("This is free software, and you are welcome to distribute it\nunder certain conditions that are discussed in the LICENSE file.\n\n");
-
-	CDStarGatewayConfig config(m_configFile);
-	if(!config.load()) {
-		CLog::logFatal("Invalid configuration, aborting");
-		return false;
-	}
-
-	// Setup Log
+	// Log
 	TLog log;
-	config.getLog(log);
-	CLog::finalise();
-	if(log.m_displayLevel	!= LOG_NONE) CLog::addTarget(new CLogConsoleTarget(log.m_displayLevel));
-	if(log.m_fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(log.m_fileLevel, log.logDir, log.m_fileRotate));
+	m_config->getLog(log);
 
+	// Paths
 	Tpaths paths;
-	config.getPaths(paths);
+	m_config->getPaths(paths);
 	m_thread = new CDStarGatewayThread(log.logDir, paths.dataDir, "");
 
 	// Setup the gateway
 	TGateway gatewayConfig;
-	config.getGateway(gatewayConfig);
+	m_config->getGateway(gatewayConfig);
 	m_thread->setGateway(gatewayConfig.type, gatewayConfig.callsign, gatewayConfig.address);
 	m_thread->setLanguage(gatewayConfig.language);
 	m_thread->setLocation(gatewayConfig.latitude, gatewayConfig.longitude);
@@ -146,12 +186,12 @@ bool CDStarGatewayApp::createThread()
 #ifdef USE_GPSD
 	// Setup GPSD
 	TGPSD gpsdConfig;
-	config.getGPSD(gpsdConfig);
+	m_config->getGPSD(gpsdConfig);
 #endif
 
 	// Setup APRS
 	TAPRS aprsConfig;
-	config.getAPRS(aprsConfig);
+	m_config->getAPRS(aprsConfig);
 	CAPRSHandler * aprsWriter = NULL;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
 		aprsWriter = new CAPRSHandler(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
@@ -176,9 +216,9 @@ bool CDStarGatewayApp::createThread()
 	bool ddEnabled = false;
 	bool atLeastOneRepeater = false;
 	CRepeaterProtocolHandlerFactory repeaterProtocolFactory;
-	for(unsigned int i = 0U; i < config.getRepeaterCount(); i++) {
+	for(unsigned int i = 0U; i < m_config->getRepeaterCount(); i++) {
 		TRepeater rptrConfig;
-		config.getRepeater(i, rptrConfig);
+		m_config->getRepeater(i, rptrConfig);
 		auto  repeaterProtocolHandler = repeaterProtocolFactory.getRepeaterProtocolHandler(rptrConfig.hwType, gatewayConfig, rptrConfig.address, rptrConfig.port);
 		if(repeaterProtocolHandler == nullptr)
 			continue;
@@ -221,9 +261,9 @@ bool CDStarGatewayApp::createThread()
 	// Setup ircddb
 	auto ircddbVersionInfo = "linux_" + PRODUCT_NAME + "-" + VERSION;
 	std::vector<CIRCDDB *> clients;
-	for(unsigned int i=0; i < config.getIrcDDBCount(); i++) {
+	for(unsigned int i=0; i < m_config->getIrcDDBCount(); i++) {
 		TircDDB ircDDBConfig;
-		config.getIrcDDB(i, ircDDBConfig);
+		m_config->getIrcDDB(i, ircDDBConfig);
 		CLog::logInfo("ircDDB Network %d set to %s user: %s, Quadnet %d", i + 1,ircDDBConfig.hostname.c_str(), ircDDBConfig.username.c_str(), ircDDBConfig.isQuadNet);
 		CIRCDDB * ircDDB = new CIRCDDBClient(ircDDBConfig.hostname, 9007U, ircDDBConfig.username, ircDDBConfig.password, ircddbVersionInfo, gatewayConfig.address, ircDDBConfig.isQuadNet);
 		clients.push_back(ircDDB);
@@ -240,31 +280,31 @@ bool CDStarGatewayApp::createThread()
 
 	// Setup Dextra
 	TDextra dextraConfig;
-	config.getDExtra(dextraConfig);
+	m_config->getDExtra(dextraConfig);
 	CLog::logInfo("DExtra enabled: %d, max. dongles: %u", int(dextraConfig.enabled), dextraConfig.maxDongles);
 	m_thread->setDExtra(dextraConfig.enabled, dextraConfig.maxDongles);
 
 	// Setup DCS
 	TDCS dcsConfig;
-	config.getDCS(dcsConfig);
+	m_config->getDCS(dcsConfig);
 	CLog::logInfo("DCS enabled: %d", int(dcsConfig.enabled));
 	m_thread->setDCS(dcsConfig.enabled);
 
 	// Setup DPlus
 	TDplus dplusConfig;
-	config.getDPlus(dplusConfig);
+	m_config->getDPlus(dplusConfig);
 	CLog::logInfo("D-Plus enabled: %d, max. dongles: %u, login: %s", int(dplusConfig.enabled), dplusConfig.maxDongles, dplusConfig.login.c_str());
 	m_thread->setDPlus(dplusConfig.enabled, dplusConfig.maxDongles, dplusConfig.login);
 
 	// Setup XLX
 	TXLX xlxConfig;
-	config.getXLX(xlxConfig);
+	m_config->getXLX(xlxConfig);
 	CLog::logInfo("XLX enabled: %d, Hosts file url: %s", int(xlxConfig.enabled), xlxConfig.url.c_str());
 	m_thread->setXLX(xlxConfig.enabled, xlxConfig.enabled ? CXLXHostsFileDownloader::download(xlxConfig.url) : "");
 
 	// Setup Remote
 	TRemote remoteConfig;
-	config.getRemote(remoteConfig);
+	m_config->getRemote(remoteConfig);
 	CLog::logInfo("Remote enabled: %d, port %u", int(remoteConfig.enabled), remoteConfig.port);
 	m_thread->setRemote(remoteConfig.enabled, remoteConfig.password, remoteConfig.port);
 
@@ -292,12 +332,14 @@ void CDStarGatewayApp::sigHandler(int sig)
 void CDStarGatewayApp::sigHandlerFatal(int sig)
 {
 	CLog::logFatal("Caught signal : %s", strsignal(sig));
+	fprintf(stderr, "Caught signal : %s\n", strsignal(sig));
 #ifdef DEBUG_DSTARGW
 	std::stringstream stackTrace;
 	stackTrace <<  boost::stacktrace::stacktrace();
 	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+	fprintf(stderr, "Stack Trace : \n%s\n", stackTrace.str().c_str());
 #endif
-	exit(1);
+	exit(3);
 }
 
 void CDStarGatewayApp::terminateHandler()
@@ -316,13 +358,15 @@ void CDStarGatewayApp::terminateHandler()
         }
 		else {
 			CLog::logFatal("Unhandled unknown exception occured");
+			fprintf(stderr, "Unknown ex\n");
 		}
     } catch(const std::exception& e) {
         CLog::logFatal("Unhandled exception occured %s", e.what());
+		fprintf(stderr, "Unhandled ex %s\n", e.what());
     }
 
 #ifdef DEBUG_DSTARGW
 	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
 #endif
-	exit(1);
+	exit(2);
 }

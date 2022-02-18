@@ -1,6 +1,5 @@
 /*
- *   Copyright (C) 2010,2011 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017,2018 by Thomas A. Early N7TAE
+ *   Copyright (c) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,27 +16,26 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#pragma once
+#include <string>
 
-#include "DStarGatewayThread.h"
-#include "DStarGatewayConfig.h"
-
-class CDStarGatewayApp
+enum DAEMONIZE_RESULT
 {
-private:
-	CDStarGatewayConfig * m_config;
-	CDStarGatewayThread * m_thread;
-	bool createThread();
-	static CDStarGatewayApp * g_app;
+    DR_PARENT,
+    DR_CHILD,
+    DR_FAILURE,
+    DR_PIDFILE_FAILED
+};
 
+class CDaemon
+{
 public:
-	CDStarGatewayApp(CDStarGatewayConfig * config);
-	~CDStarGatewayApp();
+    static DAEMONIZE_RESULT daemonise(const std::string& pidFile, const std::string& user);
+    static void finalise();
 
-	bool init();
-	void run();
+private:
+    static int tryGetLock(const std::string& file);
+    static void releaseLock(int fd, const std::string& file);
 
-	static void sigHandlerFatal(int sig);
-	static void sigHandler(int sig);
-	static void terminateHandler();
+    static int m_pid_fd;
+    static std::string m_pidFileName;
 };

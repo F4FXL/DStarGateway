@@ -21,7 +21,7 @@
 
 #include <string>
 
-const std::string APPLICATION_NAME("ircDDB Gateway");
+const std::string APPLICATION_NAME("dstargateway");
 
 const std::string CONFIG_FILE_NAME("dstargateway");
 

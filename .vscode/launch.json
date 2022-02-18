@@ -25,6 +25,10 @@
                     "description": "Définir la version désassemblage sur Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
+                },
+                {
+                    "description": "Tell GDB to follow forks child",
+                    "text": "-gdb-set follow-fork-mode child"
                 }
             ]
         },
