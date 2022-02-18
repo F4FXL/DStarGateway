@@ -131,19 +131,7 @@ m_restrictList(NULL)
 
 CDStarGatewayThread::~CDStarGatewayThread()
 {
-	CHeaderData::finalise();
-	CG2Handler::finalise();
-	CDExtraHandler::finalise();
-	CDPlusHandler::finalise();
-	CDCSHandler::finalise();
-	CRepeaterHandler::finalise();
-#ifdef USE_STARNET
-	CStarNetHandler::finalise();
-#endif
-#ifdef USE_CCS
-	CCCSHandler::finalise();
-#endif
-	CAudioUnit::finalise();
+
 }
 
 void* CDStarGatewayThread::Entry()
@@ -491,7 +479,19 @@ void* CDStarGatewayThread::Entry()
 		delete headerLogger;
 	}
 
+	CHeaderData::finalise();
+	CG2Handler::finalise();
+	CDExtraHandler::finalise();
 	CDPlusHandler::finalise();
+	CDCSHandler::finalise();
+	CRepeaterHandler::finalise();
+#ifdef USE_STARNET
+	CStarNetHandler::finalise();
+#endif
+#ifdef USE_CCS
+	CCCSHandler::finalise();
+#endif
+	CAudioUnit::finalise();
 
 	return NULL;
 }

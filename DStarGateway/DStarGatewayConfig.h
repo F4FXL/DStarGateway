@@ -26,6 +26,12 @@
 #include "LogSeverity.h"
 
 typedef struct {
+	bool daemon;
+	std::string pidFile;
+	std::string user;
+} TDaemon;
+
+typedef struct {
 	GATEWAY_TYPE type;
 	std::string callsign;
 	std::string address;
@@ -150,6 +156,7 @@ public:
 #ifdef USE_GPSD
 	void getGPSD(TGPSD & gpsd) const;
 #endif
+	void getDaemon(TDaemon & gen) const;
 
 private:
 	bool open(CConfig & cfg);
@@ -167,6 +174,7 @@ private:
 #ifdef USE_GPSD
 	bool loadGPSD(const CConfig & cfg);
 #endif
+	bool loadDaemon(const CConfig & cfg);
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -181,6 +189,8 @@ private:
 #ifdef USE_GPSD
 	TGPSD m_gpsd;
 #endif
+	TDaemon m_daemon;
+
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };
