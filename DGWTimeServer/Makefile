@@ -3,7 +3,7 @@ OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
 dgwtimeserver: ../VersionInfo/GitVersion.h $(OBJS) ../DStarBase/DStarBase.a ../BaseCommon/BaseCommon.a
-#	$(CC) $(CPPFLAGS) -o dgwtimeserver $(OBJS) ../DStarBase/DStarBase.a ../BaseCommon/BaseCommon.a $(LDFLAGS)
+	$(CC) $(CPPFLAGS) -o dgwtimeserver $(OBJS) ../DStarBase/DStarBase.a ../BaseCommon/BaseCommon.a $(LDFLAGS)
 	echo bla
 
 %.o : %.cpp
@@ -16,7 +16,7 @@ clean:
 .PHONY install:
 install: dgwtimeserver
 # copy executable
-#	@cp -f dgwtimeserver $(BIN_DIR)
+	@cp -f dgwtimeserver $(BIN_DIR)
 
 ../BaseCommon/BaseCommon.a:
 ../DStarBase/DStarBase.a:
