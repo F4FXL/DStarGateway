@@ -72,15 +72,14 @@ public:
 	void kill();
 
 private:
-	CUDPReaderWriter m_socket;
 	std::string         m_callsign;
 	std::string         m_callsignA;
 	std::string         m_callsignB;
 	std::string         m_callsignC;
 	std::string         m_callsignD;
-	std::string         m_callsignE;
 	std::string         m_callsignG;
 	in_addr          m_address;
+	std::string		 m_addressStr;
 	LANGUAGE         m_language;
 	FORMAT           m_format;
 	INTERVAL         m_interval;
@@ -110,8 +109,8 @@ private:
 	std::vector<std::string> sendTimePtPT(unsigned int hour, unsigned int min);
 
 	bool send(const std::vector<std::string>& words, unsigned int hour, unsigned int min);
-	bool sendHeader(const CHeaderData& header);
-	bool sendData(const CAMBEData& data);
+	bool sendHeader(CUDPReaderWriter& socket, const CHeaderData& header);
+	bool sendData(CUDPReaderWriter& socket, const CAMBEData& data);
 
 	bool loadAMBE();
 	bool readAMBE(const std::string& dir, const std::string& name);

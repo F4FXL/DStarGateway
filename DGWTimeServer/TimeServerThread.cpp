@@ -38,15 +38,14 @@ const unsigned int SILENCE_LENGTH = 10U;
 
 CTimeServerThread::CTimeServerThread() :
 CThread("Time Server"),
-m_socket("", 0U),
 m_callsign(),
 m_callsignA(),
 m_callsignB(),
 m_callsignC(),
 m_callsignD(),
-m_callsignE(),
 m_callsignG(),
 m_address(),
+m_addressStr(),
 m_language(LANG_ENGLISH_UK_1),
 m_format(FORMAT_VOICE_TIME),
 m_interval(INTERVAL_15MINS),
@@ -81,7 +80,7 @@ CTimeServerThread::~CTimeServerThread()
 void * CTimeServerThread::Entry()
 {
 	// Wait here until we have the essentials to run
-	while (!m_killed && m_address.s_addr == INADDR_NONE && m_callsignA.empty() && m_callsignB.empty() && m_callsignC.empty() && m_callsignD.empty() && m_callsignE.empty())
+	while (!m_killed && m_address.s_addr == INADDR_NONE && m_callsignA.empty() && m_callsignB.empty() && m_callsignC.empty() && m_callsignD.empty())
 		Sleep(500UL);		// 1/2 sec
 
 	if (m_killed)
@@ -127,8 +126,6 @@ void * CTimeServerThread::Entry()
 
 	CLog::logInfo(("Stopping the Time Server thread"));
 
-	m_socket.close();
-
 	return nullptr;
 }
 
@@ -163,12 +160,9 @@ bool CTimeServerThread::setGateway(const std::string& callsign, const std::strin
 
 	m_callsign.push_back(' ');
 
+	m_addressStr.assign(address);
 	m_address = CUDPReaderWriter::lookup(address);
 	m_dataPath.assign(dataPath);
-
-	bool ret = m_socket.open();
-	if (!ret)
-		return false;
 
 	return true;
 }
@@ -1192,7 +1186,6 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 	unsigned int idB = CHeaderData::createId();
 	unsigned int idC = CHeaderData::createId();
 	unsigned int idD = CHeaderData::createId();
-	unsigned int idE = CHeaderData::createId();
 
 	CHeaderData header;
 	header.setMyCall1(m_callsign);
@@ -1328,41 +1321,48 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		return false;
 	}
 
+	CUDPReaderWriter * socketA = nullptr;
+	CUDPReaderWriter * socketB = nullptr;
+	CUDPReaderWriter * socketC = nullptr;
+	CUDPReaderWriter * socketD = nullptr; 
+
 	if (!m_callsignA.empty()) {
+		socketA = new CUDPReaderWriter("", 0U);
+		socketA->open();
 		header.setRptCall2(m_callsignA);
 		header.setId(idA);
-		sendHeader(header);
+		sendHeader(*socketA, header);
 	}
 
 	if (!m_callsignB.empty()) {
+		socketB = new CUDPReaderWriter("", 0U);
+		socketB->open();
 		header.setRptCall2(m_callsignB);
 		header.setId(idB);
-		sendHeader(header);
+		sendHeader(*socketB, header);
 	}
 
 	if (!m_callsignC.empty()) {
+		socketC = new CUDPReaderWriter("", 0U);
+		socketC->open();
 		header.setRptCall2(m_callsignC);
 		header.setId(idC);
-		sendHeader(header);
+		sendHeader(*socketC, header);
 	}
 
 	if (!m_callsignD.empty()) {
+		socketD = new CUDPReaderWriter("", 0U);
+		socketD->open();
 		header.setRptCall2(m_callsignD);
 		header.setId(idD);
-		sendHeader(header);
+		sendHeader(*socketD, header);
 	}
 
-	if (!m_callsignE.empty()) {
-		header.setRptCall2(m_callsignE);
-		header.setId(idE);
-		sendHeader(header);
-	}
-
+	bool loop = true;
 	unsigned int out = 0U;
-
 	auto start = std::chrono::high_resolution_clock::now();
 
-	for (;;) {
+	for (;loop;) {
 		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		needed /= DSTAR_FRAME_TIME_MS;
 
@@ -1373,40 +1373,56 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 
 			if (!m_callsignA.empty()) {
 				data->setId(idA);
-				sendData(*data);
+				sendData(*socketA, *data);
 			}
 
 			if (!m_callsignB.empty()) {
 				data->setId(idB);
-				sendData(*data);
+				sendData(*socketB, *data);
 			}
 
 			if (!m_callsignC.empty()) {
 				data->setId(idC);
-				sendData(*data);
+				sendData(*socketC, *data);
 			}
 
 			if (!m_callsignD.empty()) {
 				data->setId(idD);
-				sendData(*data);
-			}
-
-			if (!m_callsignE.empty()) {
-				data->setId(idE);
-				sendData(*data);
+				sendData(*socketD, *data);
 			}
 
 			delete data;
 
-			if (m_in == out)
-				return true;
+			if (m_in == out) {
+				loop = false;
+				break;
+			}
 		}
 
 		Sleep(10UL);
 	}
+
+	if(socketA != nullptr) {
+		socketA->close();
+		delete socketA;
+	}
+	if(socketB != nullptr) {
+		socketB->close();
+		delete socketB;
+	}
+	if(socketC != nullptr) {
+		socketC->close();
+		delete socketC;
+	}
+	if(socketD != nullptr) {
+		socketD->close();
+		delete socketD;
+	}
+
+	return true;
 }
 
-bool CTimeServerThread::sendHeader(const CHeaderData &header)
+bool CTimeServerThread::sendHeader(CUDPReaderWriter& socket, const CHeaderData &header)
 {
 	unsigned char buffer[60U];
 	unsigned int length = header.getG2Data(buffer, 60U, true);
@@ -1416,7 +1432,7 @@ bool CTimeServerThread::sendHeader(const CHeaderData &header)
 	return true;
 #else
 	for (unsigned int i = 0U; i < 5U; i++) {
-		bool res = m_socket.write(buffer, length, header.getYourAddress(), header.getYourPort());
+		bool res = socket.write(buffer, length, header.getYourAddress(), header.getYourPort());
 		if (!res)
 			return false;
 	}
@@ -1425,7 +1441,7 @@ bool CTimeServerThread::sendHeader(const CHeaderData &header)
 #endif
 }
 
-bool CTimeServerThread::sendData(const CAMBEData& data)
+bool CTimeServerThread::sendData(CUDPReaderWriter& socket, const CAMBEData& data)
 {
 	unsigned char buffer[40U];
 	unsigned int length = data.getG2Data(buffer, 40U);
@@ -1434,6 +1450,6 @@ bool CTimeServerThread::sendData(const CAMBEData& data)
 	CUtils::dump(("Sending Data"), buffer, length);
 	return true;
 #else
-	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
+	return socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
 #endif
 }
