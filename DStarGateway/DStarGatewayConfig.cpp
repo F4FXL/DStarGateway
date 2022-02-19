@@ -199,6 +199,7 @@ bool CDStarGatewayConfig::loadPaths(const CConfig & cfg)
 
 bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 {
+	m_repeaters.clear();
 	for(unsigned int i = 0; i < 4; i++) {
 		std::string section = CStringUtils::string_format("repeater_%d", i+ 1);
 		bool repeaterEnabled;
