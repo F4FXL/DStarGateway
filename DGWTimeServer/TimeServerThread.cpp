@@ -108,8 +108,8 @@ void * CTimeServerThread::Entry()
 		unsigned int hour = tm->tm_hour;
 		unsigned int  min = tm->tm_min;
 
-		if (min != lastMin)
-			sendTime(15, 45);
+		// if (min != lastMin)
+		// 	sendTime(15, 45);
 
 		if (min != lastMin) {
 			if (m_interval == INTERVAL_15MINS && (min == 0U || min == 15U || min == 30U || min == 45U))
