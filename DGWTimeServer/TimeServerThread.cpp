@@ -36,11 +36,6 @@ const unsigned int MAX_FRAMES = 60U * DSTAR_FRAMES_PER_SEC;
 
 const unsigned int SILENCE_LENGTH = 10U;
 
-enum SLOW_DATA {
-	SD_HEADER,
-	SD_TEXT
-};
-
 CTimeServerThread::CTimeServerThread() :
 CThread("Time Server"),
 m_socket("", 0U),
@@ -112,6 +107,9 @@ void * CTimeServerThread::Entry()
 
 		unsigned int hour = tm->tm_hour;
 		unsigned int  min = tm->tm_min;
+
+		if (min != lastMin)
+			sendTime(15, 45);
 
 		if (min != lastMin) {
 			if (m_interval == INTERVAL_15MINS && (min == 0U || min == 15U || min == 30U || min == 45U))
@@ -1144,8 +1142,6 @@ bool CTimeServerThread::lookup(const std::string &id)
 	unsigned int  start = info->getStart();
 	unsigned int length = info->getLength();
 
-	SLOW_DATA slowData = SD_TEXT;
-
 	for (unsigned int i = 0U; i < length; i++) {
 		unsigned char* dataIn = m_ambe + (start + i) * VOICE_FRAME_LENGTH_BYTES;
 
@@ -1161,23 +1157,8 @@ bool CTimeServerThread::lookup(const std::string &id)
 			::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
 			m_encoder.sync();
 
-			switch (slowData) {
-				case SD_HEADER:
-					slowData = SD_TEXT;
-					break;
-				case SD_TEXT:
-					slowData = SD_HEADER;
-					break;
-			}
 		} else {
-			switch (slowData) {
-				case SD_HEADER:
-					m_encoder.getHeaderData(buffer + VOICE_FRAME_LENGTH_BYTES);
-					break;
-				case SD_TEXT:
-					m_encoder.getTextData(buffer + VOICE_FRAME_LENGTH_BYTES);
-					break;
-			}
+			m_encoder.getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 		}
 
 		dataOut->setData(buffer, DV_FRAME_LENGTH_BYTES);
