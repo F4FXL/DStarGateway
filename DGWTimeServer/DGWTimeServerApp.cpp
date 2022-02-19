@@ -30,7 +30,7 @@
 #include "Log.h"
 
 CDGWTimeServerApp * CDGWTimeServerApp::g_app = nullptr;
-const std::string BANNER_1 = CStringUtils::string_format("%s %s Copyright (C) %s\n", APPLICATION_NAME.c_str(),  VENDOR_NAME.c_str());
+const std::string BANNER_1 = CStringUtils::string_format("%s v%s Copyright (C) %s\n", APPLICATION_NAME.c_str(), LONG_VERSION.c_str(),  VENDOR_NAME.c_str());
 const std::string BANNER_2 = "DGWTimeServer comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n";
 const std::string BANNER_3 = "This is free software, and you are welcome to distribute it under certain conditions that are discussed in the LICENSE file.\n\n";
 
