@@ -19,7 +19,7 @@
 
 #pragma once
 
-const std::string APPLICATION_NAME("DStarGateway time Server");
+const std::string APPLICATION_NAME("DStarGateway Time Server");
 
 enum LANGUAGE {
 	LANG_ENGLISH_UK_1,

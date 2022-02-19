@@ -20,15 +20,40 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <sstream>
+#ifdef DEBUG_DSTARGW
+#include <boost/stacktrace.hpp>
+#endif
 
 #include "DGWTimeServerApp.h"
+#include "Version.h"
+#include "Log.h"
+
+CDGWTimeServerApp * CDGWTimeServerApp::g_app = nullptr;
+const std::string BANNER_1 = CStringUtils::string_format("%s %s Copyright (C) %s\n", APPLICATION_NAME.c_str(),  VENDOR_NAME.c_str());
+const std::string BANNER_2 = "DGWTimeServer comes with ABSOLUTELY NO WARRANTY; see the LICENSE for details.\n";
+const std::string BANNER_3 = "This is free software, and you are welcome to distribute it under certain conditions that are discussed in the LICENSE file.\n\n";
 
 int main(int argc, char * argv[])
 {
+	std::set_terminate(CDGWTimeServerApp::terminateHandler);
+
+	signal(SIGSEGV, CDGWTimeServerApp::sigHandlerFatal);
+	signal(SIGILL, CDGWTimeServerApp::sigHandlerFatal);
+	signal(SIGFPE, CDGWTimeServerApp::sigHandlerFatal);
+	signal(SIGABRT, CDGWTimeServerApp::sigHandlerFatal);
+	signal(SIGTERM, CDGWTimeServerApp::sigHandler);
+	signal(SIGINT, CDGWTimeServerApp::sigHandler);
+
     if (2 != argc) {
 		printf("usage: %s path_to_config_file\n", argv[0]);
 		printf("       %s --version\n", argv[0]);
 		return 1;
+	}
+
+	std::cout << std::endl << BANNER_1 << BANNER_2 << BANNER_3;
+	if(argv[1][0] == '-') {
+		return 0;
 	}
 
 	std::string configfile(argv[1]);
@@ -92,4 +117,55 @@ bool CDGWTimeServerApp::createThread()
 	}
 
 	return ret;
+}
+
+void CDGWTimeServerApp::sigHandler(int sig)
+{
+	CLog::logInfo("Caught signal : %s, shutting down gateway", strsignal(sig));
+
+	if(g_app != nullptr && g_app->m_thread != nullptr) {
+		g_app->m_thread->kill();
+	}
+}
+
+void CDGWTimeServerApp::sigHandlerFatal(int sig)
+{
+	CLog::logFatal("Caught signal : %s", strsignal(sig));
+	fprintf(stderr, "Caught signal : %s\n", strsignal(sig));
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+	fprintf(stderr, "Stack Trace : \n%s\n", stackTrace.str().c_str());
+#endif
+	exit(3);
+}
+
+void CDGWTimeServerApp::terminateHandler()
+{
+#ifdef DEBUG_DSTARGW
+	std::stringstream stackTrace;
+	stackTrace <<  boost::stacktrace::stacktrace();
+#endif
+
+	std::exception_ptr eptr;
+	eptr = std::current_exception(); 
+
+	try {
+        if (eptr != nullptr) {
+            std::rethrow_exception(eptr);
+        }
+		else {
+			CLog::logFatal("Unhandled unknown exception occured");
+			fprintf(stderr, "Unknown ex\n");
+		}
+    } catch(const std::exception& e) {
+        CLog::logFatal("Unhandled exception occured %s", e.what());
+		fprintf(stderr, "Unhandled ex %s\n", e.what());
+    }
+
+#ifdef DEBUG_DSTARGW
+	CLog::logFatal("Stack Trace : \n%s", stackTrace.str().c_str());
+#endif
+	exit(2);
 }

@@ -25,8 +25,6 @@
 
 class CDGWTimeServerApp
 {
-private:
-    /* data */
 public:
     CDGWTimeServerApp(const CTimeServerConfig * config);
     ~CDGWTimeServerApp();
@@ -34,8 +32,14 @@ public:
     bool init();
     void run();
 
+    static void sigHandler(int sig);
+    static void sigHandlerFatal(int sig);
+    static void terminateHandler();
+
 private:
     bool createThread();
+
+    static CDGWTimeServerApp * g_app;
 
     const CTimeServerConfig * m_config;
     CTimeServerThread * m_thread;
