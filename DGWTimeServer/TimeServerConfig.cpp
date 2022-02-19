@@ -81,6 +81,11 @@ bool CTimeServerConfig::loadRepeaters(const CConfig & cfg)
 
 		TRepeater * repeater = new TRepeater;
 		ret = cfg.getValue(section, "band", repeater->band, 1, 2, "") && ret;
+		if(!ret) {
+			delete repeater;
+			continue;
+		}
+		boost::to_upper(repeater->band);
 
 		bool alreadyConfigured = std::any_of(m_repeaters.begin(), m_repeaters.end(), [repeater](TRepeater * r) { return r->band == repeater->band;});
 		if(alreadyConfigured) {
