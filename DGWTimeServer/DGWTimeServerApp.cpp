@@ -29,6 +29,8 @@
 #include "Version.h"
 #include "Log.h"
 #include "Daemon.h"
+#include "LogConsoleTarget.h"
+#include "LogFileTarget.h"
 
 CDGWTimeServerApp * CDGWTimeServerApp::g_app = nullptr;
 const std::string BANNER_1 = CStringUtils::string_format("%s v%s Copyright (C) %s\n", APPLICATION_NAME.c_str(), LONG_VERSION.c_str(),  VENDOR_NAME.c_str());
@@ -57,11 +59,13 @@ int main(int argc, char * argv[])
 		return 0;
 	}
 
+	// Load config
 	std::string configfile(argv[1]);
 	CTimeServerConfig config(configfile);
 	if(!config.load())
 		return 1;
 
+	// Do daemon stuff
 	TDaemon daemon;
 	config.getDameon(daemon);
 	if (daemon.daemon) {
@@ -83,14 +87,21 @@ int main(int argc, char * argv[])
 		}
 	}
 
+	// Setup Log
+	TLog logConf;
+	config.getLog(logConf);
+	CLog::finalise();
+	if(logConf.displayLevel	!= LOG_NONE && !daemon.daemon) CLog::addTarget(new CLogConsoleTarget(logConf.displayLevel));
+	if(logConf.fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(logConf.fileLevel, logConf.logDir, logConf.fileRoot, logConf.fileRotate));
+
+	// Start the app
 	CDGWTimeServerApp app(&config);
-
-	if(!app.init())
+	if(app.init()) {
+		app.run();
 		return 0;
+	}
 
-	app.run();
-
-	return 0;
+	return 1;
 }
 
 CDGWTimeServerApp::CDGWTimeServerApp(const CTimeServerConfig * config) :

@@ -23,6 +23,7 @@
 
 #include "Config.h"
 #include "TimeServerDefs.h"
+#include "Log.h"
 
 typedef struct {
     std::string callsign;
@@ -46,6 +47,14 @@ typedef struct {
     std::string data;
 } TPaths;
 
+typedef struct {
+	std::string logDir;
+	LOG_SEVERITY displayLevel;
+	LOG_SEVERITY fileLevel;
+	std::string fileRoot;
+	bool fileRotate;
+} TLog;
+
 class CTimeServerConfig
 {
 public:
@@ -58,6 +67,7 @@ public:
     unsigned int getRepeaterCount() const;
     void getRepeater(unsigned int idx, TRepeater& repeater)  const;
     void getPaths(TPaths& paths) const;
+    void getLog(TLog& log) const;
 
 private:
 	bool open(CConfig & cfg);
@@ -65,10 +75,12 @@ private:
     bool loadTimeServer(const CConfig & cfg);
     bool loadDaemon(const CConfig & cfg);
     bool loadPaths(const CConfig & cfg);
+    bool loadLog(const CConfig & cfg);
 
     std::string m_fileName;
     std::vector<TRepeater *> m_repeaters;
     TTimeServer m_timeServer;
     TDaemon m_daemon;
     TPaths m_paths;
+    TLog m_log;
 };
