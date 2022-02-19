@@ -19,9 +19,9 @@
 
 #include <string>
 #include <iostream>
+#include <cassert>
 
 #include "DGWTimeServerApp.h"
-#include "TimeServerConfig.h"
 
 int main(int argc, char * argv[])
 {
@@ -34,7 +34,62 @@ int main(int argc, char * argv[])
 	std::string configfile(argv[1]);
 	CTimeServerConfig config(configfile);
 	if(!config.load())
+		return 1;
+
+	CDGWTimeServerApp app(&config);
+
+	if(!app.init())
 		return 0;
 
-	return 1;
+	app.run();
+
+	return 0;
+}
+
+CDGWTimeServerApp::CDGWTimeServerApp(const CTimeServerConfig * config) :
+m_config(config)
+{
+	assert(config != nullptr);
+}
+
+CDGWTimeServerApp::~CDGWTimeServerApp()
+{
+	delete m_thread;
+}
+
+bool CDGWTimeServerApp::init()
+{
+	return createThread();
+}
+
+void CDGWTimeServerApp::run()
+{
+	m_thread->Run();
+	m_thread->Wait();
+}
+
+bool CDGWTimeServerApp::createThread()
+{
+	m_thread = new CTimeServerThread();
+
+	TTimeServer timeserver;
+	m_config->getTimeServer(timeserver);
+
+	std::vector<std::string> rptrs = { "", "", "", "" };
+	TRepeater repeater;
+	for(unsigned int i = 0u; i < m_config->getRepeaterCount(); i++) {
+		m_config->getRepeater(i, repeater);
+		rptrs[i].assign(repeater.band);
+	}
+
+	TPaths paths;
+	m_config->getPaths(paths);
+
+	m_thread = new CTimeServerThread();
+	bool ret = m_thread->setGateway(timeserver.callsign, rptrs[0], rptrs[1], rptrs[2], rptrs[3], timeserver.address, paths.data);
+	if(ret) {
+		m_thread->setAnnouncements(timeserver.language, timeserver.format, timeserver.interval);
+	}
+
+	return ret;
 }

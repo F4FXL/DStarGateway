@@ -49,6 +49,7 @@ bool CTimeServerConfig::load()
 		ret = loadTimeServer(cfg) && ret;
 		ret = loadRepeaters(cfg) && ret;
         ret = loadDaemon(cfg) && ret;
+		ret = loadPaths(cfg) && ret;
     }
 
 	return ret;
@@ -136,4 +137,35 @@ bool CTimeServerConfig::loadDaemon(const CConfig & cfg)
 	ret = cfg.getValue("daemon", "pidfile", m_daemon.pidFile, 0, 1024, "") && ret;
 	ret = cfg.getValue("daemon", "user", m_daemon.user, 0, 1024, "") && ret;
 	return ret;
+}
+
+bool CTimeServerConfig::loadPaths(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("paths", "data", m_paths.data, 1, 1024, "");
+	return ret;
+}
+
+void CTimeServerConfig::getTimeServer(TTimeServer& timeserver) const
+{
+	timeserver = m_timeServer;
+}
+
+void CTimeServerConfig::getDameon(TDaemon& daemon) const
+{
+	daemon = m_daemon;
+}
+
+unsigned int CTimeServerConfig::getRepeaterCount() const
+{
+	return m_repeaters.size();
+} 
+
+void CTimeServerConfig::getRepeater(unsigned int idx, TRepeater& repeater) const
+{
+	repeater = *(m_repeaters[idx]);
+}
+
+void CTimeServerConfig::getPaths(TPaths& paths) const
+{
+	paths = m_paths;
 }

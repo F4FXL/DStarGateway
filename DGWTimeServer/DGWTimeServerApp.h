@@ -19,3 +19,24 @@
 
 #pragma once
 
+#include "TimeServerDefs.h"
+#include "TimeServerConfig.h"
+#include "TimeServerThread.h"
+
+class CDGWTimeServerApp
+{
+private:
+    /* data */
+public:
+    CDGWTimeServerApp(const CTimeServerConfig * config);
+    ~CDGWTimeServerApp();
+
+    bool init();
+    void run();
+
+private:
+    bool createThread();
+
+    const CTimeServerConfig * m_config;
+    CTimeServerThread * m_thread;
+};

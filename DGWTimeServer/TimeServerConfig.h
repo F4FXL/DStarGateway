@@ -33,7 +33,6 @@ typedef struct {
 } TTimeServer;
 
 typedef struct {
-    bool enabled;
     std::string band;
 } TRepeater;
 
@@ -43,6 +42,9 @@ typedef struct {
 	std::string user;
 } TDaemon;
 
+typedef struct {
+    std::string data;
+} TPaths;
 
 class CTimeServerConfig
 {
@@ -51,15 +53,22 @@ public:
 	~CTimeServerConfig();
 
 	bool load();
+    void getTimeServer(TTimeServer& timeserver) const;
+    void getDameon(TDaemon& daemon) const;
+    unsigned int getRepeaterCount() const;
+    void getRepeater(unsigned int idx, TRepeater& repeater)  const;
+    void getPaths(TPaths& paths) const;
 
 private:
 	bool open(CConfig & cfg);
     bool loadRepeaters(const CConfig & cfg);
     bool loadTimeServer(const CConfig & cfg);
     bool loadDaemon(const CConfig & cfg);
+    bool loadPaths(const CConfig & cfg);
 
     std::string m_fileName;
     std::vector<TRepeater *> m_repeaters;
     TTimeServer m_timeServer;
     TDaemon m_daemon;
+    TPaths m_paths;
 };
