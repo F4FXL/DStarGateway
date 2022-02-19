@@ -28,6 +28,7 @@
 #include "DGWTimeServerApp.h"
 #include "Version.h"
 #include "Log.h"
+#include "Daemon.h"
 
 CDGWTimeServerApp * CDGWTimeServerApp::g_app = nullptr;
 const std::string BANNER_1 = CStringUtils::string_format("%s v%s Copyright (C) %s\n", APPLICATION_NAME.c_str(), LONG_VERSION.c_str(),  VENDOR_NAME.c_str());
@@ -60,6 +61,27 @@ int main(int argc, char * argv[])
 	CTimeServerConfig config(configfile);
 	if(!config.load())
 		return 1;
+
+	TDaemon daemon;
+	config.getDameon(daemon);
+	if (daemon.daemon) {
+		CLog::logInfo("Configured as a daemon, detaching ...");
+		auto res = CDaemon::daemonise(daemon.pidFile, daemon.user);
+
+		switch (res)
+		{
+			case DR_PARENT:
+				return 0;
+			case DR_CHILD:
+				break;
+			case DR_PIDFILE_FAILED:
+			case DR_FAILURE:
+			default:
+				CLog::logFatal("Failed to run as daemon");
+				CLog::finalise();
+				return 1;
+		}
+	}
 
 	CDGWTimeServerApp app(&config);
 
