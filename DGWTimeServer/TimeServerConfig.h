@@ -1,5 +1,4 @@
 /*
- *   Copyright (C) 2014 by Jonathan Naylor G4KLX
  *   Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -17,24 +16,50 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#pragma once
+
 #include <string>
-#include <iostream>
+#include <vector>
 
-#include "DGWTimeServerApp.h"
-#include "TimeServerConfig.h"
+#include "Config.h"
+#include "TimeServerDefs.h"
 
-int main(int argc, char * argv[])
+typedef struct {
+    std::string callsign;
+    std::string address;
+    FORMAT format;
+    LANGUAGE language;
+    INTERVAL interval;
+} TTimeServer;
+
+typedef struct {
+    bool enabled;
+    std::string band;
+} TRepeater;
+
+typedef struct {
+	bool daemon;
+	std::string pidFile;
+	std::string user;
+} TDaemon;
+
+
+class CTimeServerConfig
 {
-    if (2 != argc) {
-		printf("usage: %s path_to_config_file\n", argv[0]);
-		printf("       %s --version\n", argv[0]);
-		return 1;
-	}
+public:
+    CTimeServerConfig(const std::string &pathname);
+	~CTimeServerConfig();
 
-	std::string configfile(argv[1]);
-	CTimeServerConfig config(configfile);
-	if(!config.load())
-		return 0;
+	bool load();
 
-	return 1;
-}
+private:
+	bool open(CConfig & cfg);
+    bool loadRepeaters(const CConfig & cfg);
+    bool loadTimeServer(const CConfig & cfg);
+    bool loadDaemon(const CConfig & cfg);
+
+    std::string m_fileName;
+    std::vector<TRepeater *> m_repeaters;
+    TTimeServer m_timeServer;
+    TDaemon m_daemon;
+};

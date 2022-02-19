@@ -4,7 +4,6 @@ DEPS = $(SRCS:.cpp=.d)
 
 dgwtimeserver: ../VersionInfo/GitVersion.h $(OBJS) ../DStarBase/DStarBase.a ../BaseCommon/BaseCommon.a
 	$(CC) $(CPPFLAGS) -o dgwtimeserver $(OBJS) ../DStarBase/DStarBase.a ../BaseCommon/BaseCommon.a $(LDFLAGS)
-	echo bla
 
 %.o : %.cpp
 	$(CC) -I../BaseCommon -I../DStarBase -I../VersionInfo $(CPPFLAGS) -MMD -MD -c $< -o $@

@@ -85,7 +85,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/DGWTimeServer/dgwtimeserver",
-            "args": [],
+            "args": ["${workspaceFolder}/Sandbox/__timeserver_test.cfg"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

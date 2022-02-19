@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2014 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013,2014 by Jonathan Naylor G4KLX
  *   Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -17,24 +17,33 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <string>
-#include <iostream>
+#pragma once
 
-#include "DGWTimeServerApp.h"
-#include "TimeServerConfig.h"
+const std::string APPLICATION_NAME("Time Server");
 
-int main(int argc, char * argv[])
-{
-    if (2 != argc) {
-		printf("usage: %s path_to_config_file\n", argv[0]);
-		printf("       %s --version\n", argv[0]);
-		return 1;
-	}
+enum LANGUAGE {
+	LANG_ENGLISH_UK_1,
+	LANG_ENGLISH_UK_2,
+	LANG_ENGLISH_US_1,
+	LANG_ENGLISH_US_2,
+	LANG_DEUTSCH_1,
+	LANG_DEUTSCH_2,
+	LANG_FRANCAIS,
+	LANG_NEDERLANDS,
+	LANG_SVENSKA,
+	LANG_ESPANOL,
+	LANG_NORSK,
+	LANG_PORTUGUES
+};
 
-	std::string configfile(argv[1]);
-	CTimeServerConfig config(configfile);
-	if(!config.load())
-		return 0;
+enum INTERVAL {
+	INTERVAL_15MINS,
+	INTERVAL_30MINS,
+	INTERVAL_60MINS
+};
 
-	return 1;
-}
+enum FORMAT {
+	FORMAT_VOICE_TIME,
+	FORMAT_VOICE_ALL,
+	FORMAT_TEXT_TIME
+};

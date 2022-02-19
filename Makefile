@@ -65,7 +65,6 @@ DGWTextTransmit/dgwtexttransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DSta
 
 DGWTimeServer/dgwtimeserver: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWTimeServer
-	echo bla
 
 DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWVoiceTransmit
