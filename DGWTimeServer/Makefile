@@ -28,7 +28,7 @@ install: dgwtimeserver
 	systemctl enable dgwtimeserver.service
 	@systemctl daemon-reload
 	@echo "\n"
-	@echo "DGWTimeserver Install complete, edit $(CFG_DIR)dstargateway.cfg and start the daemon with 'systemctl start dgwtimeserver.service'"
+	@echo "DGWTimeserver Install complete, edit $(CFG_DIR)dgwtimeserver.cfg and start the daemon with 'systemctl start dgwtimeserver.service'"
 	@echo "\n"
 
 ../BaseCommon/BaseCommon.a:
