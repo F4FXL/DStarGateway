@@ -1,12 +1,12 @@
 [Unit]
-Description=D-STAR Gateway Daemon
+Description=D-STAR Time Server Daemon
 After=network.target,network-online.target
 Wants=network-online.target
 
 [Service]
 User=dstar
 Type=simple
-ExecStart=/usr/local/bin/dgwtimeserver %CFG_DIR%/dstargateway.cfg
+ExecStart=/usr/local/bin/dgwtimeserver %CFG_DIR%/dgwtimeserver.cfg
 Restart=on-failure
 
 [Install]
