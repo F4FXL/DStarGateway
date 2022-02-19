@@ -74,6 +74,7 @@ int main(int argc, char * argv[])
 CDGWTimeServerApp::CDGWTimeServerApp(const CTimeServerConfig * config) :
 m_config(config)
 {
+	g_app = this;
 	assert(config != nullptr);
 }
 
