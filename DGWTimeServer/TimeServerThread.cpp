@@ -106,8 +106,8 @@ void * CTimeServerThread::Entry()
 		unsigned int hour = tm->tm_hour;
 		unsigned int  min = tm->tm_min;
 
-		// if (min != lastMin)
-		// 	sendTime(15, 45);
+		if (min != lastMin)
+			sendTime(15, 45);
 
 		if (min != lastMin) {
 			if (m_interval == INTERVAL_15MINS && (min == 0U || min == 15U || min == 30U || min == 45U))
@@ -1315,10 +1315,63 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		return false;
 	}
 
-	bool res = true;
+	std::vector<unsigned int> ids;
+	std::vector<CUDPReaderWriter *> sockets;
 	for(auto rpt : m_repeaters) {
-		res = sendToRepeater(header, rpt) && res;
+		auto socket = new CUDPReaderWriter("", 0U);
+		sockets.push_back(socket);
+		ids.push_back(CHeaderData::createId());
 	}
+
+	bool allOpen = std::all_of(sockets.begin(), sockets.end(), [](CUDPReaderWriter* s) { return s->open(); });
+	if(allOpen) {
+		//send headers
+		for(unsigned int i = 0; i < m_repeaters.size(); i++) {
+			CHeaderData headerCopy(header);
+			headerCopy.setId(ids[i]);
+			headerCopy.setRptCall2(m_repeaters[i]);
+			sendHeader(*(sockets[i]), headerCopy);
+			Sleep(5);
+		}
+
+			// send audio
+		bool loop = true;
+		unsigned int out = 0U;
+		auto start = std::chrono::high_resolution_clock::now();
+
+		for (;loop;) {
+			unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
+			needed /= DSTAR_FRAME_TIME_MS;
+
+			while (out < needed) {
+				for(unsigned int i = 0; i < m_repeaters.size(); i++) {
+					CAMBEData data(*(m_data[out]));
+					data.setId(ids[i]);
+					sendData(*(sockets[i]), data);
+					Sleep(5);
+				}
+
+				delete m_data[out];
+				m_data[out] = nullptr;
+				out++;
+
+				if (m_in == out) {
+					loop = false;
+					break;
+				}
+			}
+		}
+	}
+
+	for(auto socket : sockets) {
+		socket->close();
+		delete socket;
+	}
+
+	// bool res = true;
+	// for(auto rpt : m_repeaters) {
+	// 	res = sendToRepeater(header, rpt) && res;
+	// }
 
 	// std::vector<std::packaged_task<bool()> *> tasks;
 
@@ -1335,12 +1388,12 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 	// 	delete task;
 	// }
 
-	for(unsigned int i = 0U; i < MAX_FRAMES; i++) {
-		delete m_data[i];
-		m_data[i] = nullptr;
-	}
+	// for(unsigned int i = 0U; i < MAX_FRAMES; i++) {
+	// 	delete m_data[i];
+	// 	m_data[i] = nullptr;
+	// }
 
-	return res;
+	return true;
 }
 
 bool CTimeServerThread::sendToRepeater(const CHeaderData& h, const std::string& rptCall2)
