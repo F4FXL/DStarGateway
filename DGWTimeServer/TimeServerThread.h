@@ -73,10 +73,7 @@ public:
 
 private:
 	std::string         m_callsign;
-	std::string         m_callsignA;
-	std::string         m_callsignB;
-	std::string         m_callsignC;
-	std::string         m_callsignD;
+	std::vector<std::string> m_repeaters;
 	std::string         m_callsignG;
 	in_addr          m_address;
 	std::string		 m_addressStr;
@@ -111,6 +108,7 @@ private:
 	bool send(const std::vector<std::string>& words, unsigned int hour, unsigned int min);
 	bool sendHeader(CUDPReaderWriter& socket, const CHeaderData& header);
 	bool sendData(CUDPReaderWriter& socket, const CAMBEData& data);
+	bool sendToRepeater(const CHeaderData& header, const std::string& rptCall2);
 
 	bool loadAMBE();
 	bool readAMBE(const std::string& dir, const std::string& name);

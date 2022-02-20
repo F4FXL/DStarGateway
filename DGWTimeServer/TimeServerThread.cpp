@@ -24,6 +24,8 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <chrono>
+#include <future>
+#include <thread>
 
 #include "TimeServerThread.h"
 #include "DStarDefines.h"
@@ -39,10 +41,7 @@ const unsigned int SILENCE_LENGTH = 10U;
 CTimeServerThread::CTimeServerThread() :
 CThread("Time Server"),
 m_callsign(),
-m_callsignA(),
-m_callsignB(),
-m_callsignC(),
-m_callsignD(),
+m_repeaters(),
 m_callsignG(),
 m_address(),
 m_addressStr(),
@@ -80,7 +79,7 @@ CTimeServerThread::~CTimeServerThread()
 void * CTimeServerThread::Entry()
 {
 	// Wait here until we have the essentials to run
-	while (!m_killed && m_address.s_addr == INADDR_NONE && m_callsignA.empty() && m_callsignB.empty() && m_callsignC.empty() && m_callsignD.empty())
+	while (!m_killed && m_address.s_addr == INADDR_NONE && m_repeaters.size() == 0U)
 		Sleep(500UL);		// 1/2 sec
 
 	if (m_killed)
@@ -143,19 +142,19 @@ bool CTimeServerThread::setGateway(const std::string& callsign, const std::strin
 	m_callsignG.push_back('G');
 
 	if (!rpt1.empty()) {
-		m_callsignA = m_callsign + rpt1;
+		m_repeaters.push_back(m_callsign + rpt1);
 	}
 
 	if (!rpt2.empty()) {
-		m_callsignB = m_callsign + rpt2;
+		m_repeaters.push_back(m_callsign + rpt2);
 	}
 
 	if (!rpt3.empty()) {
-		m_callsignC = m_callsign + rpt3;
+		m_repeaters.push_back(m_callsign + rpt3);
 	}
 
 	if (!rpt4.empty()) {
-		m_callsignD = m_callsign + rpt4;
+		m_repeaters.push_back(m_callsign + rpt4);
 	}
 
 	m_callsign.push_back(' ');
@@ -1182,11 +1181,6 @@ void CTimeServerThread::end()
 
 bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int hour, unsigned int min)
 {
-	unsigned int idA = CHeaderData::createId();
-	unsigned int idB = CHeaderData::createId();
-	unsigned int idC = CHeaderData::createId();
-	unsigned int idD = CHeaderData::createId();
-
 	CHeaderData header;
 	header.setMyCall1(m_callsign);
 	header.setRptCall1(m_callsignG);
@@ -1321,42 +1315,46 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		return false;
 	}
 
-	CUDPReaderWriter * socketA = nullptr;
-	CUDPReaderWriter * socketB = nullptr;
-	CUDPReaderWriter * socketC = nullptr;
-	CUDPReaderWriter * socketD = nullptr; 
-
-	if (!m_callsignA.empty()) {
-		socketA = new CUDPReaderWriter("", 0U);
-		socketA->open();
-		header.setRptCall2(m_callsignA);
-		header.setId(idA);
-		sendHeader(*socketA, header);
+	bool res = true;
+	for(auto rpt : m_repeaters) {
+		res = sendToRepeater(header, rpt) && res;
 	}
 
-	if (!m_callsignB.empty()) {
-		socketB = new CUDPReaderWriter("", 0U);
-		socketB->open();
-		header.setRptCall2(m_callsignB);
-		header.setId(idB);
-		sendHeader(*socketB, header);
+	// std::vector<std::packaged_task<bool()> *> tasks;
+
+	// for(auto rpt : m_repeaters) {
+	// 	std::packaged_task<bool()> * task = new std::packaged_task<bool()>([header, rpt, this] { return sendToRepeater(header, rpt);} );
+	// 	std::thread t(std::move(*task));
+	// }
+
+	// bool res = true;
+	// for(auto task : tasks) {
+	// 	auto future = task->get_future();
+	// 	future.wait();
+	// 	res = future.get() && res;
+	// 	delete task;
+	// }
+
+	for(unsigned int i = 0U; i < MAX_FRAMES; i++) {
+		delete m_data[i];
+		m_data[i] = nullptr;
 	}
 
-	if (!m_callsignC.empty()) {
-		socketC = new CUDPReaderWriter("", 0U);
-		socketC->open();
-		header.setRptCall2(m_callsignC);
-		header.setId(idC);
-		sendHeader(*socketC, header);
-	}
+	return res;
+}
 
-	if (!m_callsignD.empty()) {
-		socketD = new CUDPReaderWriter("", 0U);
-		socketD->open();
-		header.setRptCall2(m_callsignD);
-		header.setId(idD);
-		sendHeader(*socketD, header);
-	}
+bool CTimeServerThread::sendToRepeater(const CHeaderData& h, const std::string& rptCall2)
+{
+	CUDPReaderWriter socket("", 0U);
+	if(!socket.open())
+		return false;
+
+	auto id = CHeaderData::createId();
+	CHeaderData header(h);
+	header.setId(id);
+	header.setRptCall2(rptCall2);
+
+	sendHeader(socket, header);
 
 	bool loop = true;
 	unsigned int out = 0U;
@@ -1367,31 +1365,10 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		needed /= DSTAR_FRAME_TIME_MS;
 
 		while (out < needed) {
-			CAMBEData* data = m_data[out];
-			m_data[out] = NULL;
+			CAMBEData data(*(m_data[out]));
 			out++;
-
-			if (!m_callsignA.empty()) {
-				data->setId(idA);
-				sendData(*socketA, *data);
-			}
-
-			if (!m_callsignB.empty()) {
-				data->setId(idB);
-				sendData(*socketB, *data);
-			}
-
-			if (!m_callsignC.empty()) {
-				data->setId(idC);
-				sendData(*socketC, *data);
-			}
-
-			if (!m_callsignD.empty()) {
-				data->setId(idD);
-				sendData(*socketD, *data);
-			}
-
-			delete data;
+			data.setId(id);
+			sendData(socket, data);
 
 			if (m_in == out) {
 				loop = false;
@@ -1402,22 +1379,7 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		Sleep(10UL);
 	}
 
-	if(socketA != nullptr) {
-		socketA->close();
-		delete socketA;
-	}
-	if(socketB != nullptr) {
-		socketB->close();
-		delete socketB;
-	}
-	if(socketC != nullptr) {
-		socketC->close();
-		delete socketC;
-	}
-	if(socketD != nullptr) {
-		socketD->close();
-		delete socketD;
-	}
+	socket.close();
 
 	return true;
 }
