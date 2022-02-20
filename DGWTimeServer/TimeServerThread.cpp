@@ -106,8 +106,8 @@ void * CTimeServerThread::Entry()
 		unsigned int hour = tm->tm_hour;
 		unsigned int  min = tm->tm_min;
 
-		if (min != lastMin)
-			sendTime(15, 45);
+		// if (min != lastMin)
+		// 	sendTime(15, 45);
 
 		if (min != lastMin) {
 			if (m_interval == INTERVAL_15MINS && (min == 0U || min == 15U || min == 30U || min == 45U))
@@ -1339,7 +1339,7 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		unsigned int out = 0U;
 		auto start = std::chrono::high_resolution_clock::now();
 
-		for (;loop;) {
+		while(loop) {
 			unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 			needed /= DSTAR_FRAME_TIME_MS;
 
@@ -1368,74 +1368,9 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		delete socket;
 	}
 
-	// bool res = true;
-	// for(auto rpt : m_repeaters) {
-	// 	res = sendToRepeater(header, rpt) && res;
-	// }
-
-	// std::vector<std::packaged_task<bool()> *> tasks;
-
-	// for(auto rpt : m_repeaters) {
-	// 	std::packaged_task<bool()> * task = new std::packaged_task<bool()>([header, rpt, this] { return sendToRepeater(header, rpt);} );
-	// 	std::thread t(std::move(*task));
-	// }
-
-	// bool res = true;
-	// for(auto task : tasks) {
-	// 	auto future = task->get_future();
-	// 	future.wait();
-	// 	res = future.get() && res;
-	// 	delete task;
-	// }
-
-	// for(unsigned int i = 0U; i < MAX_FRAMES; i++) {
-	// 	delete m_data[i];
-	// 	m_data[i] = nullptr;
-	// }
-
 	return true;
 }
 
-bool CTimeServerThread::sendToRepeater(const CHeaderData& h, const std::string& rptCall2)
-{
-	CUDPReaderWriter socket("", 0U);
-	if(!socket.open())
-		return false;
-
-	auto id = CHeaderData::createId();
-	CHeaderData header(h);
-	header.setId(id);
-	header.setRptCall2(rptCall2);
-
-	sendHeader(socket, header);
-
-	bool loop = true;
-	unsigned int out = 0U;
-	auto start = std::chrono::high_resolution_clock::now();
-
-	for (;loop;) {
-		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
-		needed /= DSTAR_FRAME_TIME_MS;
-
-		while (out < needed) {
-			CAMBEData data(*(m_data[out]));
-			out++;
-			data.setId(id);
-			sendData(socket, data);
-
-			if (m_in == out) {
-				loop = false;
-				break;
-			}
-		}
-
-		Sleep(10UL);
-	}
-
-	socket.close();
-
-	return true;
-}
 
 bool CTimeServerThread::sendHeader(CUDPReaderWriter& socket, const CHeaderData &header)
 {
