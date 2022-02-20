@@ -21,6 +21,7 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
+#include <csignal>
 #ifdef DEBUG_DSTARGW
 #include <boost/stacktrace.hpp>
 #endif
