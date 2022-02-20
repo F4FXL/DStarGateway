@@ -24,8 +24,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <chrono>
-#include <future>
-#include <thread>
 
 #include "TimeServerThread.h"
 #include "DStarDefines.h"
