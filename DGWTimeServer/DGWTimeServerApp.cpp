@@ -155,7 +155,7 @@ bool CDGWTimeServerApp::createThread()
 
 void CDGWTimeServerApp::sigHandler(int sig)
 {
-	CLog::logInfo("Caught signal : %s, shutting down gateway", strsignal(sig));
+	CLog::logInfo("Caught signal : %s, shutting down time server", strsignal(sig));
 
 	if(g_app != nullptr && g_app->m_thread != nullptr) {
 		g_app->m_thread->kill();
