@@ -46,32 +46,23 @@ m_addressStr(),
 m_language(LANG_ENGLISH_UK_1),
 m_format(FORMAT_VOICE_TIME),
 m_interval(INTERVAL_15MINS),
-m_ambe(NULL),
-m_ambeLength(0U),
-m_index(),
-m_seqNo(0U),
-m_in(0U),
-m_encoder(),
-m_data(NULL),
+m_data(),
 m_killed(false),
-m_dataPath("")
+m_dataPath(""),
+m_ambeFileReader(nullptr)
 {
 	CHeaderData::initialise();
-	m_address.s_addr = INADDR_NONE;
-
-	m_data = new CAMBEData*[MAX_FRAMES];
-
-	for (unsigned int i = 0U; i < MAX_FRAMES; i++)
-		m_data[i] = nullptr;
+	m_address.s_addr = INADDR_NONE; 
 }
 
 CTimeServerThread::~CTimeServerThread()
 {
-	for (auto it = m_index.begin(); it != m_index.end(); it++)
-		delete it->second;
+	for(auto d : m_data)
+		delete d;
 
-	delete[] m_ambe;
-	delete[] m_data;
+	m_data.clear();
+
+	delete[] m_ambeFileReader;
 }
 
 void * CTimeServerThread::Entry()
@@ -158,8 +149,8 @@ bool CTimeServerThread::setGateway(const std::string& callsign, const std::strin
 	m_callsign.push_back(' ');
 
 	m_addressStr.assign(address);
-	m_address = CUDPReaderWriter::lookup(address);
 	m_dataPath.assign(dataPath);
+	m_address = CUDPReaderWriter::lookup(address);
 
 	return true;
 }
@@ -988,197 +979,103 @@ bool CTimeServerThread::loadAMBE()
 			break;
 	}
 
-	bool ret = readAMBE(m_dataPath, ambeFileName);
-	if (!ret) {
-		delete[] m_ambe;
-		m_ambe = NULL;
-		return false;
-	}
+	m_ambeFileReader = new CAMBEFileReader(m_dataPath + "/" + indxFileName, m_dataPath + "/" + ambeFileName);
+	bool ret = m_ambeFileReader->read();
 
-	ret = readIndex(m_dataPath, indxFileName);
 	if (!ret) {
-		delete[] m_ambe;
-		m_ambe = NULL;
+		delete[] m_ambeFileReader;
+		m_ambeFileReader = nullptr;
 		return false;
 	}
 
 	return true;
 }
 
-bool CTimeServerThread::readAMBE(const std::string& dir, const std::string& name)
+void CTimeServerThread::buildAudio(const std::vector<std::string>& words, CSlowDataEncoder& slowDataEncoder)
 {
-	std::string fileName = dir + "/" + name;
-	struct stat sbuf;
-	
-	if (stat(fileName.c_str(), &sbuf)) {
-		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.append("/data/");
-		fileName += name;
-		if (stat(fileName.c_str(), &sbuf)) {
-			CLog::logInfo("File %s not readable\n", fileName.c_str());
-			return false;
-		}
-	}
-	unsigned int fsize = sbuf.st_size;
+	unsigned int seqNo = 0U;
 
-	FILE *file = fopen(fileName.c_str(), "rb");
-	if (NULL == file) {
-		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
-		return false;
-	}
+	m_data.clear();
 
-	CLog::logInfo("Reading %s\n", fileName.c_str());
+	if(words.size() == 0U || m_ambeFileReader == nullptr)
+		CLog::logWarning("No words, falling back to text only");
 
-	unsigned char buffer[VOICE_FRAME_LENGTH_BYTES];
+	if(m_format == FORMAT_VOICE_TIME && words.size() != 0U) {
+		// Build the audio
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
 
-	size_t n = fread(buffer, sizeof(unsigned char), 4, file);
-	if (n != 4) {
-		CLog::logError("Unable to read the header from %s\n", fileName.c_str());
-		fclose(file);
-		return false;
-	}
+		for (unsigned int i = 0U; i < words.size(); i++)
+			m_ambeFileReader->lookup(words.at(i), m_data);
 
-	if (memcmp(buffer, "AMBE", 4)) {
-		CLog::logError("Invalid header from %s\n", fileName.c_str());
-		fclose(file);
-		return false;
-	}
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
+		m_ambeFileReader->lookup(" ", m_data);
 
-	// Length of the file minus the header
-	unsigned int length = fsize - 4U;
+		for(unsigned int i = 0U; i < m_data.size(); i++) {
+			m_data[i]->setDestination(m_address, G2_DV_PORT);
+			m_data[i]->setSeq(seqNo);
 
-	// Hold the file data plus silence at the end
-	m_ambe = new unsigned char[length + SILENCE_LENGTH * VOICE_FRAME_LENGTH_BYTES];
-	m_ambeLength = length / VOICE_FRAME_LENGTH_BYTES;
+			unsigned char buffer[DV_FRAME_LENGTH_BYTES];
+			m_data[i]->getData(buffer, DV_FRAME_LENGTH_BYTES);
 
-	// Add silence to the beginning of the buffer
-	unsigned char* p = m_ambe;
-	for (unsigned int i = 0U; i < SILENCE_LENGTH; i++, p += VOICE_FRAME_LENGTH_BYTES)
-		memcpy(p, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
-
-	n = fread(p, 1, length, file);
-	if (n != length) {
-		CLog::logError("Unable to read the AMBE data from %s\n", fileName.c_str());
-		fclose(file);
-		delete[] m_ambe;
-		m_ambe = NULL;
-		return false;
-	}
-
-	fclose(file);
-
-	return true;
-}
-
-bool CTimeServerThread::readIndex(const std::string& dir, const std::string& name)
-{
-	std::string fileName = dir + "/" + name;
-	struct stat sbuf;
-	
-	if (stat(fileName.c_str(), &sbuf)) {
-		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.append("/data/");
-		fileName += name;
-		if (stat(fileName.c_str(), &sbuf)) {
-			CLog::logInfo("File %s not readable\n", fileName.c_str());
-			return false;
-		}
-	}
-
-	FILE *file = fopen(fileName.c_str(), "r");
-	if (NULL == file) {
-		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
-		return false;
-	}
-
-	// Add a silence entry at the beginning
-	m_index[" "] = new CIndexRecord(" ", 0, SILENCE_LENGTH);
-
-	CLog::logInfo("Reading %s\n", fileName.c_str());
-
-	char line[128];
-	while (fgets(line, 128, file)) {
-
-		if (strlen(line) && '#'!=line[0]) {
-			const std::string space(" \t\r\n");
-			std::string name(strtok(line, space.c_str()));
-			std::string strt(strtok(NULL, space.c_str()));
-			std::string leng(strtok(NULL, space.c_str()));
-
-			if (name.size() && strt.size() && leng.size()) {
-				unsigned long start  = std::stoul(strt);
-				unsigned long length = std::stoul(leng);
-
-				if (start >= m_ambeLength || (start + length) >= m_ambeLength)
-					CLog::logInfo("The start or end for *%s* is out of range, start: %lu, end: %lu\n", name.c_str(), start, start + length);
-				else
-					m_index[name] = new CIndexRecord(name, start + SILENCE_LENGTH, length);
+			// Insert sync bytes when the sequence number is zero, slow data otherwise
+			if (seqNo == 0U) {
+				::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
+				slowDataEncoder.sync();
+			} else {
+				slowDataEncoder.getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 			}
+
+			m_data[i]->setData(buffer, DV_FRAME_LENGTH_BYTES);
+
+			seqNo++;
+			if(seqNo >= 21U) seqNo = 0U;
+		}
+	}
+	else {
+		for (unsigned int i = 0U; i < 21U; i++, seqNo++) {
+			CAMBEData* dataOut = new CAMBEData;
+			unsigned char buffer[DV_FRAME_LENGTH_BYTES];
+			dataOut->setDestination(m_address, G2_DV_PORT);
+			dataOut->setSeq(i);
+
+			::memcpy(buffer + 0U, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
+
+			// Insert sync bytes when the sequence number is zero, slow data otherwise
+			if (i == 0U) {
+				::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
+				slowDataEncoder.sync();
+			} else {
+				slowDataEncoder.getTextData(buffer + VOICE_FRAME_LENGTH_BYTES);
+			}
+
+			dataOut->setData(buffer, DV_FRAME_LENGTH_BYTES);
+
+			m_data.push_back(dataOut);
 		}
 	}
 
-	fclose(file);
-
-	return true;
-}
-
-bool CTimeServerThread::lookup(const std::string &id)
-{
-	CIndexRecord* info = m_index[id];
-	if (info == NULL) {
-		// wxLogError(("Cannot find the AMBE index for *%s*"), id.c_str());
-		return false;
+	if(seqNo >= 21U) {
+		seqNo = 0U;
 	}
 
-	unsigned int  start = info->getStart();
-	unsigned int length = info->getLength();
-
-	for (unsigned int i = 0U; i < length; i++) {
-		unsigned char* dataIn = m_ambe + (start + i) * VOICE_FRAME_LENGTH_BYTES;
-
-		CAMBEData* dataOut = new CAMBEData;
-		dataOut->setDestination(m_address, G2_DV_PORT);
-		dataOut->setSeq(m_seqNo);
-
-		unsigned char buffer[DV_FRAME_LENGTH_BYTES];
-		::memcpy(buffer + 0U, dataIn, VOICE_FRAME_LENGTH_BYTES);
-
-		// Insert sync bytes when the sequence number is zero, slow data otherwise
-		if (m_seqNo == 0U) {
-			::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-			m_encoder.sync();
-
-		} else {
-			m_encoder.getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
-		}
-
-		dataOut->setData(buffer, DV_FRAME_LENGTH_BYTES);
-
-		m_seqNo++;
-		if (m_seqNo == 21U)
-			m_seqNo = 0U;
-
-		m_data[m_in] = dataOut;
-		m_in++;
-	}
-
-	return true;
-}
-
-void CTimeServerThread::end()
-{
 	CAMBEData* dataOut = new CAMBEData;
 	dataOut->setData(END_PATTERN_BYTES, DV_FRAME_LENGTH_BYTES);
 	dataOut->setDestination(m_address, G2_DV_PORT);
-	dataOut->setSeq(m_seqNo);
+	dataOut->setSeq(seqNo);
 	dataOut->setEnd(true);
 
-	m_data[m_in] = dataOut;
-	m_in++;
+	m_data.push_back(dataOut);
 }
 
 bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int hour, unsigned int min)
 {
+	CSlowDataEncoder encoder;
+
 	CHeaderData header;
 	header.setMyCall1(m_callsign);
 	header.setRptCall1(m_callsignG);
@@ -1241,78 +1138,26 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 			break;
 	}
 
-	m_encoder.setHeaderData(header);
-	m_encoder.setTextData(slowData);
+	encoder.setHeaderData(header);
+	encoder.setTextData(slowData);
 
-	m_in = 0U;
+	buildAudio(words, encoder);
 
-	if (m_format != FORMAT_TEXT_TIME) {
-		std::string text = words.at(0U);
-		for (unsigned int i = 1U; i < words.size(); i++) {
-			text.push_back(' ');
-			text += words.at(i);
-		}
-
-		boost::replace_all(text, "_", " ");
-		CLog::logInfo(("Sending voice \"%s\", sending text \"%s\""), text.c_str(), slowData.c_str());
-
-		m_seqNo = 0U;
-
-		// Build the audio
-		lookup((" "));
-		lookup((" "));
-		lookup((" "));
-		lookup((" "));
-
-		for (unsigned int i = 0U; i < words.size(); i++)
-			lookup(words.at(i));
-
-		lookup((" "));
-		lookup((" "));
-		lookup((" "));
-		lookup((" "));
-
-		end();
-	} else {
-		CLog::logInfo(("Sending text \"%s\""), slowData.c_str());
-
-		for (unsigned int i = 0U; i < 21U; i++) {
-			CAMBEData* dataOut = new CAMBEData;
-			dataOut->setDestination(m_address, G2_DV_PORT);
-			dataOut->setSeq(i);
-
-			unsigned char buffer[DV_FRAME_LENGTH_BYTES];
-			::memcpy(buffer + 0U, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
-
-			// Insert sync bytes when the sequence number is zero, slow data otherwise
-			if (i == 0U) {
-				::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-				m_encoder.sync();
-			} else {
-				m_encoder.getTextData(buffer + VOICE_FRAME_LENGTH_BYTES);
-			}
-
-			dataOut->setData(buffer, DV_FRAME_LENGTH_BYTES);
-
-			m_data[m_in] = dataOut;
-			m_in++;
-		}
-
-		CAMBEData* dataOut = new CAMBEData;
-		dataOut->setData(END_PATTERN_BYTES, DV_FRAME_LENGTH_BYTES);
-		dataOut->setDestination(m_address, G2_DV_PORT);
-		dataOut->setSeq(0U);
-		dataOut->setEnd(true);
-
-		m_data[m_in] = dataOut;
-		m_in++;
-	}
-
-	if (m_in == 0U) {
+	if (m_data.size() == 0U) {
 		CLog::logWarning(("Not sending, no audio files loaded"));
 		return false;
 	}
 
+	if(m_format == FORMAT_VOICE_TIME) {
+		std::string text = boost::algorithm::join(words, " ");
+		boost::replace_all(text, "_", " ");
+		CLog::logInfo("Sending voice \"%s\", sending text \"%s\"", text.c_str(), slowData.c_str());
+	}
+	else {
+		CLog::logInfo("Sending text \"%s\"", slowData.c_str());
+	}
+
+	// Build id and socket lists
 	std::vector<unsigned int> ids;
 	std::vector<CUDPReaderWriter *> sockets;
 	for(auto rpt : m_repeaters) {
@@ -1321,6 +1166,7 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 		ids.push_back(CHeaderData::createId());
 	}
 
+	// open them all
 	bool allOpen = std::all_of(sockets.begin(), sockets.end(), [](CUDPReaderWriter* s) { return s->open(); });
 	if(allOpen) {
 		//send headers
@@ -1332,7 +1178,7 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 			Sleep(5);
 		}
 
-			// send audio
+		// send audio
 		bool loop = true;
 		unsigned int out = 0U;
 		auto start = std::chrono::high_resolution_clock::now();
@@ -1353,13 +1199,15 @@ bool CTimeServerThread::send(const std::vector<std::string> &words, unsigned int
 				m_data[out] = nullptr;
 				out++;
 
-				if (m_in == out) {
+				if (out >= m_data.size()) {
 					loop = false;
 					break;
 				}
 			}
 		}
 	}
+
+	m_data.clear();
 
 	for(auto socket : sockets) {
 		socket->close();

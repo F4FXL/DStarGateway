@@ -107,10 +107,9 @@ bool CTimeServerConfig::loadTimeServer(const CConfig & cfg)
     ret = cfg.getValue("timeserver", "address", m_timeServer.address, 0, 1024, "127.0.0.1") && ret;
 
 	std::string format;
-	ret = cfg.getValue("timeserver", "format", format, "voiceandtext",  {"voice", "text", "voiceandtext"}) && ret;
+	ret = cfg.getValue("timeserver", "format", format, "voice",  {"voice", "text" }) && ret;
 	if(format == "voice")				m_timeServer.format = FORMAT_VOICE_TIME;
 	else if(format == "text")			m_timeServer.format = FORMAT_TEXT_TIME;
-	else if(format == "voiceandtext")	m_timeServer.format = FORMAT_VOICE_ALL;
 
 	std::string lang;
 	ret = cfg.getValue("timeserver", "language", lang, "english_uk_1", {"english_uk_1", "english_uk_2", "english_us_1", "english_us_2", "deutsch_1", "deutsch_2", "francais", "nederlands", "svenska", "espanol", "norsk", "portugues"}) && ret;;

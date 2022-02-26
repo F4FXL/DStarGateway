@@ -27,37 +27,7 @@
 #include "HeaderData.h"
 #include "AMBEData.h"
 #include "Thread.h"
-
-class CIndexRecord {
-public:
-	CIndexRecord(const std::string& name, unsigned int start, unsigned int length) :
-	m_name(name),
-	m_start(start),
-	m_length(length)
-	{
-	}
-
-	std::string getName() const
-	{
-		return m_name;
-	}
-
-	unsigned int getStart() const
-	{
-		return m_start;
-	}
-
-	unsigned int getLength() const
-	{
-		return m_length;
-	}
-
-private:
-	std::string     m_name;
-	unsigned int m_start;
-	unsigned int m_length;
-};
-
+#include "AMBEFileReader.h"
 
 class CTimeServerThread : public CThread
 {
@@ -72,23 +42,19 @@ public:
 	void kill();
 
 private:
-	std::string         m_callsign;
+	std::string         	 m_callsign;
 	std::vector<std::string> m_repeaters;
-	std::string         m_callsignG;
-	in_addr          m_address;
-	std::string		 m_addressStr;
-	LANGUAGE         m_language;
-	FORMAT           m_format;
-	INTERVAL         m_interval;
-	unsigned char*   m_ambe;
-	unsigned int     m_ambeLength;
-	std::unordered_map<std::string, CIndexRecord*> m_index;
-	unsigned int     m_seqNo;
-	unsigned int     m_in;
-	CSlowDataEncoder m_encoder;
-	CAMBEData**      m_data;
-	bool             m_killed;
-	std::string		 m_dataPath;
+	std::string         	 m_callsignG;
+	in_addr          		 m_address;
+	std::string		 		 m_addressStr;
+	LANGUAGE         		 m_language;
+	FORMAT           		 m_format;
+	INTERVAL         		 m_interval;
+	CSlowDataEncoder 		 m_encoder;
+	std::vector<CAMBEData*>  m_data;
+	bool             		 m_killed;
+	std::string		 		 m_dataPath;
+	CAMBEFileReader * 		 m_ambeFileReader;
 
 	void sendTime(unsigned int hour, unsigned int min);
 
@@ -110,9 +76,8 @@ private:
 	bool sendData(CUDPReaderWriter& socket, const CAMBEData& data);
 
 	bool loadAMBE();
-	bool readAMBE(const std::string& dir, const std::string& name);
-	bool readIndex(const std::string& dir, const std::string& name);
 
 	bool lookup(const std::string& id);
-	void end();
+
+	void buildAudio(const std::vector<std::string>& words, CSlowDataEncoder& slowDataEncoder);
 };
