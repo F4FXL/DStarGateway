@@ -1015,6 +1015,8 @@ void CTimeServerThread::buildAudio(const std::vector<std::string>& words, CSlowD
 		m_ambeFileReader->lookup(" ", m_data);
 		m_ambeFileReader->lookup(" ", m_data);
 
+
+		// add the slow data
 		for(unsigned int i = 0U; i < m_data.size(); i++) {
 			m_data[i]->setDestination(m_address, G2_DV_PORT);
 			m_data[i]->setSeq(seqNo);
