@@ -196,7 +196,7 @@ void CAudioUnit::clock(unsigned int ms)
 		while (m_out < needed && m_out < m_data.size()) {
 			CAMBEData* data = m_data[m_out];
 			m_out++;
-			CLog::logTrace("m_out %u, needed %u, m_data %u", m_out, needed, m_data.size());
+			// CLog::logTrace("m_out %u, needed %u, m_data %u", m_out, needed, m_data.size());
 			m_handler->process(*data, DIR_INCOMING, AS_INFO);
 		}
 
