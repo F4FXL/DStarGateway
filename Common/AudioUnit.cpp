@@ -23,7 +23,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <stdio.h>
-#include <thread>
 
 #include "DStarDefines.h"
 #include "HeaderData.h"
@@ -189,7 +188,6 @@ void CAudioUnit::clock(unsigned int ms)
 	}
 
 	if (m_status == AS_TRANSMIT) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_time).count();
 		needed /= DSTAR_FRAME_TIME_MS;
 
