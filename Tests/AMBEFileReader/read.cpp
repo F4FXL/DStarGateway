@@ -21,6 +21,7 @@
 #include <string>
 
 #include "AMBEFileReader.h"
+#include "Log.h"
 
 namespace AMBEFileReaderTests
 {
@@ -55,6 +56,10 @@ namespace AMBEFileReaderTests
     {
         std::string indexFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.indx";
         std::string ambeFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.ambe";
+
+        CLog::logInfo("Reading file: %s", indexFile.c_str());
+        CLog::logInfo("Reading file: %s", ambeFile.c_str());
+
         CAMBEFileReader reader(indexFile, ambeFile);
         bool res = reader.read();
         EXPECT_TRUE(res) << "read shall return true on existent files";
