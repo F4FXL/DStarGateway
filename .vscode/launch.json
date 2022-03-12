@@ -135,7 +135,7 @@
             "program": "${workspaceFolder}/Tests/dstargateway_tests",
             "args": [ ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/Tests/",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

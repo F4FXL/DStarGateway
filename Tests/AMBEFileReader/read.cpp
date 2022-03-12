@@ -38,7 +38,7 @@ namespace AMBEFileReaderTests
 
     TEST_F(AMBEFileReader_read, onlyIndexFileExists)
     {
-        std::string indexFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.indx";
+        std::string indexFile = std::string(std::filesystem::current_path()) + "/AMBEFileReader/fr_FR.indx";
         CAMBEFileReader reader(indexFile, "/this/file/does/not/exist");
         bool res = reader.read();
         EXPECT_FALSE(res) << "read shall return false on non existent file";
@@ -46,7 +46,7 @@ namespace AMBEFileReaderTests
 
     TEST_F(AMBEFileReader_read, onlyAmbeFileExists)
     {
-        std::string ambeFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.ambe";
+        std::string ambeFile = std::string(std::filesystem::current_path()) + "/AMBEFileReader/fr_FR.ambe";
         CAMBEFileReader reader("/this/file/does/not/exist", ambeFile);
         bool res = reader.read();
         EXPECT_FALSE(res) << "read shall return false on non existent file";
@@ -54,11 +54,8 @@ namespace AMBEFileReaderTests
 
     TEST_F(AMBEFileReader_read, bothFileExist)
     {
-        std::string indexFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.indx";
-        std::string ambeFile = std::string(std::filesystem::current_path()) + "/Tests/AMBEFileReader/fr_FR.ambe";
-
-        CLog::logInfo("Reading file: %s", indexFile.c_str());
-        CLog::logInfo("Reading file: %s", ambeFile.c_str());
+        std::string indexFile = std::string(std::filesystem::current_path()) + "/AMBEFileReader/fr_FR.indx";
+        std::string ambeFile = std::string(std::filesystem::current_path()) + "/AMBEFileReader/fr_FR.ambe";
 
         CAMBEFileReader reader(indexFile, ambeFile);
         bool res = reader.read();

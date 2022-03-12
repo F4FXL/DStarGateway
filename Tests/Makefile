@@ -10,7 +10,7 @@ dstargateway_tests: ../VersionInfo/GitVersion.h $(OBJS) ../APRS/APRS.a ../IRCDDB
 
 -include $(DEPS)
 
-.PHONY run-tests: dstargateway_tests 
+.PHONY run-tests: dstargateway_tests
 	./dstargateway_tests
 
 .PHONY clean :
