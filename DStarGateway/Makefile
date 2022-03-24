@@ -22,6 +22,15 @@ install: dstargateway
 	@sed -i "s|path=/var/log/dstargateway/|path=$(LOG_DIR)|g" $(CFG_DIR)/dstargateway.cfg
 	@sed -i "s|data=/usr/local/share/dstargateway.d/|data=$(DATA_DIR)|g" $(CFG_DIR)/dstargateway.cfg
 
+# SystemD service install
+	@cp -f ../debian/dstargateway.service /lib/systemd/system/
+	@sed -i "s|%CFG_DIR%|$(CFG_DIR)|g" /lib/systemd/system/dstargateway.service
+	systemctl enable dstargateway.service
+	@systemctl daemon-reload
+	@echo "\n"
+	@echo "DStarGateway Install complete, edit $(CFG_DIR)dstargateway.cfg and start the daemon with 'systemctl start dstargateway.service'"
+	@echo "\n"
+
 ../APRS/APRS.a:
 ../Common/Common.a:
 ../DStarBase/DStarBase.a:

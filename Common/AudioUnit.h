@@ -23,42 +23,14 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <vector>
 
 #include "RepeaterCallback.h"
 #include "SlowDataEncoder.h"
 #include "AMBEData.h"
 #include "Timer.h"
 #include "Defs.h"
-
-class CIndexRecord {
-public:
-	CIndexRecord(const std::string& name, unsigned int start, unsigned int length) :
-	m_name(name),
-	m_start(start),
-	m_length(length)
-	{
-	}
-
-	std::string getName() const
-	{
-		return m_name;
-	}
-
-	unsigned int getStart() const
-	{
-		return m_start;
-	}
-
-	unsigned int getLength() const
-	{
-		return m_length;
-	}
-
-private:
-	std::string  m_name;
-	unsigned int m_start;
-	unsigned int m_length;
-};
+#include "AMBEFileReader.h"
 
 enum AUDIO_STATUS {
 	AS_IDLE,
@@ -87,14 +59,10 @@ public:
 	static void finalise();
 
 private:
-	static std::map<std::string, CIndexRecord *> m_index;
-	static unsigned char* m_ambe;
-	static unsigned int   m_ambeLength;
 	static TEXT_LANG      m_language;
 
 	IRepeaterCallback* m_handler;
 	std::string        m_callsign;
-	CSlowDataEncoder   m_encoder;
 	AUDIO_STATUS       m_status;
 	LINK_STATUS        m_linkStatus;
 	LINK_STATUS        m_tempLinkStatus;
@@ -104,17 +72,12 @@ private:
 	std::string        m_tempReflector;
 	bool               m_hasTemporary;
 	CTimer             m_timer;
-	CAMBEData**        m_data;
-	unsigned int       m_in;
+	std::vector<CAMBEData*>   m_data;
+	static CAMBEFileReader*   m_ambeFilereader;
 	unsigned int       m_out;
-	unsigned int       m_seqNo;
 	std::chrono::high_resolution_clock::time_point m_time;
 
-	bool lookup(unsigned int id, const std::string& name);
-	void spellReflector(unsigned int id, const std::string& reflector);
+	void spellReflector(const std::string& reflector);
 	void sendStatus(LINK_STATUS status, const std::string& reflector, const std::string& text);
-
-	static bool readAMBE(const std::string& dir, const std::string& name);
-	static bool readIndex(const std::string& dir, const std::string& name);
 };
 

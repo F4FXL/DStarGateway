@@ -1,5 +1,6 @@
 /*
- *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2014 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,27 +19,28 @@
 
 #pragma once
 
-#include <string>
-#include <fstream>
+#include "TimeServerDefs.h"
+#include "TimeServerConfig.h"
+#include "TimeServerThread.h"
 
-#include "LogTarget.h"
-
-class CLogFileTarget : public CLogTarget
+class CDGWTimeServerApp
 {
 public:
-    CLogFileTarget(LOG_SEVERITY logLevel, const std::string& directory, const std::string& fileRoot, bool rotate);
-    ~CLogFileTarget();
+    CDGWTimeServerApp(const CTimeServerConfig * config);
+    ~CDGWTimeServerApp();
 
-protected:
-    virtual void printLogInt(const std::string& msg);
+    bool init();
+    void run();
+
+    static void sigHandler(int sig);
+    static void sigHandlerFatal(int sig);
+    static void terminateHandler();
 
 private:
-    void printLogIntRotate(const std::string& msg);
-    void printLogIntFixed(const std::string& msg);
-    std::string buildFileName();
-    std::string m_dir;
-    std::string m_fileRoot;
-    bool m_rotate;
-    std::fstream m_file;
-    int m_day;
+    bool createThread();
+
+    static CDGWTimeServerApp * g_app;
+
+    const CTimeServerConfig * m_config;
+    CTimeServerThread * m_thread;
 };

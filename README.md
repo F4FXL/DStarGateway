@@ -135,26 +135,27 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
-- [Improvement] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21))
-- [Improvement] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
-- [Improvement] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
+- [**Improvement**] Add time server
+- [**Improvement**] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21)). DStarGateway can also be run as a "forking" daemon. This might be required for distros still using sysv. Systemd can live without it.
+- [**Improvement**] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
+- [**Improvement**] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 ## 5.2. Version 0.5
-- [Improvement] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
-- [Bugfix] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
-- [Improvement] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
-- [Improvement] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
-- [Bugfix] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
-- [Bugfix] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
-- [Bugfix] Trying to connect to ghost ircDDB when no ircDDB is configured
+- [**Improvement**] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
+- [**Bugfix**] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
+- [**Improvement**] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
+- [**Improvement**] Add forwarding of RS-MS1A messages to APRS-IS ([#9](https://github.com/F4FXL/DStarGateway/issues/9))
+- [**Bugfix**] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
+- [**Bugfix**] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
+- [**Bugfix**] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.3. Version 0.4
-- [Improvement] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
-- [Bugfix] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
-- [Improvement] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
-- [Improvement] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
+- [**Improvement**] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
+- [**Bugfix**] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
+- [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
+- [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
 ## 5.4. Version 0.3
-- [Improvement] Get ride of libcongif++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
+- [**Improvement**] Get ride of libcongig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.5. Version 0.2
-- [Bugfix] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
+- [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
 ## 5.6. Version 0.1
 First working version
@@ -163,10 +164,9 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
 - &#9745; Better NatTraversal
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
   - Support for all protocols (G2, DExtra, DPlus) DCS does nto make sense as it was historically never used as protocol for linking repeaters
-  - A [branch](https://github.com/F4FXL/DStarGateway/tree/feature/NatTraversal) already exists for this
 - &#9745; Send the connection status to APRS-IS as a status frame
 - &#9746; Reinstantiate DRATS
-- &#9746; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
+- &#9745; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
 - &#9746; Forward messages from RS-MS1A to APRS and vice versa

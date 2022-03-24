@@ -1,5 +1,6 @@
 /*
- *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2012,2013,2014 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,27 +19,30 @@
 
 #pragma once
 
-#include <string>
-#include <fstream>
+const std::string APPLICATION_NAME("DStarGateway Time Server");
 
-#include "LogTarget.h"
+enum LANGUAGE {
+	LANG_ENGLISH_UK_1,
+	LANG_ENGLISH_UK_2,
+	LANG_ENGLISH_US_1,
+	LANG_ENGLISH_US_2,
+	LANG_DEUTSCH_1,
+	LANG_DEUTSCH_2,
+	LANG_FRANCAIS,
+	LANG_NEDERLANDS,
+	LANG_SVENSKA,
+	LANG_ESPANOL,
+	LANG_NORSK,
+	LANG_PORTUGUES
+};
 
-class CLogFileTarget : public CLogTarget
-{
-public:
-    CLogFileTarget(LOG_SEVERITY logLevel, const std::string& directory, const std::string& fileRoot, bool rotate);
-    ~CLogFileTarget();
+enum INTERVAL {
+	INTERVAL_15MINS,
+	INTERVAL_30MINS,
+	INTERVAL_60MINS
+};
 
-protected:
-    virtual void printLogInt(const std::string& msg);
-
-private:
-    void printLogIntRotate(const std::string& msg);
-    void printLogIntFixed(const std::string& msg);
-    std::string buildFileName();
-    std::string m_dir;
-    std::string m_fileRoot;
-    bool m_rotate;
-    std::fstream m_file;
-    int m_day;
+enum FORMAT {
+	FORMAT_VOICE_TIME,
+	FORMAT_TEXT_TIME
 };

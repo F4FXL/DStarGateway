@@ -40,7 +40,7 @@ endif
 
 
 .PHONY: all
-all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWVoiceTransmit/dgwvoicetransmit #tests
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWTimeServer/dgwtimeserver DGWVoiceTransmit/dgwvoicetransmit #tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -62,6 +62,9 @@ DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DS
 
 DGWTextTransmit/dgwtexttransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWTextTransmit
+
+DGWTimeServer/dgwtimeserver: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWTimeServer
 
 DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWVoiceTransmit
@@ -99,6 +102,7 @@ install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
 # install accessories
 	$(MAKE) -C DGWRemoteControl install
 	$(MAKE) -C DGWTextTransmit install
+	$(MAKE) -C DGWTimeServer install
 	$(MAKE) -C DGWVoiceTransmit install
 	
 # create user for daemon
@@ -115,17 +119,8 @@ install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
 	$(MAKE) -C Data install
 	@chown -R dstar:dstar $(DATA_DIR)
 
-#install executables
+# install services executables
 	$(MAKE) -C DStarGateway install
-
-# SystemD service install
-	@cp -f debian/dstargateway.service /lib/systemd/system/
-	@sed -i "s|%CFG_DIR%|$(CFG_DIR)|g" /lib/systemd/system/dstargateway.service
-	systemctl enable dstargateway.service
-	@systemctl daemon-reload
-	@echo "\n\n"
-	@echo "Install complete, edit $(CFG_DIR)dstargateway.cfg and start the daemon with 'systemctl start dstargateway.service'"
-	@echo "\n\n"
 
 .PHONY: uninstall
 uninstall :

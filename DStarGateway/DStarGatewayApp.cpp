@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
 	TLog logConf;
 	config->getLog(logConf);
 	CLog::finalise();
-	if(logConf.m_displayLevel	!= LOG_NONE && !daemon.daemon) CLog::addTarget(new CLogConsoleTarget(logConf.m_displayLevel));
-	if(logConf.m_fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(logConf.m_fileLevel, logConf.logDir, logConf.m_fileRotate));
+	if(logConf.displayLevel	!= LOG_NONE && !daemon.daemon) CLog::addTarget(new CLogConsoleTarget(logConf.displayLevel));
+	if(logConf.fileLevel		!= LOG_NONE) CLog::addTarget(new CLogFileTarget(logConf.fileLevel, logConf.logDir, logConf.fileRoot, logConf.fileRotate));
 
 	//write banner in log file if we are dameon
 	if(daemon.daemon) {

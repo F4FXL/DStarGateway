@@ -10,12 +10,14 @@ dstargateway_tests: ../VersionInfo/GitVersion.h $(OBJS) ../APRS/APRS.a ../IRCDDB
 
 -include $(DEPS)
 
-.PHONY run-tests: dstargateway_tests 
+.PHONY run-tests: dstargateway_tests
 	./dstargateway_tests
 
 .PHONY clean :
 clean :
-	@$(RM) *.o *.d dstargateway_tests
+	find . -name "*.o" -type f -delete
+	find . -name "*.d" -type f -delete
+	$(RM) *.o *.d dstargateway_tests
 
 ../APRS/APRS.a:
 ../Common/Common.a:

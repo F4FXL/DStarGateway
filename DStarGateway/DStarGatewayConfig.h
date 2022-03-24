@@ -86,10 +86,10 @@ typedef struct {
 
 typedef struct {
 	std::string logDir;
-	LOG_SEVERITY m_displayLevel;
-	LOG_SEVERITY m_fileLevel;
-	std::string m_fileRoot;
-	bool m_fileRotate;
+	LOG_SEVERITY displayLevel;
+	LOG_SEVERITY fileLevel;
+	std::string fileRoot;
+	bool fileRotate;
 } TLog;
 
 typedef struct {
