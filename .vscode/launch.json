@@ -109,7 +109,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/DGWVoiceTransmit/dgwvoicetransmit",
-            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool"],
+            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool", "-text", "www.F5KAV.fr"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

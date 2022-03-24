@@ -28,11 +28,11 @@
 #include "HeaderData.h"
 #include "AMBEData.h"
 
-bool parseCLIArgs(int argc, char * argv[], std::string& repeater, std::vector<std::string>& vector);
+bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vector<std::string>& vector, std::string& text);
 
 class CVoiceTransmit {
 public:
-	CVoiceTransmit(const std::string& callsign, CVoiceStore* store);
+	CVoiceTransmit(const std::string& callsign, CVoiceStore* store, const std::string& text);
 	~CVoiceTransmit();
 
 	bool run();
@@ -40,6 +40,7 @@ public:
 private:
 	CUDPReaderWriter m_socket;
 	std::string         m_callsign;
+	std::string			m_text;
 	CVoiceStore*     m_store;
 
 	bool sendHeader(CHeaderData* header);
