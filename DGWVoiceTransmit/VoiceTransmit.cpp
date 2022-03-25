@@ -70,7 +70,7 @@ bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vec
 	if(positionalArgs.size() < 2U)
 		return false;
 
-	repeater.assign(boost::replace_all_copy(positionalArgs[0], "_", " "));
+	repeater.assign(boost::replace_all_copy(boost::to_upper_copy(positionalArgs[0]), "_", " "));
 	files.assign(positionalArgs.begin() + 1, positionalArgs.end());
 
 	if(namedArgs.count("text") > 0U) {
