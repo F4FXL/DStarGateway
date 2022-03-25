@@ -26,13 +26,15 @@
 #include "DStarDefines.h"
 #include "VoiceTransmit.h"
 #include "SlowDataEncoder.h"
+#include "APRSUtils.h"
+#include "StringUtils.h"
 
 int main(int argc, const char * argv[])
 {
-	std::string repeater, text;
+	std::string repeater, text, dprs;
 	std::vector<std::string> filenames;
 
-	if (!parseCLIArgs(argc, argv, repeater, filenames, text)) {
+	if (!parseCLIArgs(argc, argv, repeater, filenames, text, dprs)) {
 		::fprintf(stderr, "dgwvoicetransmit: invalid command line usage: dgwvoicetransmit [-text text] <repeater> <file1> <file2> ..., exiting\n");
 		return 1;
 	}
@@ -46,7 +48,7 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 
-	CVoiceTransmit tt(repeater, &store, text);
+	CVoiceTransmit tt(repeater, &store, text, dprs);
 	bool ret = tt.run();
 
 	store.close();
@@ -55,7 +57,7 @@ int main(int argc, const char * argv[])
 	return ret ? 0 : 1;
 }
 
-bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vector<std::string>& files, std::string& text)
+bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vector<std::string>& files, std::string& text, std::string& dprs)
 {
 	if(argc < 3)
 		return false;
@@ -68,7 +70,7 @@ bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vec
 	if(positionalArgs.size() < 2U)
 		return false;
 
-	repeater.assign(positionalArgs[0]);
+	repeater.assign(boost::replace_all_copy(positionalArgs[0], "_", " "));
 	files.assign(positionalArgs.begin() + 1, positionalArgs.end());
 
 	if(namedArgs.count("text") > 0U) {
@@ -78,13 +80,24 @@ bool parseCLIArgs(int argc, const char * argv[], std::string& repeater, std::vec
 		text.assign("");
 	}
 
+	if(namedArgs.count("dprs") > 0U) {
+		std::string dprsRepeater(repeater);
+		CAPRSUtils::dstarCallsignToAPRS(dprsRepeater);
+		std::string dprsnoCrc = CStringUtils::string_format("%s>DPRS:%s\r", dprsRepeater.c_str(), namedArgs["dprs"].c_str());
+		dprs = CStringUtils::string_format("$$CRC%04X,%s", CAPRSUtils::calcGPSAIcomCRC(dprsnoCrc), dprsnoCrc.c_str());
+	}
+	else {
+		dprs.assign("");
+	}
+
 	return true;
 }
 
-CVoiceTransmit::CVoiceTransmit(const std::string& callsign, CVoiceStore* store, const std::string& text) :
+CVoiceTransmit::CVoiceTransmit(const std::string& callsign, CVoiceStore* store, const std::string& text, const std::string& dprs) :
 m_socket("", 0U),
 m_callsign(callsign),
 m_text(text),
+m_dprs(dprs),
 m_store(store)
 {
 	assert(store != NULL);
@@ -121,8 +134,9 @@ bool CVoiceTransmit::run()
 
 	if(!m_text.empty()) {
 		slowData = new CSlowDataEncoder();
-		slowData->setHeaderData(*header);
-		slowData->setTextData(m_text);
+		// slowData->setHeaderData(*header);
+		if(!m_text.empty()) slowData->setTextData(m_text);
+		if(!m_dprs.empty()) slowData->setGPSData(m_dprs);
 	}
 
 	sendHeader(header);
@@ -133,8 +147,9 @@ bool CVoiceTransmit::run()
 
 	unsigned int out   = 0U;
 	unsigned int seqNo = 0U;
+	bool loop = true;
 
-	for (;;) {
+	while (loop) {
 		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		needed /= DSTAR_FRAME_TIME_MS;
 
@@ -153,7 +168,8 @@ bool CVoiceTransmit::run()
 
 				m_socket.close();
 
-				return true;
+				loop = false;
+				break;
 			}
 
 			if(slowData != nullptr) { // Override slowdata if specified so
@@ -163,7 +179,6 @@ bool CVoiceTransmit::run()
 				// Insert sync bytes when the sequence number is zero, slow data otherwise
 				if (seqNo == 0U) {
 					::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-					slowData->sync();
 				} else {
 					slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 				}
@@ -177,17 +192,19 @@ bool CVoiceTransmit::run()
 			ambe->setId(id);
 
 			sendData(ambe);
-
 			delete ambe;
 
 			out++;
-
 			seqNo++;
 			if(seqNo >= 21U) seqNo = 0U;
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10U));
 	}
+
+	if(slowData != nullptr) delete slowData;
+
+	return true;
 }
 
 bool CVoiceTransmit::sendHeader(CHeaderData* header)

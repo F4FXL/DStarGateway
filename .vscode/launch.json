@@ -109,7 +109,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/DGWVoiceTransmit/dgwvoicetransmit",
-            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool", "-text", "www.F5KAV.fr", "-dprs", "!4858.72ND00736.91E&RNG0037/A=000098 440 Voice 439.80000MHz -9.4000MHz"],
+            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool", "-text", "www.F5KAV.fr", "-dprs", "!4858.72N/00736.91Er/"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
