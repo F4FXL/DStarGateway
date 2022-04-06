@@ -37,8 +37,12 @@ unsigned int CAPRSUtils::calcGPSAIcomCRC(const std::string& gpsa)
 {
 	unsigned int icomcrc = 0xFFFFU;
 
+	unsigned int dataBegin = 0U;
+	if(boost::starts_with(gpsa, "$$CRC") && gpsa.length() >= 10 && gpsa[9] == ',')
+		dataBegin = 10U;
+
     auto length = gpsa.length();
-	for (unsigned int j = 10U; j < length; j++) {
+	for (unsigned int j = dataBegin; j < length; j++) {
 		unsigned char ch = (unsigned char)gpsa[j];
 
 		for (unsigned int i = 0U; i < 8U; i++) {
