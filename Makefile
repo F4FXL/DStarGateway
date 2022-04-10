@@ -82,6 +82,8 @@ clean:
 	$(MAKE) -C Common clean
 	$(MAKE) -C BaseCommon clean
 	$(MAKE) -C DGWRemoteControl clean
+	$(MAKE) -C DGWTextTransmit clean
+	$(MAKE) -C DGWTimeServer clean
 	$(MAKE) -C DStarBase clean
 	$(MAKE) -C DStarGateway clean
 	$(MAKE) -C IRCDDB clean
