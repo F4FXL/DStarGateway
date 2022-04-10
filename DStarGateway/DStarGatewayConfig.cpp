@@ -56,6 +56,7 @@ bool CDStarGatewayConfig::load()
 		ret = loadGPSD(cfg) && ret;
 #endif
 		ret = loadDaemon(cfg) && ret;
+		ret = loadAccessControl(cfg) && ret;
 	}
 
 	if(ret) {
@@ -350,6 +351,15 @@ bool CDStarGatewayConfig::loadGPSD(const CConfig & cfg)
 }
 #endif
 
+bool CDStarGatewayConfig::loadAccessControl(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("AccessControl", "whiteList", m_accessControl.whiteList, 0U, 2048U, "");
+	ret = cfg.getValue("AccessControl", "blackList", m_accessControl.blackList, 0U, 2048U, "") && ret;
+	ret = cfg.getValue("AccessControl", "restrictList", m_accessControl.restrictList, 0U, 2048U, "") && ret;
+	
+	return ret;
+}
+
 bool CDStarGatewayConfig::open(CConfig & cfg)
 {
 	try {
@@ -450,4 +460,9 @@ void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
 void CDStarGatewayConfig::getDaemon(TDaemon & gen) const
 {
 	gen = m_daemon;
+}
+
+void CDStarGatewayConfig::getAccessControl(TAccessControl & accessControl) const
+{
+	accessControl = m_accessControl;
 }

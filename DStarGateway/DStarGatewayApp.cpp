@@ -212,6 +212,34 @@ bool CDStarGatewayApp::createThread()
 		}
 	}
 
+	// Setup access control
+	TAccessControl accessControl;
+	m_config->getAccessControl(accessControl);
+
+	CCallsignList * whiteList = new CCallsignList(accessControl.whiteList);
+	if(whiteList->load() && whiteList->getCount() > 0U) {
+		m_thread->setWhiteList(whiteList);
+	}
+	else {
+		delete whiteList;
+	}
+
+	CCallsignList * blackList = new CCallsignList(accessControl.blackList);
+	if(blackList->load() && blackList->getCount() > 0U) {
+		m_thread->setBlackList(blackList);
+	}
+	else {
+		delete blackList;
+	}
+
+	CCallsignList * restrictList = new CCallsignList(accessControl.restrictList);
+	if(restrictList->load() && restrictList->getCount() > 0U) {
+		m_thread->setRestrictList(restrictList);
+	}
+	else {
+		delete restrictList;
+	}
+
 	// Setup the repeaters
 	bool ddEnabled = false;
 	bool atLeastOneRepeater = false;
