@@ -135,6 +135,8 @@ the testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
+- [**Improvement**] Add call sign lists ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
+- [**Improvement**] Add a way to override Slow Data in VoiceTransmit ([#23](https://github.com/F4FXL/DStarGateway/issues/23))
 - [**Improvement**] Add time server
 - [**Improvement**] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21)). DStarGateway can also be run as a "forking" daemon. This might be required for distros still using sysv. Systemd can live without it.
 - [**Improvement**] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))

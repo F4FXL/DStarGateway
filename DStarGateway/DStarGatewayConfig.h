@@ -134,6 +134,12 @@ typedef struct {
 } TGPSD;
 #endif
 
+typedef struct {
+	std::string whiteList;
+	std::string blackList;
+	std::string restrictList;
+} TAccessControl;
+
 class CDStarGatewayConfig {
 public:
 	CDStarGatewayConfig(const std::string &pathname);
@@ -157,6 +163,7 @@ public:
 	void getGPSD(TGPSD & gpsd) const;
 #endif
 	void getDaemon(TDaemon & gen) const;
+	void getAccessControl(TAccessControl & accessControl) const;
 
 private:
 	bool open(CConfig & cfg);
@@ -175,6 +182,7 @@ private:
 	bool loadGPSD(const CConfig & cfg);
 #endif
 	bool loadDaemon(const CConfig & cfg);
+	bool loadAccessControl(const CConfig & cfg);
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -190,6 +198,7 @@ private:
 	TGPSD m_gpsd;
 #endif
 	TDaemon m_daemon;
+	TAccessControl m_accessControl;
 
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;

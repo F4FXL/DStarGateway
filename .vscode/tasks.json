@@ -26,7 +26,10 @@
                 "USE_GPSD=1",
                 "DStarGateway/dstargateway"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
@@ -78,10 +81,7 @@
                 "USE_GPSD=1",
                 "DGWVoiceTransmit/dgwvoicetransmit"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
