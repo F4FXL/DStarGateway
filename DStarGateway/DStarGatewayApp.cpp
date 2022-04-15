@@ -260,6 +260,9 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.reflectorAtStartup,
 								rptrConfig.reflectorReconnect,
 								rptrConfig.frequency,
+								#ifdef USE_DRATS
+								true,
+								#endif
 								rptrConfig.offset,
 								rptrConfig.range,
 								rptrConfig.latitude,
