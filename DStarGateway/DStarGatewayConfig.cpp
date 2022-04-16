@@ -57,6 +57,9 @@ bool CDStarGatewayConfig::load()
 #endif
 		ret = loadDaemon(cfg) && ret;
 		ret = loadAccessControl(cfg) && ret;
+#ifdef USE_DRATS
+		ret = loadDRats(cfg) && ret;
+#endif
 	}
 
 	if(ret) {
@@ -360,6 +363,15 @@ bool CDStarGatewayConfig::loadAccessControl(const CConfig & cfg)
 	return ret;
 }
 
+#ifdef USE_DRATS
+bool CDStarGatewayConfig::loadDRats(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("DRats", "enabled", m_drats.enabled, false);
+
+	return ret;
+}
+#endif
+
 bool CDStarGatewayConfig::open(CConfig & cfg)
 {
 	try {
@@ -466,3 +478,10 @@ void CDStarGatewayConfig::getAccessControl(TAccessControl & accessControl) const
 {
 	accessControl = m_accessControl;
 }
+
+#if USE_DRATS
+void CDStarGatewayConfig::getDRats(TDRats & drats) const
+{
+	drats = m_drats;
+}
+#endif
