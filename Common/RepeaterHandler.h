@@ -20,10 +20,6 @@
 #ifndef	RepeaterHandler_H
 #define	RepeaterHandler_H
 
-//#define USE_CCS
-//#define USE_STARNET
-//#define USE_DRATS
-
 #include "RepeaterProtocolHandler.h"
 #include "DExtraProtocolHandler.h"
 #include "DPlusProtocolHandler.h"
