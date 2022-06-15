@@ -21,10 +21,10 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
           name: "Build"
-          command: "make -j 3 ENABLE_DEBUG=1 USE_GPSD=1"
+          command: "make -j 3 ENABLE_DEBUG=1 USE_GPSD=1 USE_DRATS=1"
       - run:
           name: "Run Tests"
-          command: "make run-tests ENABLE_DEBUG=1 USE_GPSD=1"
+          command: "make run-tests ENABLE_DEBUG=1 USE_GPSD=1 USE_DRATS=1"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
