@@ -11,6 +11,7 @@
                 "-j3",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
+                "USE_DRATS=1",
                 "all"
             ],
             "group": "build",
