@@ -17,6 +17,7 @@
       - [3.5.0.3. Debug Build](#3503-debug-build)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
+  - [3.8. Updating host files](#38-updating-host-files)
 - [4. Contributing](#4-contributing)
   - [4.1. Work Flow](#41-work-flow)
   - [4.2. Continuous Integration](#42-continuous-integration)
@@ -102,7 +103,7 @@ make
 make USE_GPS=1
 ```
 #### 3.5.0.2. Build With DRats Support
-IMHO Drats is a dying thing, therefore it is included as a build option.
+IMHO Drats is a decaying thing, therefore it is included as a build option.
 ```
 make USE_DRATS=1
 ```
@@ -110,7 +111,7 @@ make USE_DRATS=1
 ```
 make ENABLE_DEBUG=1
 ```
-Note that this will link with libl
+Note that this will will add libl dependency. Building this way will output the stack trace in case of a crash.
 ## 3.6. Installing
 The program is meant to run as a systemd service. All bits an pieces are provided.
 ```
@@ -122,13 +123,21 @@ After installing you have to edit the configuration file. If you went with defau
 The configuration format is quite straight forward. It is organised in sections and key/value pairs.
 The order of the sections or key/values pairs inside the sections does not matter nor does casing.
 Boolean values can be set using true, false, 1 or 0
-Floating point values must use . (point) as decimal separatorsensitive.
+Floating point values must use . (point) as decimal separator.
 
-When done with configuration, the daemon will be started automatically on boot. To manual start and stop it use the usual systemd commands
+When done with configuration, the daemon will be started automatically on next boot. To manual start and stop it, use the usual systemd commands
 ```
 sudo systemctl start dstargateway.service
 sudo systemctl stop dstargateway.service
 ```
+
+## 3.8. Updating host files
+To update host files, from within the source code directory, run
+```
+sudo make newhostfiles
+sudo systemctl restart dstargateway.service
+```
+
 # 4. Contributing
 ## 4.1. Work Flow
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome but pleasee observe following rules :
@@ -137,7 +146,7 @@ I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my work
 - Code formating rules are observed (these are very lousy though)
 ## 4.2. Continuous Integration
 I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all) I am trying to rewrite the code so that it can be put into some Behavior Driven Development scheme. This is a long haul task and I'll try do do it on the go while changing/adding stuff.
-the testing framwework used is Google Test.
+The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
