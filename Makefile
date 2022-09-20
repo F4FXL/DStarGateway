@@ -38,10 +38,6 @@ export CPPFLAGS+= -DUSE_GPSD
 export LDFLAGS+= -lgps
 endif
 
-ifeq ($(USE_DRATS), 1)
-export CPPFLAGS+= -DUSE_DRATS
-endif
-
 .PHONY: all
 all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWTimeServer/dgwtimeserver DGWVoiceTransmit/dgwvoicetransmit #tests
 

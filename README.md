@@ -13,8 +13,7 @@
   - [3.4. Prerequisites and dependencies](#34-prerequisites-and-dependencies)
   - [3.5. Building](#35-building)
       - [3.5.0.1. Build With GPSD Support](#3501-build-with-gpsd-support)
-      - [3.5.0.2. Build With DRats Support](#3502-build-with-drats-support)
-      - [3.5.0.3. Debug Build](#3503-debug-build)
+      - [3.5.0.2. Debug Build](#3502-debug-build)
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
   - [3.8. Updating host files](#38-updating-host-files)
@@ -102,12 +101,7 @@ make
 ```
 make USE_GPS=1
 ```
-#### 3.5.0.2. Build With DRats Support
-IMHO Drats is a decaying thing, therefore it is included as a build option.
-```
-make USE_DRATS=1
-```
-#### 3.5.0.3. Debug Build
+#### 3.5.0.2. Debug Build
 ```
 make ENABLE_DEBUG=1
 ```

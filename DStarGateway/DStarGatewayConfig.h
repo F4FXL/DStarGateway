@@ -56,9 +56,7 @@ typedef struct {
 	HW_TYPE hwType;
 	bool reflectorAtStartup;
 	RECONNECT reflectorReconnect;
-#ifdef USE_DRATS
 	bool dRatsEnabled;
-#endif
 	double frequency;
 	double offset;
 	double range;
@@ -115,11 +113,9 @@ typedef struct {
 	bool enabled;
 } TDCS;
 
-#ifdef USE_DRATS
 typedef struct {
 	bool enabled;
 } TDRats;
-#endif
 
 typedef struct {
 	bool enabled;
@@ -170,9 +166,7 @@ public:
 #endif
 	void getDaemon(TDaemon & gen) const;
 	void getAccessControl(TAccessControl & accessControl) const;
-#ifdef USE_DRATS
 	void getDRats(TDRats & drats) const;
-#endif
 
 private:
 	bool open(CConfig & cfg);
@@ -192,9 +186,7 @@ private:
 #endif
 	bool loadDaemon(const CConfig & cfg);
 	bool loadAccessControl(const CConfig & cfg);
-#ifdef USE_DRATS
 	bool loadDRats(const CConfig & cfg);
-#endif
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -211,9 +203,7 @@ private:
 #endif
 	TDaemon m_daemon;
 	TAccessControl m_accessControl;
-#ifdef USE_DRATS
 	TDRats m_drats;
-#endif
 
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
