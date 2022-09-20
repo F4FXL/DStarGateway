@@ -5,7 +5,7 @@
   - [2.3. Thanks](#23-thanks)
   - [2.4. Features](#24-features)
     - [2.4.1. Features that where left out :](#241-features-that-where-left-out-)
-    - [2.4.2. Additional Features :](#242-additional-features-)
+    - [2.4.2. Additional Features compared to ircddbGateway:](#242-additional-features-compared-to-ircddbgateway)
 - [3. Building and installing](#3-building-and-installing)
   - [3.1. Initial setup](#31-initial-setup)
   - [3.2. Get latest stable version (recommended)](#32-get-latest-stable-version-recommended)
@@ -55,12 +55,11 @@ All the features found in ircddbGateway are supposed to be working. Except the o
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using VoiceTransmit.
 - APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
-- DRats : Is on the to-do list see [#6](#6)
 - CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it for good.
 
-### 2.4.2. Additional Features :
-- DPlus, DExtra and G2 NAT Traversal using ircddb network as rendez-vous server
-- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs.
+### 2.4.2. Additional Features compared to ircddbGateway:
+- DPlus, DExtra and G2 NAT Traversal using ircddb network as rendez-vous server. I.e. it is not required to open firewall ports for Callsign Routing or Gateway calls. however it is still recommended to do so. But NAT Traversal will bring more flexibility when operating on CGNAT (Mobile) Networks.
+- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs. Yes, you can send messages to APRS stations and Vice Versa. Additionnally part of the message is sent as Text Dat in the slow data. This allows you to read the message dirdclty on your radio screen.
 - Repeater Link status is sent to APRS-IS as a status frame
 
 # 3. Building and installing
@@ -144,7 +143,7 @@ The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.6
-- [**Improvement**] Add DRats Support (conditional build) ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
+- [**Improvement**] Add DRats Support ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add call sign lists ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add a way to override Slow Data in VoiceTransmit ([#23](https://github.com/F4FXL/DStarGateway/issues/23))
 - [**Improvement**] Add time server
@@ -177,9 +176,9 @@ I started this during my 2021 seasons holiday. It took me almost 8 days to get t
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
   - Support for all protocols (G2, DExtra, DPlus) DCS does nto make sense as it was historically never used as protocol for linking repeaters
 - &#9745; Send the connection status to APRS-IS as a status frame
-- &#9746; Reinstantiate DRATS
+- &#9745; Reinstantiate DRATS
 - &#9745; Migrate all the "accessories" (VoiceTransmit, RemoteControl ...)
 - &#9746; Automatic refresh of host files
 - &#9746; Reduce ircDDB dependency, build something more P2P, maybe based on [Distributed Hashtable](https://github.com/DavidKeller/kademlia) ?
-- &#9746; Forward messages from RS-MS1A to APRS and vice versa
+- &#9745; Forward messages from RS-MS1A to APRS and vice versa
 - Everything that might come handy to make dstar the most powerful system ever :)
