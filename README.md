@@ -51,10 +51,10 @@ Quite a few classes are more or less copy/paste from each other some sanitizatio
 All the features found in ircddbGateway are supposed to be working. Except the ones listed below
 
 ### 2.4.1. Features that where left out :
-- CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar an more or les a burdain to use. Call sign routing is by far more flexible and superior.
+- CCS: is still being used? I always considered this as trojan horse to push some DMR Agenda into DStar and a burdain to use. Call sign routing is by far more flexible and superior.
 - Starnet: You might consider running [Smart Group Server XL](https://github.com/F4FXL/smart-group-server-xl) from a dedicated computer instead.
 - Announcement: same can be achieved using VoiceTransmit.
-- APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary burden.
+- APRSGateway capability: I would prefer to have some sort of TCP "APRS-IS proxy" program sitting between the program and the APRS server, thus keeping the ability to directly connect to APRS-IS or not, depending on the system owner wish. I run mostly DStar Only repeaters, having an additional program to maintain is unnecessary overkill.
 - CallSign Server : this is a legacy from the dead project xreflector.net, I will most probably drop it for good.
 
 ### 2.4.2. Additional Features compared to ircddbGateway:
