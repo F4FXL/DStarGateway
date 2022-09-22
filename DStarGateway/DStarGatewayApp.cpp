@@ -240,6 +240,10 @@ bool CDStarGatewayApp::createThread()
 		delete restrictList;
 	}
 
+	// Drats
+	TDRats drats;
+	m_config->getDRats(drats);
+
 	// Setup the repeaters
 	bool ddEnabled = false;
 	bool atLeastOneRepeater = false;
@@ -260,6 +264,7 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.reflectorAtStartup,
 								rptrConfig.reflectorReconnect,
 								rptrConfig.frequency,
+								drats.enabled,
 								rptrConfig.offset,
 								rptrConfig.range,
 								rptrConfig.latitude,

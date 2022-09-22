@@ -157,23 +157,6 @@ bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, c
 	TOIPV4(addr)->sin_port = htons(port);
 
 	return write(buffer, length, addr);
-	// sockaddr_in addr;
-	// ::memset(&addr, 0x00, sizeof(sockaddr_in));
-
-	// addr.sin_family = AF_INET;
-	// addr.sin_addr   = address;
-	// addr.sin_port   = htons(port);
-
-	// ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
-	// if (ret < 0) {
-	// 	CLog::logError("Error returned from sendto (port: %u), err: %s\n", m_port, strerror(errno));
-	// 	return false;
-	// }
-
-	// if (ret != ssize_t(length))
-	// 	return false;
-
-	// return true;
 }
 
 bool CUDPReaderWriter::write(const unsigned char* buffer, unsigned int length, const struct sockaddr_storage& addr)

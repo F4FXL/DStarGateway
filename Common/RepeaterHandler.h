@@ -20,10 +20,6 @@
 #ifndef	RepeaterHandler_H
 #define	RepeaterHandler_H
 
-//#define USE_CCS
-//#define USE_STARNET
-//#define USE_DRATS
-
 #include "RepeaterProtocolHandler.h"
 #include "DExtraProtocolHandler.h"
 #include "DPlusProtocolHandler.h"
@@ -39,9 +35,7 @@
 #include "CacheManager.h"
 #include "HeaderLogger.h"
 #include "CallsignList.h"
-#ifdef USE_DRATS
 #include "DRATSServer.h"
-#endif
 #include "CCSCallback.h"
 #include "VersionUnit.h"
 #ifdef USE_CCS
@@ -68,11 +62,7 @@ class CRepeaterHandler : public IRepeaterCallback, public IReflectorCallback, pu
 public:
 	static void initialise(unsigned int maxRepeaters);
 
-#ifdef USE_DRATS
 	static void add(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3);
-#else
-	static void add(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3);
-#endif
 
 	static void setLocalAddress(const std::string& address);
 	static void setG2HandlerPool(CG2ProtocolHandlerPool* handler);
@@ -147,11 +137,8 @@ public:
 	virtual void readAPRSFrame(CAPRSFrame& frame);
 
 protected:
-#ifdef USE_DRATS
 	CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3);
-#else
-	CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3);
-#endif
+
 	virtual ~CRepeaterHandler();
 
 	void resolveUserInt(const std::string& user, const std::string& repeater, const std::string& gateway, const std::string& address);
@@ -282,10 +269,8 @@ private:
 	// APRS to DPRS
 	CAPRSUnit*				  m_aprsUnit;
 
-#ifdef USE_DRATS
 	// D-RATS handler
 	CDRATSServer*             m_drats;
-#endif
 
 	// DTMF commands
 	CDTMF                     m_dtmf;

@@ -38,7 +38,6 @@ export CPPFLAGS+= -DUSE_GPSD
 export LDFLAGS+= -lgps
 endif
 
-
 .PHONY: all
 all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWTimeServer/dgwtimeserver DGWVoiceTransmit/dgwvoicetransmit #tests
 
