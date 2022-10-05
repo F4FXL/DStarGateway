@@ -247,8 +247,8 @@ bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 		ret = cfg.getValue(section, "latitude", repeater->latitude, -90.0, 90.0, m_gateway.latitude) && ret;
 		ret = cfg.getValue(section, "longitude", repeater->longitude, -180.0, 180.0, m_gateway.longitude) && ret;
 		ret = cfg.getValue(section, "agl", repeater->agl, 0, 1000.0, 0.0) && ret;
-		ret = cfg.getValue(section, "description1", m_gateway.description1, 0, 1024, "") && ret;
-		ret = cfg.getValue(section, "description2", m_gateway.description2, 0, 1024, "") && ret;
+		ret = cfg.getValue(section, "description1", repeater->description1, 0, 1024, "") && ret;
+		ret = cfg.getValue(section, "description2", repeater->description2, 0, 1024, "") && ret;
 		ret = cfg.getValue(section, "url", m_gateway.url, 0, 1024, "") && ret;;
 		ret = cfg.getValue(section, "band1", repeater->band1, 0, 255, 0) && ret;
 		ret = cfg.getValue(section, "band2", repeater->band2, 0, 255, 0) && ret;
