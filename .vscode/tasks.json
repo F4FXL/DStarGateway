@@ -8,23 +8,10 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "all"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Build DStarGateway",
-            "type": "shell",
-            "command": "make",
-            "args": [
-                "-j3",
-                "ENABLE_DEBUG=1",
-                "USE_GPSD=1",
-                "DStarGateway/dstargateway"
             ],
             "group": {
                 "kind": "build",
@@ -33,11 +20,24 @@
             "problemMatcher": []
         },
         {
+            "label": "Build DStarGateway",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j9",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DStarGateway/dstargateway"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
             "label": "Build DGWRemoteControl",
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DGWRemoteControl/dgwremotecontrol"
@@ -50,7 +50,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DGWTextTransmit/dgwtexttransmit"
@@ -63,7 +63,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DGWTimeServer/dgwtimeserver"
@@ -76,7 +76,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DGWVoiceTransmit/dgwvoicetransmit"
@@ -89,7 +89,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "tests",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"

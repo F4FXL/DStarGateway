@@ -35,7 +35,7 @@ int main(int argc, const char * argv[])
 	std::vector<std::string> filenames;
 
 	if (!parseCLIArgs(argc, argv, repeater, filenames, text, dprs)) {
-		::fprintf(stderr, "dgwvoicetransmit: invalid command line usage: dgwvoicetransmit [-text text] <repeater> <file1> <file2> ..., exiting\n");
+		::fprintf(stderr, "dgwvoicetransmit: invalid command line usage: dgwvoicetransmit [-text text] [-dprs dprs] <repeater> <file1> <file2> ..., exiting\n");
 		return 1;
 	}
 
