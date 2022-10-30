@@ -30,9 +30,8 @@
 #include "Utils.h"
 #include "Log.h"
 
-unsigned char* CAudioUnit::m_ambe = NULL;
-unsigned int   CAudioUnit::m_ambeLength = 0U;
-std::map<std::string, CIndexRecord *> CAudioUnit::m_index;
+
+CAMBEFileReader * CAudioUnit::m_ambeFilereader = nullptr;
 
 TEXT_LANG CAudioUnit::m_language = TL_ENGLISH_UK;
 
@@ -46,6 +45,11 @@ void CAudioUnit::initialise()
 
 void CAudioUnit::setLanguage(const std::string & dir, TEXT_LANG language)
 {
+	if(m_ambeFilereader != nullptr) {
+		delete m_ambeFilereader;
+		m_ambeFilereader = nullptr;
+	}
+
 	m_language = language;
 
 	std::string ambeFileName;
@@ -94,32 +98,22 @@ void CAudioUnit::setLanguage(const std::string & dir, TEXT_LANG language)
 			break;
 	}
 
-	bool ret = readAMBE(dir, ambeFileName);
-	if (!ret) {
-		delete[] m_ambe;
-		m_ambe = NULL;
-		return;
-	}
-
-	ret = readIndex(dir, indxFileName);
-	if (!ret) {
-		delete[] m_ambe;
-		m_ambe = NULL;
+	m_ambeFilereader = new CAMBEFileReader(dir + "/" + indxFileName, dir + "/" + ambeFileName);
+	bool ret = m_ambeFilereader->read();
+	if(!ret) {
+		delete m_ambeFilereader;
+		m_ambeFilereader = nullptr;
 	}
 }
 
 void CAudioUnit::finalise()
 {
-	for (std::map<std::string, CIndexRecord *>::iterator it = m_index.begin(); it != m_index.end(); ++it)
-		delete it->second;
-
-	delete[] m_ambe;
+	delete m_ambeFilereader;
 }
 
 CAudioUnit::CAudioUnit(IRepeaterCallback* handler, const std::string& callsign) :
 m_handler(handler),
 m_callsign(callsign),
-m_encoder(),
 m_status(AS_IDLE),
 m_linkStatus(LS_NONE),
 m_tempLinkStatus(LS_NONE),
@@ -129,28 +123,24 @@ m_reflector(),
 m_tempReflector(),
 m_hasTemporary(false),
 m_timer(1000U, REPLY_TIME),
-m_data(NULL),
-m_in(0U),
-m_out(0U),
-m_seqNo(0U) //,
+m_data(),
+m_out(0U)
 //m_time()
 {
 	assert(handler != NULL);
-
-	m_data = new CAMBEData*[MAX_FRAMES];
-
-	for (unsigned int i = 0U; i < MAX_FRAMES; i++)
-		m_data[i] = NULL;
 }
 
 CAudioUnit::~CAudioUnit()
 {
-	delete[] m_data;
+	for (auto item : m_data) {
+		delete item;
+	}
+	m_data.clear();
 }
 
 void CAudioUnit::sendStatus()
 {
-	if (m_ambe == NULL)
+	if (m_ambeFilereader == nullptr)
 		return;
 
 	if (m_status != AS_IDLE)
@@ -190,7 +180,6 @@ void CAudioUnit::clock(unsigned int ms)
 		m_timer.stop();
 
 		m_out    = 0U;
-		m_seqNo  = 0U;
 		m_status = AS_TRANSMIT;
 
 		m_time = std::chrono::high_resolution_clock::now();
@@ -199,29 +188,20 @@ void CAudioUnit::clock(unsigned int ms)
 	}
 
 	if (m_status == AS_TRANSMIT) {
-		std::chrono::high_resolution_clock::time_point hrctp = std::chrono::high_resolution_clock::now();
-		auto elapse = std::chrono::duration_cast<std::chrono::milliseconds>(hrctp - m_time);
-		unsigned int needed = elapse.count() / DSTAR_FRAME_TIME_MS;
+		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_time).count();
+		needed /= DSTAR_FRAME_TIME_MS;
 
-		while (m_out < needed) {
+		while (m_out < needed && m_out < m_data.size()) {
 			CAMBEData* data = m_data[m_out];
-			m_data[m_out] = NULL;
 			m_out++;
-
-			if (m_in == m_out)
-				data->setEnd(true);
-
+			// CLog::logTrace("m_out %u, needed %u, m_data %u", m_out, needed, m_data.size());
 			m_handler->process(*data, DIR_INCOMING, AS_INFO);
+		}
 
-			delete data;
-
-			if (m_in == m_out) {
-				m_in     = 0U;
-				m_out    = 0U;
-				m_status = AS_IDLE;
-				m_timer.stop();
-				return;
-			}
+		if (m_out >= m_data.size()) {
+			m_out    = 0U;
+			m_status = AS_IDLE;
+			m_timer.stop();
 		}
 
 		return;
@@ -230,63 +210,14 @@ void CAudioUnit::clock(unsigned int ms)
 
 void CAudioUnit::cancel()
 {
-	for (unsigned int i = 0U; i < MAX_FRAMES; i++) {
-		if (m_data[i] != NULL) {
-			delete m_data[i];
-			m_data[i] = NULL;
-		}
-	}
-
+	CLog::logTrace("Audio Unit Cancel");
 	m_status = AS_IDLE;
 	m_out    = 0U;
-	m_in     = 0U;
 
 	m_timer.stop();
 }
 
-bool CAudioUnit::lookup(unsigned int id, const std::string &name)
-{
-	CIndexRecord* info = m_index[name];
-	if (info == NULL) {
-		// CLog::logError("Cannot find the AMBE index for *%s*", name.c_str());
-		return false;
-	}
-
-	unsigned int  start = info->getStart();
-	unsigned int length = info->getLength();
-
-	for (unsigned int i = 0U; i < length; i++) {
-		unsigned char* dataIn = m_ambe + (start + i) * VOICE_FRAME_LENGTH_BYTES;
-
-		CAMBEData* dataOut = new CAMBEData;
-		dataOut->setSeq(m_seqNo);
-		dataOut->setId(id);
-
-		unsigned char buffer[DV_FRAME_LENGTH_BYTES];
-		memcpy(buffer + 0U, dataIn, VOICE_FRAME_LENGTH_BYTES);
-
-		// Insert sync bytes when the sequence number is zero, slow data otherwise
-		if (m_seqNo == 0U) {
-			memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-			m_encoder.sync();
-		} else {
-			m_encoder.getTextData(buffer + VOICE_FRAME_LENGTH_BYTES);
-		}
-
-		dataOut->setData(buffer, DV_FRAME_LENGTH_BYTES);
-
-		m_seqNo++;
-		if (m_seqNo == 21)
-			m_seqNo = 0;
-
-		m_data[m_in] = dataOut;
-		m_in++;
-	}
-
-	return true;
-}
-
-void CAudioUnit::spellReflector(unsigned int id, const std::string &reflector)
+void CAudioUnit::spellReflector(const std::string &reflector)
 {
 	unsigned int length = reflector.size();
 
@@ -294,11 +225,10 @@ void CAudioUnit::spellReflector(unsigned int id, const std::string &reflector)
 		std::string c = reflector.substr(i, 1);
 
 		if (c.compare(" "))
-			lookup(id, c);
+			m_ambeFilereader->lookup(c, m_data);
 	}
 
 	char c = reflector.at(length - 1);
-
 	if (c == ' ')
 		return;
 
@@ -306,197 +236,113 @@ void CAudioUnit::spellReflector(unsigned int id, const std::string &reflector)
 	cstr.push_back(c);
 	if (m_linkStatus == LS_LINKING_DCS || m_linkStatus == LS_LINKED_DCS ||
 	    m_linkStatus == LS_LINKING_CCS || m_linkStatus == LS_LINKED_CCS) {
-		lookup(id, cstr);
+		m_ambeFilereader->lookup(cstr, m_data);
 		return;
 	}
 
 	switch (c) {
 		case 'A':
-			lookup(id, "alpha");
+			m_ambeFilereader->lookup("alpha", m_data);
 			break;
 		case 'B':
-			lookup(id, "bravo");
+			m_ambeFilereader->lookup("bravo", m_data);
 			break;
 		case 'C':
-			lookup(id, "charlie");
+			m_ambeFilereader->lookup("charlie", m_data);
 			break;
 		case 'D':
-			lookup(id, "delta");
+			m_ambeFilereader->lookup("delta", m_data);
 			break;
 		default:
-			lookup(id, cstr);
+			m_ambeFilereader->lookup(cstr, m_data);
 			break;
 	}
-}
-
-bool CAudioUnit::readAMBE(const std::string& dir, const std::string& name)
-{
-	std::string fileName = dir + "/" + name;
-	struct stat sbuf;
-	
-	if (stat(fileName.c_str(), &sbuf)) {
-		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.append("/data/");
-		fileName += name;
-		if (stat(fileName.c_str(), &sbuf)) {
-			CLog::logInfo("File %s not readable\n", fileName.c_str());
-			return false;
-		}
-	}
-	unsigned int fsize = sbuf.st_size;
-
-	FILE *file = fopen(fileName.c_str(), "rb");
-	if (NULL == file) {
-		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
-		return false;
-	}
-
-	CLog::logInfo("Reading %s\n", fileName.c_str());
-
-	unsigned char buffer[VOICE_FRAME_LENGTH_BYTES];
-
-	size_t n = fread(buffer, sizeof(unsigned char), 4, file);
-	if (n != 4) {
-		CLog::logError("Unable to read the header from %s\n", fileName.c_str());
-		fclose(file);
-		return false;
-	}
-
-	if (memcmp(buffer, "AMBE", 4)) {
-		CLog::logError("Invalid header from %s\n", fileName.c_str());
-		fclose(file);
-		return false;
-	}
-
-	// Length of the file minus the header
-	unsigned int length = fsize - 4U;
-
-	// Hold the file data plus silence at the end
-	m_ambe = new unsigned char[length + SILENCE_LENGTH * VOICE_FRAME_LENGTH_BYTES];
-	m_ambeLength = length / VOICE_FRAME_LENGTH_BYTES;
-
-	// Add silence to the beginning of the buffer
-	unsigned char* p = m_ambe;
-	for (unsigned int i = 0U; i < SILENCE_LENGTH; i++, p += VOICE_FRAME_LENGTH_BYTES)
-		memcpy(p, NULL_AMBE_DATA_BYTES, VOICE_FRAME_LENGTH_BYTES);
-
-	n = fread(p, 1, length, file);
-	if (n != length) {
-		CLog::logError("Unable to read the AMBE data from %s\n", fileName.c_str());
-		fclose(file);
-		delete[] m_ambe;
-		m_ambe = NULL;
-		return false;
-	}
-
-	fclose(file);
-
-	return true;
-}
-
-bool CAudioUnit::readIndex(const std::string& dir, const std::string& name)
-{
-	std::string fileName = dir + "/" + name;
-	struct stat sbuf;
-	
-	if (stat(fileName.c_str(), &sbuf)) {
-		CLog::logInfo("File %s not readable\n", fileName.c_str());
-		fileName.append("/data/");
-		fileName += name;
-		if (stat(fileName.c_str(), &sbuf)) {
-			CLog::logInfo("File %s not readable\n", fileName.c_str());
-			return false;
-		}
-	}
-
-	FILE *file = fopen(fileName.c_str(), "r");
-	if (NULL == file) {
-		CLog::logInfo("Cannot open %s for reading\n", fileName.c_str());
-		return false;
-	}
-
-	// Add a silence entry at the beginning
-	m_index[" "] = new CIndexRecord(" ", 0, SILENCE_LENGTH);
-
-	CLog::logInfo("Reading %s\n", fileName.c_str());
-
-	char line[128];
-	while (fgets(line, 128, file)) {
-
-		if (strlen(line) && '#'!=line[0]) {
-			const std::string space(" \t\r\n");
-			std::string name(strtok(line, space.c_str()));
-			std::string strt(strtok(NULL, space.c_str()));
-			std::string leng(strtok(NULL, space.c_str()));
-
-			if (name.size() && strt.size() && leng.size()) {
-				unsigned long start  = std::stoul(strt);
-				unsigned long length = std::stoul(leng);
-
-				if (start >= m_ambeLength || (start + length) >= m_ambeLength)
-					CLog::logInfo("The start or end for *%s* is out of range, start: %lu, end: %lu\n", name.c_str(), start, start + length);
-				else
-					m_index[name] = new CIndexRecord(name, start + SILENCE_LENGTH, length);
-			}
-		}
-	}
-
-	fclose(file);
-
-	return true;
 }
 
 void CAudioUnit::sendStatus(LINK_STATUS status, const std::string& reflector, const std::string &text)
 {
-		m_encoder.setTextData(text);
+	CLog::logTrace("Audio Unit sendStatus");
 
-		// Create the message
-		unsigned int id = CHeaderData::createId();
+	// do some clean up, delete old message
+	for (auto item : m_data) {
+		delete item;
+	}
+	m_data.clear();
 
-		lookup(id, " ");
-		lookup(id, " ");
-		lookup(id, " ");
-		lookup(id, " ");
+	// Create the message
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
 
-		bool found;
+	bool found;
 
-		switch (status) {
-			case LS_NONE:
-				lookup(id, "notlinked");
-				break;
-			case LS_LINKED_CCS:
-			case LS_LINKED_DCS:
-			case LS_LINKED_DPLUS:
-			case LS_LINKED_DEXTRA:
-			case LS_LINKED_LOOPBACK:
-				found = lookup(id, "linkedto");
-				if (!found) {
-					lookup(id, "linked");
-					lookup(id, "2");
-				}
-				spellReflector(id, reflector);
-				break;
-			default:
-				found = lookup(id, "linkingto");
-				if (!found) {
-					lookup(id, "linking");
-					lookup(id, "2");
-				}
-				spellReflector(id, reflector);
-				break;
+	switch (status) {
+		case LS_NONE:
+			m_ambeFilereader->lookup("notlinked", m_data);
+			break;
+		case LS_LINKED_CCS:
+		case LS_LINKED_DCS:
+		case LS_LINKED_DPLUS:
+		case LS_LINKED_DEXTRA:
+		case LS_LINKED_LOOPBACK:
+			found = m_ambeFilereader->lookup("linkedto", m_data);
+			if (!found) {
+				m_ambeFilereader->lookup("linked", m_data);
+				m_ambeFilereader->lookup("2", m_data);
+			}
+			spellReflector(reflector);
+			break;
+		default:
+			found = m_ambeFilereader->lookup("linkingto", m_data);
+			if (!found) {
+				m_ambeFilereader->lookup("linking", m_data);
+				m_ambeFilereader->lookup("2", m_data);
+			}
+			spellReflector(reflector);
+			break;
+	}
+
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
+	m_ambeFilereader->lookup(" ", m_data);
+
+	unsigned int id = CHeaderData::createId();
+	// RPT1 and RPT2 will be filled in later
+	CHeaderData header;
+	header.setMyCall1(m_callsign);
+	header.setMyCall2("INFO");
+	header.setYourCall("CQCQCQ  ");
+	header.setId(id);
+
+	CSlowDataEncoder slowDataEncoder;
+	slowDataEncoder.setTextData(text);
+	unsigned int seqNo = 0U;
+
+	// add the slow data, id, seq num etc ...
+	for(unsigned int i = 0U; i < m_data.size(); i++) {
+		m_data[i]->setId(id);
+		m_data[i]->setSeq(seqNo);
+
+		unsigned char buffer[DV_FRAME_LENGTH_BYTES];
+		m_data[i]->getData(buffer, DV_FRAME_LENGTH_BYTES);
+
+		// Insert sync bytes when the sequence number is zero, slow data otherwise
+		if (seqNo == 0U) {
+			::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
+			slowDataEncoder.sync();
+		} else {
+			slowDataEncoder.getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 		}
 
-		lookup(id, " ");
-		lookup(id, " ");
-		lookup(id, " ");
-		lookup(id, " ");
+		m_data[i]->setData(buffer, DV_FRAME_LENGTH_BYTES);
 
-		// RPT1 and RPT2 will be filled in later
-		CHeaderData header;
-		header.setMyCall1(m_callsign);
-		header.setMyCall2("INFO");
-		header.setYourCall("CQCQCQ  ");
-		header.setId(id);
+		seqNo++;
+		if(seqNo >= 21U) seqNo = 0U;
+	}
 
-		m_handler->process(header, DIR_INCOMING, AS_INFO);
+	m_data[m_data.size() - 1]->setEnd(true);
+
+	m_handler->process(header, DIR_INCOMING, AS_INFO);
 }

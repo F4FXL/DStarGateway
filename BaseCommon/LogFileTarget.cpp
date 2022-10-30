@@ -21,19 +21,19 @@
 #include <fstream>
 #include <chrono>
 #include <ctime>
+#include <cassert>
 
 #include "LogFileTarget.h"
 
-#define LOG_FILE_ROOT "dstargateway"
-
-CLogFileTarget::CLogFileTarget(LOG_SEVERITY logLevel, const std::string & dir, bool rotate) : 
+CLogFileTarget::CLogFileTarget(LOG_SEVERITY logLevel, const std::string & dir,  const std::string& fileRoot, bool rotate) : 
 CLogTarget(logLevel),
 m_dir(dir),
+m_fileRoot(fileRoot),
 m_rotate(rotate),
 m_file(),
 m_day(0)
 {
-
+    assert(!fileRoot.empty());
 }
 
 CLogFileTarget::~CLogFileTarget()
@@ -53,7 +53,7 @@ void CLogFileTarget::printLogIntFixed(const std::string& msg)
 
     std::string filename(m_dir);
     if(filename[filename.length() - 1U] != '/') filename.push_back('/');
-    filename.append(LOG_FILE_ROOT).append(".log");
+    filename.append(m_fileRoot).append(".log");
     m_file.open(filename, std::ios::app);
 
     if(m_file.is_open()) {
@@ -80,7 +80,7 @@ void CLogFileTarget::printLogIntRotate(const std::string& msg)
         if(filename[filename.length() - 1U] != '/') filename.push_back('/');
         char buf[64];
         std::strftime(buf, 42, "-%Y-%m-%d", now_tm);
-        filename.append(LOG_FILE_ROOT).append(buf).append(".log");
+        filename.append(m_fileRoot).append(buf).append(".log");
         m_file.open(filename, std::ios::app);
         if(!m_file.is_open()) {
             std::cerr << "FAILED TO OPEN LOG FILE :" << filename;

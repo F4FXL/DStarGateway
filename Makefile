@@ -38,9 +38,8 @@ export CPPFLAGS+= -DUSE_GPSD
 export LDFLAGS+= -lgps
 endif
 
-
 .PHONY: all
-all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol #tests
+all: DStarGateway/dstargateway  DGWRemoteControl/dgwremotecontrol DGWTextTransmit/dgwtexttransmit DGWTimeServer/dgwtimeserver DGWVoiceTransmit/dgwvoicetransmit #tests
 
 APRS/APRS.a: BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C APRS
@@ -60,6 +59,15 @@ DStarGateway/dstargateway :  VersionInfo/GitVersion.h $(OBJS) APRS/APRS.a Common
 DGWRemoteControl/dgwremotecontrol: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWRemoteControl
 
+DGWTextTransmit/dgwtexttransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWTextTransmit
+
+DGWTimeServer/dgwtimeserver: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWTimeServer
+
+DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DGWVoiceTransmit
+
 IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C IRCDDB
 
@@ -70,8 +78,12 @@ VersionInfo/GitVersion.h: FORCE
 clean:
 	$(MAKE) -C Tests clean
 	$(MAKE) -C APRS clean
-	$(MAKE) -C Common clean
 	$(MAKE) -C BaseCommon clean
+	$(MAKE) -C Common clean
+	$(MAKE) -C DGWRemoteControl clean
+	$(MAKE) -C DGWTextTransmit clean
+	$(MAKE) -C DGWTimeServer clean
+	$(MAKE) -C DGWVoiceTransmit clean
 	$(MAKE) -C DStarBase clean
 	$(MAKE) -C DStarGateway clean
 	$(MAKE) -C IRCDDB clean
@@ -90,8 +102,12 @@ newhostfiles :
 
 .PHONY: install
 install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
-# install remote control
+# install accessories
 	$(MAKE) -C DGWRemoteControl install
+	$(MAKE) -C DGWTextTransmit install
+	$(MAKE) -C DGWTimeServer install
+	$(MAKE) -C DGWVoiceTransmit install
+	
 # create user for daemon
 	@useradd --user-group -M --system dstar --shell /bin/false || true
 
@@ -106,17 +122,8 @@ install : DStarGateway/dstargateway DGWRemoteControl/dgwremotecontrol
 	$(MAKE) -C Data install
 	@chown -R dstar:dstar $(DATA_DIR)
 
-#install executables
+# install services executables
 	$(MAKE) -C DStarGateway install
-
-# SystemD service install
-	@cp -f debian/dstargateway.service /lib/systemd/system/
-	@sed -i "s|%CFG_DIR%|$(CFG_DIR)|g" /lib/systemd/system/dstargateway.service
-	systemctl enable dstargateway.service
-	@systemctl daemon-reload
-	@echo "\n\n"
-	@echo "Install complete, edit $(CFG_DIR)dstargateway.cfg and start the daemon with 'systemctl start dstargateway.service'"
-	@echo "\n\n"
 
 .PHONY: uninstall
 uninstall :

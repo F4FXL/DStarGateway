@@ -25,6 +25,10 @@
                     "description": "Définir la version désassemblage sur Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
+                },
+                {
+                    "description": "Tell GDB to follow forks child",
+                    "text": "-gdb-set follow-fork-mode child"
                 }
             ]
         },
@@ -53,13 +57,85 @@
         ]
         },
         {
+            "name": "(gdb) dgwtextransmit",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/DGWTextTransmit/dgwtexttransmit",
+            "args": ["F4FXL  B", "-file", "${workspaceFolder}/Sandbox/text.txt"],//["F4FXL  B", "-text", "test de julien a nouveau"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Activer l'impression en mode Pretty pour gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Définir la version désassemblage sur Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) dgwtimeserver",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/DGWTimeServer/dgwtimeserver",
+            "args": ["${workspaceFolder}/Sandbox/__timeserver_test.cfg"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Activer l'impression en mode Pretty pour gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Définir la version désassemblage sur Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) dgwvoicetransmit",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/DGWVoiceTransmit/dgwvoicetransmit",
+            "args": ["F4FXL  B", "${workspaceFolder}/Sandbox/Announce_F5ZEE__B.dvtool", "-text", "www.F5KAV.fr", "-dprs", "!4858.72N/00736.91Er/"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Activer l'impression en mode Pretty pour gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Définir la version désassemblage sur Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "Tests",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/dstargateway_tests",
             "args": [ ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/Tests/",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

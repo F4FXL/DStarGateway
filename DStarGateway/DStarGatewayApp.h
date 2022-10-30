@@ -20,23 +20,24 @@
 #pragma once
 
 #include "DStarGatewayThread.h"
-
-void __sigHandler(int sig);
+#include "DStarGatewayConfig.h"
 
 class CDStarGatewayApp
 {
 private:
-	std::string m_configFile;
-	CDStarGatewayThread *m_thread;
+	CDStarGatewayConfig * m_config;
+	CDStarGatewayThread * m_thread;
 	bool createThread();
+	static CDStarGatewayApp * g_app;
 
 public:
-	CDStarGatewayApp(const std::string &configFile);
+	CDStarGatewayApp(CDStarGatewayConfig * config);
 	~CDStarGatewayApp();
 
 	bool init();
 	void run();
 
 	static void sigHandlerFatal(int sig);
+	static void sigHandler(int sig);
 	static void terminateHandler();
 };

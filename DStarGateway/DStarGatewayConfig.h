@@ -26,6 +26,12 @@
 #include "LogSeverity.h"
 
 typedef struct {
+	bool daemon;
+	std::string pidFile;
+	std::string user;
+} TDaemon;
+
+typedef struct {
 	GATEWAY_TYPE type;
 	std::string callsign;
 	std::string address;
@@ -50,9 +56,7 @@ typedef struct {
 	HW_TYPE hwType;
 	bool reflectorAtStartup;
 	RECONNECT reflectorReconnect;
-#ifdef USE_DRATS
 	bool dRatsEnabled;
-#endif
 	double frequency;
 	double offset;
 	double range;
@@ -80,10 +84,10 @@ typedef struct {
 
 typedef struct {
 	std::string logDir;
-	LOG_SEVERITY m_displayLevel;
-	LOG_SEVERITY m_fileLevel;
-	std::string m_fileRoot;
-	bool m_fileRotate;
+	LOG_SEVERITY displayLevel;
+	LOG_SEVERITY fileLevel;
+	std::string fileRoot;
+	bool fileRotate;
 } TLog;
 
 typedef struct {
@@ -111,6 +115,10 @@ typedef struct {
 
 typedef struct {
 	bool enabled;
+} TDRats;
+
+typedef struct {
+	bool enabled;
 	std::string url;
 } TXLX;
 
@@ -127,6 +135,12 @@ typedef struct {
 	std::string m_port;
 } TGPSD;
 #endif
+
+typedef struct {
+	std::string whiteList;
+	std::string blackList;
+	std::string restrictList;
+} TAccessControl;
 
 class CDStarGatewayConfig {
 public:
@@ -150,6 +164,9 @@ public:
 #ifdef USE_GPSD
 	void getGPSD(TGPSD & gpsd) const;
 #endif
+	void getDaemon(TDaemon & gen) const;
+	void getAccessControl(TAccessControl & accessControl) const;
+	void getDRats(TDRats & drats) const;
 
 private:
 	bool open(CConfig & cfg);
@@ -167,6 +184,9 @@ private:
 #ifdef USE_GPSD
 	bool loadGPSD(const CConfig & cfg);
 #endif
+	bool loadDaemon(const CConfig & cfg);
+	bool loadAccessControl(const CConfig & cfg);
+	bool loadDRats(const CConfig & cfg);
 
 	std::string m_fileName;
 	TGateway m_gateway;
@@ -181,6 +201,10 @@ private:
 #ifdef USE_GPSD
 	TGPSD m_gpsd;
 #endif
+	TDaemon m_daemon;
+	TAccessControl m_accessControl;
+	TDRats m_drats;
+
 	std::vector<TRepeater *> m_repeaters;
 	std::vector<TircDDB *> m_ircDDB;
 };

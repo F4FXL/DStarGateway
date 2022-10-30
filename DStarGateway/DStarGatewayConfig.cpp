@@ -55,6 +55,9 @@ bool CDStarGatewayConfig::load()
 #ifdef USE_GPSD
 		ret = loadGPSD(cfg) && ret;
 #endif
+		ret = loadDaemon(cfg) && ret;
+		ret = loadAccessControl(cfg) && ret;
+		ret = loadDRats(cfg) && ret;
 	}
 
 	if(ret) {
@@ -66,6 +69,14 @@ bool CDStarGatewayConfig::load()
 		CLog::logError("Loading Configuration from %s failed", m_fileName.c_str());
 	}
 
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDaemon(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("daemon", "daemon", m_daemon.daemon, false);
+	ret = cfg.getValue("daemon", "pidfile", m_daemon.pidFile, 0, 1024, "") && ret;
+	ret = cfg.getValue("daemon", "user", m_daemon.user, 0, 1024, "") && ret;
 	return ret;
 }
 
@@ -144,33 +155,31 @@ bool CDStarGatewayConfig::loadLog(const CConfig & cfg)
 		m_log.logDir.push_back('/');
 	}
 
-	ret = cfg.getValue("log", "fileRoot", m_log.m_fileRoot, 0, 64, "dstargateway") && ret;
-	ret = cfg.getValue("log", "fileRotate", m_log.m_fileRotate, true) && ret;
+	ret = cfg.getValue("log", "fileRoot", m_log.fileRoot, 0, 64, "dstargateway") && ret;
+	ret = cfg.getValue("log", "fileRotate", m_log.fileRotate, true) && ret;
 
 	std::string levelStr;
 	ret = cfg.getValue("log", "fileLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
 	if(ret) {
-		if(levelStr == "trace")			m_log.m_fileLevel = LOG_TRACE;
-		else if(levelStr == "debug")	m_log.m_fileLevel = LOG_DEBUG;
-		else if(levelStr == "info")		m_log.m_fileLevel = LOG_INFO;
-		else if(levelStr == "warning")	m_log.m_fileLevel = LOG_WARNING;
-		else if(levelStr == "error")	m_log.m_fileLevel = LOG_ERROR;
-		else if(levelStr == "fatal")	m_log.m_fileLevel = LOG_FATAL;
-		else if(levelStr == "none")		m_log.m_fileLevel = LOG_NONE;
+		if(levelStr == "trace")			m_log.fileLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.fileLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.fileLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.fileLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.fileLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.fileLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.fileLevel = LOG_NONE;
 	}
 
 	ret = cfg.getValue("log", "displayLevel", levelStr, "info", {"trace", "debug", "info", "warning", "error", "fatal", "none"}) && ret;
 	if(ret) {
-		if(levelStr == "trace")			m_log.m_displayLevel = LOG_TRACE;
-		else if(levelStr == "debug")	m_log.m_displayLevel = LOG_DEBUG;
-		else if(levelStr == "info")		m_log.m_displayLevel = LOG_INFO;
-		else if(levelStr == "warning")	m_log.m_displayLevel = LOG_WARNING;
-		else if(levelStr == "error")	m_log.m_displayLevel = LOG_ERROR;
-		else if(levelStr == "fatal")	m_log.m_displayLevel = LOG_FATAL;
-		else if(levelStr == "none")		m_log.m_displayLevel = LOG_NONE;
+		if(levelStr == "trace")			m_log.displayLevel = LOG_TRACE;
+		else if(levelStr == "debug")	m_log.displayLevel = LOG_DEBUG;
+		else if(levelStr == "info")		m_log.displayLevel = LOG_INFO;
+		else if(levelStr == "warning")	m_log.displayLevel = LOG_WARNING;
+		else if(levelStr == "error")	m_log.displayLevel = LOG_ERROR;
+		else if(levelStr == "fatal")	m_log.displayLevel = LOG_FATAL;
+		else if(levelStr == "none")		m_log.displayLevel = LOG_NONE;
 	}
-
-	//TODO 20211226 check if directories are accessible
 
 	return ret;
 }
@@ -190,6 +199,7 @@ bool CDStarGatewayConfig::loadPaths(const CConfig & cfg)
 
 bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 {
+	m_repeaters.clear();
 	for(unsigned int i = 0; i < 4; i++) {
 		std::string section = CStringUtils::string_format("repeater_%d", i+ 1);
 		bool repeaterEnabled;
@@ -237,9 +247,9 @@ bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 		ret = cfg.getValue(section, "latitude", repeater->latitude, -90.0, 90.0, m_gateway.latitude) && ret;
 		ret = cfg.getValue(section, "longitude", repeater->longitude, -180.0, 180.0, m_gateway.longitude) && ret;
 		ret = cfg.getValue(section, "agl", repeater->agl, 0, 1000.0, 0.0) && ret;
-		ret = cfg.getValue(section, "description1", m_gateway.description1, 0, 1024, "") && ret;
-		ret = cfg.getValue(section, "description2", m_gateway.description2, 0, 1024, "") && ret;
-		ret = cfg.getValue(section, "url", m_gateway.url, 0, 1024, "") && ret;;
+		ret = cfg.getValue(section, "description1", repeater->description1, 0, 1024, m_gateway.description1) && ret;
+		ret = cfg.getValue(section, "description2", repeater->description2, 0, 1024, m_gateway.description2) && ret;
+		ret = cfg.getValue(section, "url", repeater->url, 0, 1024, m_gateway.url) && ret;;
 		ret = cfg.getValue(section, "band1", repeater->band1, 0, 255, 0) && ret;
 		ret = cfg.getValue(section, "band2", repeater->band2, 0, 255, 0) && ret;
 		ret = cfg.getValue(section, "band3", repeater->band3, 0, 255, 0) && ret;
@@ -342,6 +352,22 @@ bool CDStarGatewayConfig::loadGPSD(const CConfig & cfg)
 }
 #endif
 
+bool CDStarGatewayConfig::loadAccessControl(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("AccessControl", "whiteList", m_accessControl.whiteList, 0U, 2048U, "");
+	ret = cfg.getValue("AccessControl", "blackList", m_accessControl.blackList, 0U, 2048U, "") && ret;
+	ret = cfg.getValue("AccessControl", "restrictList", m_accessControl.restrictList, 0U, 2048U, "") && ret;
+	
+	return ret;
+}
+
+bool CDStarGatewayConfig::loadDRats(const CConfig & cfg)
+{
+	bool ret = cfg.getValue("DRats", "enabled", m_drats.enabled, false);
+
+	return ret;
+}
+
 bool CDStarGatewayConfig::open(CConfig & cfg)
 {
 	try {
@@ -438,3 +464,18 @@ void CDStarGatewayConfig::getGPSD(TGPSD & gpsd) const
 	gpsd = m_gpsd;
 }
 #endif
+
+void CDStarGatewayConfig::getDaemon(TDaemon & gen) const
+{
+	gen = m_daemon;
+}
+
+void CDStarGatewayConfig::getAccessControl(TAccessControl & accessControl) const
+{
+	accessControl = m_accessControl;
+}
+
+void CDStarGatewayConfig::getDRats(TDRats & drats) const
+{
+	drats = m_drats;
+}

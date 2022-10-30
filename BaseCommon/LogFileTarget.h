@@ -26,7 +26,7 @@
 class CLogFileTarget : public CLogTarget
 {
 public:
-    CLogFileTarget(LOG_SEVERITY logLevel, const std::string& directory, bool rotate);
+    CLogFileTarget(LOG_SEVERITY logLevel, const std::string& directory, const std::string& fileRoot, bool rotate);
     ~CLogFileTarget();
 
 protected:
@@ -37,6 +37,7 @@ private:
     void printLogIntFixed(const std::string& msg);
     std::string buildFileName();
     std::string m_dir;
+    std::string m_fileRoot;
     bool m_rotate;
     std::fstream m_file;
     int m_day;

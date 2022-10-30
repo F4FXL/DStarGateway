@@ -60,7 +60,7 @@ const std::string LOOPBACK_ADDRESS("127.0.0.1");
 const unsigned int REMOTE_DUMMY_PORT = 65016U;
 
 CDStarGatewayThread::CDStarGatewayThread(const std::string& logDir, const std::string& dataDir, const std::string& name) :
-CThread(),
+CThread("Gateway"),
 m_logDir(logDir),
 m_dataDir(dataDir),
 m_name(name),
@@ -131,19 +131,7 @@ m_restrictList(NULL)
 
 CDStarGatewayThread::~CDStarGatewayThread()
 {
-	CHeaderData::finalise();
-	CG2Handler::finalise();
-	CDExtraHandler::finalise();
-	CDPlusHandler::finalise();
-	CDCSHandler::finalise();
-	CRepeaterHandler::finalise();
-#ifdef USE_STARNET
-	CStarNetHandler::finalise();
-#endif
-#ifdef USE_CCS
-	CCCSHandler::finalise();
-#endif
-	CAudioUnit::finalise();
+
 }
 
 void* CDStarGatewayThread::Entry()
@@ -481,10 +469,29 @@ void* CDStarGatewayThread::Entry()
 		delete m_remote;
 	}
 
+	if(m_aprsWriter != nullptr) {
+		m_aprsWriter->close();
+		delete m_aprsWriter;
+	}
+
 	if (headerLogger != NULL) {
 		headerLogger->close();
 		delete headerLogger;
 	}
+
+	CHeaderData::finalise();
+	CG2Handler::finalise();
+	CDExtraHandler::finalise();
+	CDPlusHandler::finalise();
+	CDCSHandler::finalise();
+	CRepeaterHandler::finalise();
+#ifdef USE_STARNET
+	CStarNetHandler::finalise();
+#endif
+#ifdef USE_CCS
+	CCCSHandler::finalise();
+#endif
+	CAudioUnit::finalise();
 
 	return NULL;
 }
@@ -504,15 +511,10 @@ void CDStarGatewayThread::setGateway(GATEWAY_TYPE gatewayType, const std::string
 	m_gatewayAddress  = gatewayAddress;
 }
 
-#ifdef USE_DRATS
+
 void CDStarGatewayThread::addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
 {
 	CRepeaterHandler::add(callsign, band, address, port, hwType, reflector, atStartup, reconnect, dratsEnabled, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
-#else
-void CDStarGatewayThread::addRepeater(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
-{
-	CRepeaterHandler::add(callsign, band, address, port, hwType, reflector, atStartup, reconnect, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
-#endif
 
 	std::string repeater = callsign;
 	repeater.resize(LONG_CALLSIGN_LENGTH - 1U);

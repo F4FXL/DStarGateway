@@ -30,4 +30,5 @@ CLogTarget(logLevel)
 void CLogConsoleTarget::printLogInt(const std::string& msg)
 {
     std::cout << msg;
+    std::cout.flush();
 }

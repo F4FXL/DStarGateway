@@ -63,11 +63,8 @@ CAPRSHandler*              CRepeaterHandler::m_aprsWriter  = NULL;
 
 CCallsignList*            CRepeaterHandler::m_restrictList = NULL;
 
-#ifdef USE_DRATS
-	CRepeaterHandler::CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unigned char band3) :
-#else
-	CRepeaterHandler::CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3) :
-#endif
+CRepeaterHandler::CRepeaterHandler(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3) :
+
 m_index(0x00U),
 m_rptCallsign(),
 m_gwyCallsign(),
@@ -137,9 +134,7 @@ m_wxAudio(NULL),
 m_wxNeeded(false),
 #endif
 m_version(NULL),
-#ifdef USE_DRATS
 m_drats(NULL),
-#endif
 m_dtmf(),
 m_pollTimer(1000U, 900U),			// 15 minutes
 #ifdef USE_CSS
@@ -228,7 +223,7 @@ m_heardTimer(1000U, 0U, 100U)		// 100ms
 	m_version   = new CVersionUnit(this, callsign);
 	m_aprsUnit = new CAPRSUnit(this);
 
-#ifdef USE_DRATS
+
 	if (dratsEnabled) {
 		m_drats = new CDRATSServer(m_localAddress, port, callsign, this);
 		bool ret = m_drats->open();
@@ -237,7 +232,6 @@ m_heardTimer(1000U, 0U, 100U)		// 100ms
 			m_drats = NULL;
 		}
 	}
-#endif
 }
 
 CRepeaterHandler::~CRepeaterHandler()
@@ -250,10 +244,8 @@ CRepeaterHandler::~CRepeaterHandler()
 #endif
 	delete m_version;
 
-#ifdef USE_DRATS
 	if (m_drats != NULL)
 		m_drats->close();
-#endif
 }
 
 void CRepeaterHandler::initialise(unsigned int maxRepeaters)
@@ -272,21 +264,14 @@ void CRepeaterHandler::setIndex(unsigned int index)
 	m_index = index;
 }
 
-#ifdef USE_DRATS
 void CRepeaterHandler::add(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, bool dratsEnabled, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
-#else
-void CRepeaterHandler::add(const std::string& callsign, const std::string& band, const std::string& address, unsigned int port, HW_TYPE hwType, const std::string& reflector, bool atStartup, RECONNECT reconnect, double frequency, double offset, double range, double latitude, double longitude, double agl, const std::string& description1, const std::string& description2, const std::string& url, IRepeaterProtocolHandler* handler, unsigned char band1, unsigned char band2, unsigned char band3)
-#endif
 {
 	assert(!callsign.empty());
 	assert(port > 0U);
 	assert(handler != NULL);
 
-#ifdef USE_DRATS
+
 	CRepeaterHandler* repeater = new CRepeaterHandler(callsign, band, address, port, hwType, reflector, atStartup, reconnect, dratsEnabled, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
-#else
-	CRepeaterHandler* repeater = new CRepeaterHandler(callsign, band, address, port, hwType, reflector, atStartup, reconnect, frequency, offset, range, latitude, longitude, agl, description1, description2, url, handler, band1, band2, band3);
-#endif
 
 	for (unsigned int i = 0U; i < m_maxRepeaters; i++) {
 		if (m_repeaters[i] == NULL) {
@@ -436,11 +421,6 @@ void CRepeaterHandler::finalise()
 	for (unsigned int i = 0U; i < m_maxRepeaters; i++) {
 		delete m_repeaters[i];
 		m_repeaters[i] = NULL;
-	}
-
-	if (m_aprsWriter != NULL) {
-		m_aprsWriter->close();
-		delete m_aprsWriter;
 	}
 
 	delete[] m_repeaters;
@@ -611,10 +591,8 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	// The Icom heard timer
 	m_heardTimer.stop();
 
-#ifdef USE_DRATS
 	if (m_drats != NULL)
 		m_drats->writeHeader(header);
-#endif
 
 	// Reset the statistics
 	m_frames  = 0U;
@@ -841,10 +819,9 @@ void CRepeaterHandler::processRepeater(CAMBEData& data)
 	// CCS gets everything
 	m_ccsHandler->writeAMBE(data);
 #endif
-#ifdef USE_DRATS
+
 	if (m_drats != NULL)
 		m_drats->writeData(data);
-#endif
 
 	if (m_aprsWriter != NULL)
 		m_aprsWriter->writeData(m_rptCallsign, data);
@@ -1577,10 +1554,10 @@ void CRepeaterHandler::clockInt(unsigned int ms)
 		if (m_repeaterId != 0x00U) {
 			if (m_text.empty())
 				sendHeard();
-#ifdef USE_DRATS
+				
 			if (m_drats != NULL)
 				m_drats->writeEnd();
-#endif
+
 
 			sendStats();
 

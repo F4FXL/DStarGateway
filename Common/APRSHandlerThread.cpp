@@ -37,7 +37,7 @@ const unsigned int APRS_READ_TIMEOUT = 1U;
 const unsigned int APRS_KEEP_ALIVE_TIMEOUT = 60U;
 
 CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
-CThread(),
+CThread("APRS"),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),
@@ -65,7 +65,7 @@ m_clientName(FULL_PRODUCT_NAME)
 }
 
 CAPRSHandlerThread::CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter) :
-CThread(),
+CThread("APRS"),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),

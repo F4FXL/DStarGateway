@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "all"
@@ -24,7 +24,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DStarGateway/dstargateway"
@@ -37,10 +37,49 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1",
                 "DGWRemoteControl/dgwremotecontrol"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWTextTransmit",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j9",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWTextTransmit/dgwtexttransmit"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWTimeServer",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j9",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWTimeServer/dgwtimeserver"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build DGWVoiceTransmit",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j9",
+                "ENABLE_DEBUG=1",
+                "USE_GPSD=1",
+                "DGWVoiceTransmit/dgwvoicetransmit"
             ],
             "group": "build",
             "problemMatcher": []
@@ -50,7 +89,7 @@
             "type": "shell",
             "command": "make",
             "args": [
-                "-j3",
+                "-j9",
                 "tests",
                 "ENABLE_DEBUG=1",
                 "USE_GPSD=1"
