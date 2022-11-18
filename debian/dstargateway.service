@@ -6,6 +6,7 @@ Wants=network-online.target
 [Service]
 User=dstar
 Type=simple
+ExecStartPre=/bin/bash -c 'until host google.com; do sleep 1; done'
 ExecStart=/usr/local/bin/dstargateway %CFG_DIR%/dstargateway.cfg
 Restart=on-failure
 RestartSec=5
