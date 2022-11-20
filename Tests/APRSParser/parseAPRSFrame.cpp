@@ -173,7 +173,7 @@ namespace APRSParserTests
         EXPECT_EQ(aprsFrame.getPath().size(), 0);
     }
 
-    TEST_F(APRSParser_parseAPRSFrame, Object)
+    TEST_F(APRSParser_parseAPRSFrame, ObjectAlive)
     {
         CAPRSFrame aprsFrame;
         bool retVal = CAPRSParser::parseFrame("F8DSN-15>API510,DSTAR*:;F1ZBV    *091510h4802.40N/00647.12ErPHG7430/A=003182R Vosges 145,6625@-0,6MHz", aprsFrame);
@@ -185,6 +185,36 @@ namespace APRSParserTests
         EXPECT_EQ(aprsFrame.getType(), APFT_OBJECT);
         EXPECT_EQ(aprsFrame.getPath().size(), 1);
         EXPECT_STRCASEEQ(aprsFrame.getPath().at(0).c_str(), "DSTAR*");
+    }
+
+    TEST_F(APRSParser_parseAPRSFrame, ObjectKilled)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F8DSN-15>API510,DSTAR*:;F1ZBV    _091510h4802.40N/00647.12ErPHG7430/A=003182R Vosges 145,6625@-0,6MHz", aprsFrame);
+
+        EXPECT_TRUE(retVal);
+        EXPECT_STRCASEEQ(aprsFrame.getBody().c_str(), ";F1ZBV    _091510h4802.40N/00647.12ErPHG7430/A=003182R Vosges 145,6625@-0,6MHz");
+        EXPECT_STRCASEEQ(aprsFrame.getDestination().c_str(), "API510");
+        EXPECT_STRCASEEQ(aprsFrame.getSource().c_str(), "F8DSN-15");
+        EXPECT_EQ(aprsFrame.getType(), APFT_OBJECT);
+        EXPECT_EQ(aprsFrame.getPath().size(), 1);
+        EXPECT_STRCASEEQ(aprsFrame.getPath().at(0).c_str(), "DSTAR*");
+    }
+
+    TEST_F(APRSParser_parseAPRSFrame, ObjectInvalid)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F8DSN-15>API510,DSTAR*:;F1ZBV    ~091510h4802.40N/00647.12ErPHG7430/A=003182R Vosges 145,6625@-0,6MHz", aprsFrame);
+
+        EXPECT_FALSE(retVal);
+    }
+
+    TEST_F(APRSParser_parseAPRSFrame, ObjectTooShort)
+    {
+        CAPRSFrame aprsFrame;
+        bool retVal = CAPRSParser::parseFrame("F8DSN-15>API510,DSTAR*:;F1ZBV", aprsFrame);
+
+        EXPECT_FALSE(retVal);
     }
 
     TEST_F(APRSParser_parseAPRSFrame, messageToSelf)
