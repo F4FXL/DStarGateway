@@ -138,6 +138,11 @@ bool CAPRSParser::parseInt(CAPRSFrame& frame)
                 type = APFT_TELEMETRY;
             }
             break;
+        case ';' :
+            if( body.length() >= 10 && (body[9] == '*' || body[9] == '_')) {
+                type = APFT_OBJECT;
+            }
+            break;
         default:
             type = APFT_UNKNOWN;
             break;

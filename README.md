@@ -21,12 +21,13 @@
   - [4.1. Work Flow](#41-work-flow)
   - [4.2. Continuous Integration](#42-continuous-integration)
 - [5. Version History](#5-version-history)
-  - [5.1. Version 0.6](#51-version-06)
-  - [5.2. Version 0.5](#52-version-05)
-  - [5.3. Version 0.4](#53-version-04)
-  - [5.4. Version 0.3](#54-version-03)
-  - [5.5. Version 0.2](#55-version-02)
-  - [5.6. Version 0.1](#56-version-01)
+  - [5.1. Version 0.7](#51-version-07)
+  - [5.2. Version 0.6](#52-version-06)
+  - [5.3. Version 0.5](#53-version-05)
+  - [5.4. Version 0.4](#54-version-04)
+  - [5.5. Version 0.3](#55-version-03)
+  - [5.6. Version 0.2](#56-version-02)
+  - [5.7. Version 0.1](#57-version-01)
 - [6. Future](#6-future)
 
 
@@ -142,7 +143,9 @@ I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FX
 The testing framwework used is Google Test.
 
 # 5. Version History
-## 5.1. Version 0.6
+## 5.1. Version 0.7
+- [**Improvement**] Add/Fix DPRS Object support([#28](https://github.com/F4FXL/DStarGateway/issues/22))
+## 5.2. Version 0.6
 - [**Improvement**] Add DRats Support ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add call sign lists ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add a way to override Slow Data in VoiceTransmit ([#23](https://github.com/F4FXL/DStarGateway/issues/23))
@@ -150,7 +153,7 @@ The testing framwework used is Google Test.
 - [**Improvement**] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21)). DStarGateway can also be run as a "forking" daemon. This might be required for distros still using sysv. Systemd can live without it.
 - [**Improvement**] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 - [**Improvement**] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
-## 5.2. Version 0.5
+## 5.3. Version 0.5
 - [**Improvement**] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
 - [**Bugfix**] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
 - [**Improvement**] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
@@ -158,17 +161,17 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [**Bugfix**] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [**Bugfix**] Trying to connect to ghost ircDDB when no ircDDB is configured
-## 5.3. Version 0.4
+## 5.4. Version 0.4
 - [**Improvement**] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [**Bugfix**] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
-## 5.4. Version 0.3
+## 5.5. Version 0.3
 - [**Improvement**] Get ride of libcongig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.5. Version 0.2
+## 5.6. Version 0.2
 - [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.6. Version 0.1
+## 5.7. Version 0.1
 First working version
 # 6. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
