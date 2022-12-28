@@ -49,6 +49,7 @@
 #include "APRSFixedIdFrameProvider.h"
 #include "Daemon.h"
 #include "APRSHandlerThread.h"
+#include "DummyAPRSHandlerThread.h"
 
 CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
 const std::string BANNER_1 = CStringUtils::string_format("%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
@@ -193,11 +194,15 @@ bool CDStarGatewayApp::createThread()
 	// Setup APRS
 	TAPRS aprsConfig;
 	m_config->getAPRS(aprsConfig);
-	CAPRSHandler * aprsWriter = NULL;
+	CAPRSHandler * outgoingAprsWriter = nullptr;
+	CAPRSHandler * incomingAprsWriter = nullptr;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
 		CAPRSHandlerThread* thread = new CAPRSHandlerThread(gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address, aprsConfig.hostname, aprsConfig.port);
-		aprsWriter = new CAPRSHandler((IAPRSHandlerThread *)thread);
-		if(aprsWriter->open()) {
+		outgoingAprsWriter = new CAPRSHandler((IAPRSHandlerThread *)thread);
+
+		incomingAprsWriter = new CAPRSHandler((IAPRSHandlerThread *)new CDummyAPRSHandlerThread());
+
+		if(outgoingAprsWriter->open()) {
 #ifdef USE_GPSD
 			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gatewayConfig.callsign, gpsdConfig.m_address, gpsdConfig.m_port)
 																									: new CAPRSFixedIdFrameProvider(gatewayConfig.callsign);
@@ -205,12 +210,12 @@ bool CDStarGatewayApp::createThread()
 			CAPRSIdFrameProvider * idFrameProvider = new CAPRSFixedIdFrameProvider(gatewayConfig.callsign);
 #endif
 			idFrameProvider->start();
-			aprsWriter->setIdFrameProvider(idFrameProvider);
-			m_thread->setAPRSWriter(aprsWriter);
+			outgoingAprsWriter->setIdFrameProvider(idFrameProvider);
+			m_thread->setAPRSWriters(outgoingAprsWriter, incomingAprsWriter);
 		}
 		else {
-			delete aprsWriter;
-			aprsWriter = NULL;
+			delete outgoingAprsWriter;
+			outgoingAprsWriter = NULL;
 		}
 	}
 
@@ -280,7 +285,10 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band2,
 								rptrConfig.band3);
 
-		aprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+		if(outgoingAprsWriter != nullptr)
+			outgoingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+		if(incomingAprsWriter != nullptr)
+			incomingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}

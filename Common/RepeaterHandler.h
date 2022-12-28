@@ -74,7 +74,7 @@ public:
 	static void setDPlusEnabled(bool enabled);
 	static void setDCSEnabled(bool enabled);
 	static void setHeaderLogger(CHeaderLogger* logger);
-	static void setAPRSWriter(CAPRSHandler* writer);
+	static void setAPRSWriters(CAPRSHandler* outgoingAprsWriter, CAPRSHandler* incomingAprsWriter);
 	static void setInfoEnabled(bool enabled);
 	static void setEchoEnabled(bool enabled);
 	static void setDTMFEnabled(bool enabled);
@@ -169,7 +169,8 @@ private:
 
 	static CHeaderLogger*   m_headerLogger;
 
-	static CAPRSHandler*     m_aprsWriter;
+	static CAPRSHandler*     m_outgoingAprsWriter;
+	static CAPRSHandler*     m_incomingAprsWriter;
 
 	static CCallsignList*   m_whiteList;
 	static CCallsignList*   m_blackList;

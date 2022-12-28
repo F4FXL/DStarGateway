@@ -66,7 +66,7 @@ public:
 	virtual void setCCS(bool enabled, const std::string& host);
 #endif
 	virtual void setLog(bool enabled);
-	virtual void setAPRSWriter(CAPRSHandler* writer);
+	virtual void setAPRSWriters(CAPRSHandler* outgoingAprsWriter, CAPRSHandler* incomingAPRSHandler);
 	virtual void setInfoEnabled(bool enabled);
 	virtual void setEchoEnabled(bool enabled);
 	virtual void setDTMFEnabled(bool enabled);
@@ -100,7 +100,8 @@ private:
 	CDPlusProtocolHandlerPool*     m_dplusPool;
 	CDCSProtocolHandlerPool*       m_dcsPool;
 	CG2ProtocolHandlerPool*       m_g2HandlerPool;
-	CAPRSHandler*              m_aprsWriter;
+	CAPRSHandler*              m_outgoingAprsWriter;
+	CAPRSHandler*			   m_incomingAprsWriter;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;
 	TEXT_LANG                 m_language;
