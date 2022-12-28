@@ -151,7 +151,7 @@ void* CAPRSHandlerThread::Entry()
 				if(!m_queue.empty()){
 					auto frameStr = m_queue.getData();
 
-					CLog::logInfo("APRS ==> %s", frameStr.c_str());
+					CLog::logInfo("APRS Frame sent to IS ==> %s", frameStr.c_str());
 
 					bool ret = m_socket.writeLine(frameStr);
 					if (!ret) {
