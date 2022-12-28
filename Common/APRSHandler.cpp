@@ -22,7 +22,6 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
-
 #include "StringUtils.h"
 #include "Log.h"
 #include "APRSHandler.h"
@@ -89,7 +88,7 @@ void CAPRSHandler::writeHeader(const std::string& callsign, const CHeaderData& h
 
 	CAPRSCollector* collector = entry->getCollector();
 
-	collector->writeHeader(header.getMyCall1());
+	collector->writeHeader(header);
 }
 
 void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
@@ -122,17 +121,17 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 		return;
 	}
 
-	collector->getData([=](const std::string& text)
+	collector->getData([=](const std::string& rawFrame, const std::string& dstarCall)
 	{
 		CAPRSFrame frame;
-		if(!CAPRSParser::parseFrame(text, frame)) {
-			CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
+		if(!CAPRSParser::parseFrame(rawFrame, frame)) {
+			CLog::logWarning("Failed to parse DPRS Frame : %s", rawFrame.c_str());
 			return;
 		}
 
 		// If we already have a q-construct, don't send it on
 		if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
-			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
+			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", rawFrame.c_str());
 			return;
 		}
 
@@ -141,6 +140,8 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 		
 		std::string output ;
 		CAPRSFormater::frameToString(output, frame);
+
+		CLog::logInfo("DPRS\t%s\t%s\t%s", dstarCall.c_str(), frame.getSource().c_str(), rawFrame.c_str());
 
 		m_thread->write(frame);
 	});

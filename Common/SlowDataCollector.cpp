@@ -27,7 +27,7 @@ const unsigned int SLOW_DATA_BLOCK_LENGTH = 6U;
 
 CSlowDataCollector::CSlowDataCollector(unsigned char slowDataType) :
 m_slowDataType(slowDataType),
-m_myCall(),
+m_myCall1(),
 m_state(SS_FIRST)
 {
     m_buffer  = new unsigned char[SLOW_DATA_BLOCK_LENGTH];
@@ -39,14 +39,24 @@ CSlowDataCollector::~CSlowDataCollector()
     delete[] m_buffer;
 }
 
-std::string CSlowDataCollector::getMyCall() const
+std::string CSlowDataCollector::getMyCall1() const
 {
-    return m_myCall;
+    return m_myCall1;
 }
 
-void CSlowDataCollector::setMyCall(const std::string& myCall)
+void CSlowDataCollector::setMyCall1(const std::string& myCall)
 {
-    m_myCall = myCall;
+    m_myCall1 = myCall;
+}
+
+std::string CSlowDataCollector::getMyCall2() const
+{
+    return m_myCall2;
+}
+
+void CSlowDataCollector::setMyCall2(const std::string& myCall)
+{
+    m_myCall2 = myCall;
 }
 
 bool CSlowDataCollector::writeData(const unsigned char* data)

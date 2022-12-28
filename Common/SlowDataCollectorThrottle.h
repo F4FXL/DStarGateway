@@ -28,8 +28,10 @@ class CSlowDataCollectorThrottle : public ISlowDataCollector
 public:
     CSlowDataCollectorThrottle(ISlowDataCollector* collector, unsigned int timeout);
     ~CSlowDataCollectorThrottle();
-    std::string getMyCall() const;
-    void setMyCall(const std::string& mycall);
+    std::string getMyCall1() const;
+    void setMyCall1(const std::string& mycall);
+    std::string getMyCall2() const;
+    void setMyCall2(const std::string& mycall);
     bool writeData(const unsigned char* data);
     void sync();
     unsigned int getData(unsigned char* data, unsigned int length);
