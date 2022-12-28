@@ -23,13 +23,13 @@
 #include "APRSFixedIdFrameProvider.h"
 #include "StringUtils.h"
 
-CAPRSFixedIdFrameProvider::CAPRSFixedIdFrameProvider() :
-CAPRSIdFrameProvider(20U) // Initial timeout of 20 seconds
+CAPRSFixedIdFrameProvider::CAPRSFixedIdFrameProvider(const std::string& gateway) :
+CAPRSIdFrameProvider(gateway, 20U) // Initial timeout of 20 seconds
 {
 
 }
 
-bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
+bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
 {
     if (entry == nullptr)
         return false;
@@ -114,9 +114,9 @@ bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, c
                                                         lon.c_str(), (entry->getLongitude() < 0.0F) ? 'W' : 'E',
                                                         entry->getRange() * 0.6214, entry->getAGL() * 3.28, band.c_str(), desc.c_str());
 
-    CAPRSFrame * frame = new CAPRSFrame(gateway + "-S",
+    CAPRSFrame * frame = new CAPRSFrame(m_gateway + "-S",
                                         "APD5T1",
-                                        { "TCPIP*", "qAC" , gateway + "-GS" },
+                                        { "TCPIP*", "qAC" , m_gateway + "-GS" },
                                         body, APFT_OBJECT);
 
     frames.push_back(frame);

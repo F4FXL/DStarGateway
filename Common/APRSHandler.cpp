@@ -18,10 +18,10 @@
  */
 
 #include <cassert>
-#include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+
 #include "StringUtils.h"
 #include "Log.h"
 #include "APRSHandler.h"
@@ -33,24 +33,12 @@
 #include "APRSFormater.h"
 #include "APRSUtils.h"
 
-CAPRSHandler::CAPRSHandler(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
-m_thread(NULL),
-m_gateway(),
-m_address(),
-m_port(0U),
+CAPRSHandler::CAPRSHandler(IAPRSHandlerThread* thread) :
+m_thread(thread),
 m_array(),
 m_idFrameProvider(nullptr)
 {
-	assert(!hostname.empty());
-	assert(port > 0U);
-	assert(!gateway.empty());
-	assert(!password.empty());
-
-	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port);
-
-	m_gateway = gateway;
-	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
-	boost::trim(m_gateway);
+	assert(thread != nullptr);
 }
 
 CAPRSHandler::~CAPRSHandler()
@@ -60,6 +48,7 @@ CAPRSHandler::~CAPRSHandler()
 	}
 
 	m_array.clear();
+	delete m_thread;
 }
 
 void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
@@ -210,7 +199,7 @@ void CAPRSHandler::sendIdFrames()
 	{
 		for(auto entry : m_array) {
 			std::vector<CAPRSFrame *> frames;
-			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
+			if(m_idFrameProvider->buildAPRSFrames(entry.second, frames)) {
 				for(auto frame : frames) {
 					m_thread->write(*frame);
 					delete frame;

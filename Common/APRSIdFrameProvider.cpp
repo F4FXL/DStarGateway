@@ -17,13 +17,21 @@
  */
 
 #include <cassert>
+#include <boost/algorithm/string.hpp>
 
 #include "APRSIdFrameProvider.h"
 
-CAPRSIdFrameProvider::CAPRSIdFrameProvider(unsigned int timeout) :
+CAPRSIdFrameProvider::CAPRSIdFrameProvider(const std::string& gateway, unsigned int timeout) :
+m_gateway(),
 m_timer(1000U)
 {
+    assert(!gateway.empty());
+
     m_timer.start(timeout);
+
+    m_gateway = gateway;
+	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
+	boost::trim(m_gateway);
 }
 
 CAPRSIdFrameProvider::~CAPRSIdFrameProvider()
@@ -31,11 +39,11 @@ CAPRSIdFrameProvider::~CAPRSIdFrameProvider()
 
 }
 
-bool CAPRSIdFrameProvider::buildAPRSFrames(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *> & frames)
+bool CAPRSIdFrameProvider::buildAPRSFrames(const CAPRSEntry * entry, std::vector<CAPRSFrame *> & frames)
 {
     assert(entry != nullptr);
 
-    return buildAPRSFramesInt(gateway, entry, frames);
+    return buildAPRSFramesInt(entry, frames);
 }
 
 bool CAPRSIdFrameProvider::wantsToSend()

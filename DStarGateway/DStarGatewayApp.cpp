@@ -1,6 +1,6 @@
 /*
  *   Copyright (C) 2010,2011 by Jonathan Naylor G4KLX
- *   Copyright (c) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (c) 2021,2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 #include "Daemon.h"
+#include "APRSHandlerThread.h"
 
 CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
 const std::string BANNER_1 = CStringUtils::string_format("%s Copyright (C) %s\n", FULL_PRODUCT_NAME.c_str(), VENDOR_NAME.c_str());
@@ -194,13 +195,14 @@ bool CDStarGatewayApp::createThread()
 	m_config->getAPRS(aprsConfig);
 	CAPRSHandler * aprsWriter = NULL;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
-		aprsWriter = new CAPRSHandler(aprsConfig.hostname, aprsConfig.port, gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address);
+		CAPRSHandlerThread* thread = new CAPRSHandlerThread(gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address, aprsConfig.hostname, aprsConfig.port);
+		aprsWriter = new CAPRSHandler((IAPRSHandlerThread *)thread);
 		if(aprsWriter->open()) {
 #ifdef USE_GPSD
-			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gpsdConfig.m_address, gpsdConfig.m_port)
-																									: new CAPRSFixedIdFrameProvider();
+			CAPRSIdFrameProvider * idFrameProvider = aprsConfig.m_positionSource == POSSRC_GPSD ? (CAPRSIdFrameProvider *)new CAPRSGPSDIdFrameProvider(gatewayConfig.callsign, gpsdConfig.m_address, gpsdConfig.m_port)
+																									: new CAPRSFixedIdFrameProvider(gatewayConfig.callsign);
 #else
-			CAPRSIdFrameProvider * idFrameProvider = new CAPRSFixedIdFrameProvider();
+			CAPRSIdFrameProvider * idFrameProvider = new CAPRSFixedIdFrameProvider(gatewayConfig.callsign);
 #endif
 			idFrameProvider->start();
 			aprsWriter->setIdFrameProvider(idFrameProvider);

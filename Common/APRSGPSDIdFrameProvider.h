@@ -29,13 +29,13 @@
 class CAPRSGPSDIdFrameProvider : public CAPRSIdFrameProvider
 {
 public:
-    CAPRSGPSDIdFrameProvider(std::string address, std::string port);
+    CAPRSGPSDIdFrameProvider(const std::string& gateway, const std::string& address, const std::string& port);
 
     virtual void start();
     virtual void close();
 
 protected:
-    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
+    virtual bool buildAPRSFramesInt(const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
 
 private:
 	std::string			m_gpsdAddress;

@@ -26,7 +26,6 @@
 
 
 #include "APRSEntry.h"
-#include "APRSHandlerThread.h"
 #include "UDPReaderWriter.h"
 #include "APRSCollector.h"
 #include "DStarDefines.h"
@@ -34,10 +33,11 @@
 #include "AMBEData.h"
 #include "Timer.h"
 #include "APRSIdFrameProvider.h"
+#include "IAPRSHandlerThread.h"
 
 class CAPRSHandler {
 public:
-	CAPRSHandler(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address);
+	CAPRSHandler(IAPRSHandlerThread * thread);
 	~CAPRSHandler();
 
 	bool open();
@@ -61,10 +61,7 @@ public:
 	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 
 private:
-	CAPRSHandlerThread*		m_thread;
-	std::string				m_gateway;
-	in_addr					m_address;
-	unsigned int			m_port;
+	IAPRSHandlerThread*		m_thread;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 	CAPRSIdFrameProvider * m_idFrameProvider;
 
