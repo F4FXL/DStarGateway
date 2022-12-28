@@ -58,7 +58,7 @@ unsigned char CNMEASentenceCollector::calcXOR(const std::string& nmea)
     unsigned char res = 0U;
     
     if(!nmea.empty()) {
-        unsigned int i =  nmea[0] == '$' ?  1U : 0U; //skip $ it it is there
+        unsigned int i =  nmea[0] == '$' ?  1U : 0U; //skip $ if it is there
         while(i < nmea.length())
         {
             if(nmea[i] != '*') {
