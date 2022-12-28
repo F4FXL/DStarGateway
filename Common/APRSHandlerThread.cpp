@@ -176,7 +176,7 @@ void* CAPRSHandlerThread::Entry()
 					}
 					else if(line.length() > 0 && line[0] != '#') {
 						m_keepAliveTimer.start();
-						CLog::logDebug("APRS <== %s", line.c_str());
+						CLog::logDebug("APRS Frame received from IS <== %s", line.c_str());
 						CAPRSFrame readFrame;
 						if(CAPRSParser::parseFrame(line, readFrame)) {
 							for(auto cb : m_APRSReadCallbacks) {
