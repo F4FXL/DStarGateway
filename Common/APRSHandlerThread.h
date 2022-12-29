@@ -25,11 +25,11 @@
 #include "RingBuffer.h"
 #include "Timer.h"
 #include "Thread.h"
-#include "IAPRSHandlerThread.h"
+#include "IAPRSHandlerBackend.h"
 #include "APRSFrame.h"
 
 
-class CAPRSHandlerThread : public CThread, IAPRSHandlerThread {
+class CAPRSHandlerThread : public CThread, IAPRSHandlerBackend {
 public:
 	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
 	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter);

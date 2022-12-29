@@ -33,7 +33,7 @@
 #include "APRSFormater.h"
 #include "APRSUtils.h"
 
-CAPRSHandler::CAPRSHandler(IAPRSHandlerThread* thread) :
+CAPRSHandler::CAPRSHandler(IAPRSHandlerBackend* thread) :
 m_thread(thread),
 m_array(),
 m_idFrameProvider(nullptr)

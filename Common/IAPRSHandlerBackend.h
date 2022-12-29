@@ -21,10 +21,10 @@
 #include "APRSFrame.h"
 #include "ReadAPRSFrameCallback.h"
 
-class IAPRSHandlerThread
+class IAPRSHandlerBackend
 {
 public:
-    virtual ~IAPRSHandlerThread() { } ;
+    virtual ~IAPRSHandlerBackend() { } ;
 
     virtual bool start() = 0;
     virtual bool isConnected() const = 0;

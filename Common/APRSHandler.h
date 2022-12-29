@@ -33,11 +33,11 @@
 #include "AMBEData.h"
 #include "Timer.h"
 #include "APRSIdFrameProvider.h"
-#include "IAPRSHandlerThread.h"
+#include "IAPRSHandlerBackend.h"
 
 class CAPRSHandler {
 public:
-	CAPRSHandler(IAPRSHandlerThread * thread);
+	CAPRSHandler(IAPRSHandlerBackend * thread);
 	~CAPRSHandler();
 
 	bool open();
@@ -61,7 +61,7 @@ public:
 	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 
 private:
-	IAPRSHandlerThread*		m_thread;
+	IAPRSHandlerBackend*		m_thread;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 	CAPRSIdFrameProvider * m_idFrameProvider;
 

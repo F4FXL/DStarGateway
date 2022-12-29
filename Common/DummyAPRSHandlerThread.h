@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "IAPRSHandlerThread.h"
+#include "IAPRSHandlerBackend.h"
 
-class CDummyAPRSHandlerThread : public IAPRSHandlerThread
+class CDummyAPRSHandlerThread : public IAPRSHandlerBackend
 {
 public:
     CDummyAPRSHandlerThread();
