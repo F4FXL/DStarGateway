@@ -1,3 +1,4 @@
+[![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all)
 - [1. Introduction](#1-introduction)
 - [2. Current State](#2-current-state)
   - [2.1. Code sanity](#21-code-sanity)
