@@ -100,8 +100,8 @@ private:
 	CDPlusProtocolHandlerPool*     m_dplusPool;
 	CDCSProtocolHandlerPool*       m_dcsPool;
 	CG2ProtocolHandlerPool*       m_g2HandlerPool;
-	CAPRSHandler*              m_outgoingAprsWriter;
-	CAPRSHandler*			   m_incomingAprsWriter;
+	CAPRSHandler*              m_outgoingAprsHandler;
+	CAPRSHandler*			   m_incomingAprsHandler;
 	CIRCDDB*                  m_irc;
 	CCacheManager             m_cache;
 	TEXT_LANG                 m_language;

@@ -76,8 +76,8 @@ m_dextraPool(nullptr),
 m_dplusPool(nullptr),
 m_dcsPool(nullptr),
 m_g2HandlerPool(nullptr),
-m_outgoingAprsWriter(nullptr),
-m_incomingAprsWriter(nullptr),
+m_outgoingAprsHandler(nullptr),
+m_incomingAprsHandler(nullptr),
 m_irc(nullptr),
 m_cache(),
 m_language(TL_ENGLISH_UK),
@@ -251,7 +251,7 @@ void* CDStarGatewayThread::Entry()
 	CRepeaterHandler::setDPlusEnabled(m_dplusEnabled);
 	CRepeaterHandler::setDCSEnabled(m_dcsEnabled);
 	CRepeaterHandler::setHeaderLogger(headerLogger);
-	CRepeaterHandler::setAPRSWriters(m_outgoingAprsWriter, m_incomingAprsWriter);
+	CRepeaterHandler::setAPRSHandlers(m_outgoingAprsHandler, m_incomingAprsHandler);
 	CRepeaterHandler::setInfoEnabled(m_infoEnabled);
 	CRepeaterHandler::setEchoEnabled(m_echoEnabled);
 	CRepeaterHandler::setDTMFEnabled(m_dtmfEnabled);
@@ -378,8 +378,8 @@ void* CDStarGatewayThread::Entry()
 				m_statusFileTimer.start();
 			}
 
-			if (m_outgoingAprsWriter != NULL)
-				m_outgoingAprsWriter->clock(ms);
+			if (m_outgoingAprsHandler != NULL)
+				m_outgoingAprsHandler->clock(ms);
 
 			if (m_logEnabled) {
 				m_statusTimer1.clock(ms);
@@ -470,9 +470,9 @@ void* CDStarGatewayThread::Entry()
 		delete m_remote;
 	}
 
-	if(m_outgoingAprsWriter != nullptr) {
-		m_outgoingAprsWriter->close();
-		delete m_outgoingAprsWriter;
+	if(m_outgoingAprsHandler != nullptr) {
+		m_outgoingAprsHandler->close();
+		delete m_outgoingAprsHandler;
 	}
 
 	if (headerLogger != NULL) {
@@ -639,8 +639,8 @@ void CDStarGatewayThread::setLog(bool enabled)
 
 void CDStarGatewayThread::setAPRSWriters(CAPRSHandler* outgoingWriter, CAPRSHandler* incomingWriter)
 {
-	m_outgoingAprsWriter = outgoingWriter;
-	m_incomingAprsWriter = incomingWriter;
+	m_outgoingAprsHandler = outgoingWriter;
+	m_incomingAprsHandler = incomingWriter;
 }
 
 void CDStarGatewayThread::setInfoEnabled(bool enabled)
@@ -1246,8 +1246,8 @@ void CDStarGatewayThread::writeStatus()
 CDStarGatewayStatusData* CDStarGatewayThread::getStatus() const
 {
 	bool aprsStatus = false;
-	if (m_outgoingAprsWriter != NULL)
-		aprsStatus = m_outgoingAprsWriter->isConnected();
+	if (m_outgoingAprsHandler != NULL)
+		aprsStatus = m_outgoingAprsHandler->isConnected();
 
 	CDStarGatewayStatusData* status = new CDStarGatewayStatusData(m_lastStatus, aprsStatus);
 
