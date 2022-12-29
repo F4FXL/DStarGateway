@@ -18,38 +18,38 @@
 
 #include "DummyAPRSHandlerThread.h"
 
-CDummyAPRSHandlerThread::CDummyAPRSHandlerThread()
+CDummyAPRSHandlerBackend::CDummyAPRSHandlerBackend()
 {
 
 }
 
-CDummyAPRSHandlerThread::~CDummyAPRSHandlerThread()
+CDummyAPRSHandlerBackend::~CDummyAPRSHandlerBackend()
 {
 
 }
 
-bool CDummyAPRSHandlerThread::start()
-{
-    return true;
-}
-
-bool CDummyAPRSHandlerThread::isConnected() const
+bool CDummyAPRSHandlerBackend::start()
 {
     return true;
 }
 
-void CDummyAPRSHandlerThread::write(CAPRSFrame &)
+bool CDummyAPRSHandlerBackend::isConnected() const
+{
+    return true;
+}
+
+void CDummyAPRSHandlerBackend::write(CAPRSFrame &)
 {
 }
 
-void CDummyAPRSHandlerThread::clock(unsigned int)
+void CDummyAPRSHandlerBackend::clock(unsigned int)
 {
 }
 
-void CDummyAPRSHandlerThread::stop()
+void CDummyAPRSHandlerBackend::stop()
 {
 }
 
-void CDummyAPRSHandlerThread::addReadAPRSCallback(IReadAPRSFrameCallback *)
+void CDummyAPRSHandlerBackend::addReadAPRSCallback(IReadAPRSFrameCallback *)
 {
 }

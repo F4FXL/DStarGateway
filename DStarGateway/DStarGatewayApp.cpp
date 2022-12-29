@@ -200,7 +200,7 @@ bool CDStarGatewayApp::createThread()
 		CAPRSHandlerThread* thread = new CAPRSHandlerThread(gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address, aprsConfig.hostname, aprsConfig.port);
 		outgoingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)thread);
 
-		incomingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)new CDummyAPRSHandlerThread());
+		incomingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)new CDummyAPRSHandlerBackend());
 
 		if(outgoingAprsWriter->open()) {
 #ifdef USE_GPSD

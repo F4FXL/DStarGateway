@@ -20,11 +20,11 @@
 
 #include "IAPRSHandlerBackend.h"
 
-class CDummyAPRSHandlerThread : public IAPRSHandlerBackend
+class CDummyAPRSHandlerBackend : public IAPRSHandlerBackend
 {
 public:
-    CDummyAPRSHandlerThread();
-    ~CDummyAPRSHandlerThread();
+    CDummyAPRSHandlerBackend();
+    ~CDummyAPRSHandlerBackend();
 
     bool start();
     bool isConnected() const;
