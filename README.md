@@ -145,9 +145,10 @@ The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.7
-- [**Improvement**] Add/Fix DPRS Object support([#28](https://github.com/F4FXL/DStarGateway/issues/22))
+- [**Improvement**] Add/Fix DPRS Object support([#28](https://github.com/F4FXL/DStarGateway/issues/28))
+- [**Improvement**] Log incoming DPRS frames so they can be used in e.g. dashboards([#29](https://github.com/F4FXL/DStarGateway/issues/29))
 ## 5.2. Version 0.6
-- [**Improvement**] Add DRats Support ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
+- [**Improvement**] Add DRats Support ([#24](https://github.com/F4FXL/DStarGateway/issues/24))
 - [**Improvement**] Add call sign lists ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add a way to override Slow Data in VoiceTransmit ([#23](https://github.com/F4FXL/DStarGateway/issues/23))
 - [**Improvement**] Add time server
