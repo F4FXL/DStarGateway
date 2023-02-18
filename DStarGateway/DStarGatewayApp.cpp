@@ -48,7 +48,7 @@
 #include "APRSGPSDIdFrameProvider.h"
 #include "APRSFixedIdFrameProvider.h"
 #include "Daemon.h"
-#include "APRSHandlerThread.h"
+#include "APRSISHandlerThread.h"
 #include "DummyAPRSHandlerThread.h"
 
 CDStarGatewayApp * CDStarGatewayApp::g_app = nullptr;
@@ -197,8 +197,8 @@ bool CDStarGatewayApp::createThread()
 	CAPRSHandler * outgoingAprsWriter = nullptr;
 	CAPRSHandler * incomingAprsWriter = nullptr;
 	if(aprsConfig.enabled && !aprsConfig.password.empty()) {
-		CAPRSHandlerThread* thread = new CAPRSHandlerThread(gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address, aprsConfig.hostname, aprsConfig.port);
-		outgoingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)thread);
+		CAPRSISHandlerThread* aprsisthread = new CAPRSISHandlerThread(gatewayConfig.callsign, aprsConfig.password, gatewayConfig.address, aprsConfig.hostname, aprsConfig.port);
+		outgoingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)aprsisthread);
 
 		incomingAprsWriter = new CAPRSHandler((IAPRSHandlerBackend *)new CDummyAPRSHandlerBackend());
 

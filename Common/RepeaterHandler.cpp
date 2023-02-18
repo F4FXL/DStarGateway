@@ -59,8 +59,8 @@ bool                      CRepeaterHandler::m_dtmfEnabled = true;
 
 CHeaderLogger*            CRepeaterHandler::m_headerLogger = NULL;
 
-CAPRSHandler*              CRepeaterHandler::m_outgoingAprsHandler  = NULL;
-CAPRSHandler*              CRepeaterHandler::m_incomingAprsHandler  = NULL;
+CAPRSHandler*              CRepeaterHandler::m_outgoingAprsHandler  = NULL; //handles APRS/DPRS frames coming from radio to network
+CAPRSHandler*              CRepeaterHandler::m_incomingAprsHandler  = NULL; //handles APRS/DPRS frames coming from network to radio
 
 CCallsignList*            CRepeaterHandler::m_restrictList = NULL;
 

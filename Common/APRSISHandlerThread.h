@@ -29,11 +29,11 @@
 #include "APRSFrame.h"
 
 
-class CAPRSHandlerThread : public CThread, IAPRSHandlerBackend {
+class CAPRSISHandlerThread : public CThread, IAPRSHandlerBackend {
 public:
-	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
-	CAPRSHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter);
-	virtual ~CAPRSHandlerThread();
+	CAPRSISHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
+	CAPRSISHandlerThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter);
+	virtual ~CAPRSISHandlerThread();
 
 	bool start();
 
