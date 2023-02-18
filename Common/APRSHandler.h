@@ -61,7 +61,7 @@ public:
 	void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 
 private:
-	IAPRSHandlerBackend*		m_thread;
+	IAPRSHandlerBackend*		m_backend;
 	std::unordered_map<std::string,CAPRSEntry *>	m_array;
 	CAPRSIdFrameProvider * m_idFrameProvider;
 

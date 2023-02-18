@@ -34,7 +34,7 @@
 #include "APRSUtils.h"
 
 CAPRSHandler::CAPRSHandler(IAPRSHandlerBackend* thread) :
-m_thread(thread),
+m_backend(thread),
 m_array(),
 m_idFrameProvider(nullptr)
 {
@@ -48,7 +48,7 @@ CAPRSHandler::~CAPRSHandler()
 	}
 
 	m_array.clear();
-	delete m_thread;
+	delete m_backend;
 }
 
 void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
@@ -62,7 +62,7 @@ void CAPRSHandler::setPort(const std::string& callsign, const std::string& band,
 
 bool CAPRSHandler::open()
 {
-	return m_thread->start();
+	return m_backend->start();
 }
 
 void CAPRSHandler::writeHeader(const std::string& callsign, const CHeaderData& header)
@@ -105,7 +105,7 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 	if (!complete)
 		return;
 
-	if (!m_thread->isConnected()) {
+	if (!m_backend->isConnected()) {
 		collector->reset();
 		return;
 	}
@@ -132,7 +132,7 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 
 		CLog::logInfo("DPRS\t%s\t%s\t%s", dstarCall.c_str(), frame.getSource().c_str(), rawFrame.c_str());
 
-		m_thread->write(frame);
+		m_backend->write(frame);
 	});
 }
 
@@ -149,7 +149,7 @@ void CAPRSHandler::writeStatus(const std::string& callsign, const std::string st
 
 void CAPRSHandler::clock(unsigned int ms)
 {
-	m_thread->clock(ms);
+	m_backend->clock(ms);
 
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->clock(ms);
@@ -171,7 +171,7 @@ void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 {
 	assert(entry != nullptr);
 
-	if(!m_thread->isConnected())
+	if(!m_backend->isConnected())
 		return;
 
 
@@ -189,19 +189,19 @@ void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 					 body,
 					 APFT_STATUS);
 
-	m_thread->write(frame);
+	m_backend->write(frame);
 
 }
 
 void CAPRSHandler::sendIdFrames()
 {
-	if(m_thread->isConnected())
+	if(m_backend->isConnected())
 	{
 		for(auto entry : m_array) {
 			std::vector<CAPRSFrame *> frames;
 			if(m_idFrameProvider->buildAPRSFrames(entry.second, frames)) {
 				for(auto frame : frames) {
-					m_thread->write(*frame);
+					m_backend->write(*frame);
 					delete frame;
 				}
 			}
@@ -211,12 +211,12 @@ void CAPRSHandler::sendIdFrames()
 
 bool CAPRSHandler::isConnected() const
 {
-	return m_thread->isConnected();
+	return m_backend->isConnected();
 }
 
 void CAPRSHandler::close()
 {
-	m_thread->stop();
+	m_backend->stop();
 	
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->close();
@@ -227,5 +227,5 @@ void CAPRSHandler::close()
 
 void CAPRSHandler::addReadAPRSCallback(IReadAPRSFrameCallback* cb)
 {
-	m_thread->addReadAPRSCallback(cb);
+	m_backend->addReadAPRSCallback(cb);
 }
