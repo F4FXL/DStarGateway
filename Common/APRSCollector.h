@@ -24,6 +24,7 @@
 #include <functional>
 
 #include "SlowDataCollector.h"
+#include "HeaderData.h"
 #include "Defs.h"
 
 enum APRS_STATE {
@@ -39,7 +40,7 @@ public:
 	CAPRSCollector();
 	~CAPRSCollector();
 
-	void writeHeader(const std::string& callsign);
+	void writeHeader(const CHeaderData& callsign);
 
 	bool writeData(const unsigned char* data);
 
@@ -49,7 +50,7 @@ public:
 
 	unsigned int getData(unsigned char dataType, unsigned char* data, unsigned int length);
 	
-	void getData(std::function<void(const std::string&)> dataHandler);
+	void getData(std::function<void(const std::string&, const std::string&)> dataHandler);
 
 	void clock(unsigned int ms);
 

@@ -18,7 +18,6 @@
  */
 
 #include <cassert>
-#include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <cassert>
 #include <algorithm>
@@ -34,24 +33,12 @@
 #include "APRSFormater.h"
 #include "APRSUtils.h"
 
-CAPRSHandler::CAPRSHandler(const std::string& hostname, unsigned int port, const std::string& gateway, const std::string& password, const std::string& address) :
-m_thread(NULL),
-m_gateway(),
-m_address(),
-m_port(0U),
+CAPRSHandler::CAPRSHandler(IAPRSHandlerBackend* thread) :
+m_backend(thread),
 m_array(),
 m_idFrameProvider(nullptr)
 {
-	assert(!hostname.empty());
-	assert(port > 0U);
-	assert(!gateway.empty());
-	assert(!password.empty());
-
-	m_thread = new CAPRSHandlerThread(gateway, password, address, hostname, port);
-
-	m_gateway = gateway;
-	m_gateway = m_gateway.substr(0, LONG_CALLSIGN_LENGTH - 1U);
-	boost::trim(m_gateway);
+	assert(thread != nullptr);
 }
 
 CAPRSHandler::~CAPRSHandler()
@@ -61,6 +48,7 @@ CAPRSHandler::~CAPRSHandler()
 	}
 
 	m_array.clear();
+	delete m_backend;
 }
 
 void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
@@ -74,7 +62,7 @@ void CAPRSHandler::setPort(const std::string& callsign, const std::string& band,
 
 bool CAPRSHandler::open()
 {
-	return m_thread->start();
+	return m_backend->start();
 }
 
 void CAPRSHandler::writeHeader(const std::string& callsign, const CHeaderData& header)
@@ -89,7 +77,7 @@ void CAPRSHandler::writeHeader(const std::string& callsign, const CHeaderData& h
 
 	CAPRSCollector* collector = entry->getCollector();
 
-	collector->writeHeader(header.getMyCall1());
+	collector->writeHeader(header);
 }
 
 void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
@@ -117,22 +105,22 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 	if (!complete)
 		return;
 
-	if (!m_thread->isConnected()) {
+	if (!m_backend->isConnected()) {
 		collector->reset();
 		return;
 	}
 
-	collector->getData([=](const std::string& text)
+	collector->getData([=](const std::string& rawFrame, const std::string& dstarCall)
 	{
 		CAPRSFrame frame;
-		if(!CAPRSParser::parseFrame(text, frame)) {
-			CLog::logWarning("Failed to parse DPRS Frame : %s", text.c_str());
+		if(!CAPRSParser::parseFrame(rawFrame, frame)) {
+			CLog::logWarning("Failed to parse DPRS Frame : %s", rawFrame.c_str());
 			return;
 		}
 
 		// If we already have a q-construct, don't send it on
 		if(std::any_of(frame.getPath().begin(), frame.getPath().end(), [] (std::string s) { return !s.empty() && s[0] == 'q'; })) {
-			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", text.c_str());
+			CLog::logWarning("DPRS Frame already has q construct, not forwarding to APRS-IS: %s", rawFrame.c_str());
 			return;
 		}
 
@@ -142,7 +130,9 @@ void CAPRSHandler::writeData(const std::string& callsign, const CAMBEData& data)
 		std::string output ;
 		CAPRSFormater::frameToString(output, frame);
 
-		m_thread->write(frame);
+		CLog::logInfo("DPRS\t%s\t%s\t%s", dstarCall.c_str(), frame.getSource().c_str(), rawFrame.c_str());
+
+		m_backend->write(frame);
 	});
 }
 
@@ -159,7 +149,7 @@ void CAPRSHandler::writeStatus(const std::string& callsign, const std::string st
 
 void CAPRSHandler::clock(unsigned int ms)
 {
-	m_thread->clock(ms);
+	m_backend->clock(ms);
 
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->clock(ms);
@@ -181,7 +171,7 @@ void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 {
 	assert(entry != nullptr);
 
-	if(!m_thread->isConnected())
+	if(!m_backend->isConnected())
 		return;
 
 
@@ -199,19 +189,19 @@ void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 					 body,
 					 APFT_STATUS);
 
-	m_thread->write(frame);
+	m_backend->write(frame);
 
 }
 
 void CAPRSHandler::sendIdFrames()
 {
-	if(m_thread->isConnected())
+	if(m_backend->isConnected())
 	{
 		for(auto entry : m_array) {
 			std::vector<CAPRSFrame *> frames;
-			if(m_idFrameProvider->buildAPRSFrames(m_gateway, entry.second, frames)) {
+			if(m_idFrameProvider->buildAPRSFrames(entry.second, frames)) {
 				for(auto frame : frames) {
-					m_thread->write(*frame);
+					m_backend->write(*frame);
 					delete frame;
 				}
 			}
@@ -221,12 +211,12 @@ void CAPRSHandler::sendIdFrames()
 
 bool CAPRSHandler::isConnected() const
 {
-	return m_thread->isConnected();
+	return m_backend->isConnected();
 }
 
 void CAPRSHandler::close()
 {
-	m_thread->stop();
+	m_backend->stop();
 	
 	if(m_idFrameProvider != nullptr) {
 		m_idFrameProvider->close();
@@ -237,5 +227,5 @@ void CAPRSHandler::close()
 
 void CAPRSHandler::addReadAPRSCallback(IReadAPRSFrameCallback* cb)
 {
-	m_thread->addReadAPRSCallback(cb);
+	m_backend->addReadAPRSCallback(cb);
 }

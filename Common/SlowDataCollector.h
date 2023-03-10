@@ -29,8 +29,10 @@ class ISlowDataCollector
 public:
     virtual ~ISlowDataCollector() { } ;
 
-    virtual std::string getMyCall() const = 0;
-    virtual void setMyCall(const std::string& mycall) = 0;
+    virtual std::string getMyCall1() const = 0;
+    virtual void setMyCall1(const std::string& mycall) = 0;
+    virtual std::string getMyCall2() const = 0;
+    virtual void setMyCall2(const std::string& mycall) = 0;
     virtual bool writeData(const unsigned char* data) = 0;
     virtual void sync() = 0;
     virtual unsigned int getData(unsigned char* data, unsigned int length) = 0;
@@ -46,8 +48,10 @@ public:
     CSlowDataCollector(unsigned char slowDataType);
     virtual ~CSlowDataCollector();
 
-    std::string getMyCall() const;
-    void setMyCall(const std::string& mycall);
+    std::string getMyCall1() const;
+    void setMyCall1(const std::string& mycall);
+    std::string getMyCall2() const;
+    void setMyCall2(const std::string& mycall);
     bool writeData(const unsigned char* data);
     void sync();
     unsigned int getData(unsigned char* data, unsigned int length);
@@ -64,7 +68,8 @@ protected:
     
 private:
     unsigned char m_slowDataType;
-    std::string m_myCall;
+    std::string m_myCall1;
+    std::string m_myCall2;
     SLOWDATA_STATE m_state;
     unsigned char * m_buffer;
 };

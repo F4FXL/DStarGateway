@@ -69,15 +69,16 @@ m_stopped(true),
 m_gatewayType(GT_REPEATER),
 m_gatewayCallsign(),
 m_gatewayAddress(),
-m_icomRepeaterHandler(NULL),
-m_hbRepeaterHandler(NULL),
-m_dummyRepeaterHandler(NULL),
-m_dextraPool(NULL),
-m_dplusPool(NULL),
-m_dcsPool(NULL),
-m_g2HandlerPool(NULL),
-m_aprsWriter(NULL),
-m_irc(NULL),
+m_icomRepeaterHandler(nullptr),
+m_hbRepeaterHandler(nullptr),
+m_dummyRepeaterHandler(nullptr),
+m_dextraPool(nullptr),
+m_dplusPool(nullptr),
+m_dcsPool(nullptr),
+m_g2HandlerPool(nullptr),
+m_outgoingAprsHandler(nullptr),
+m_incomingAprsHandler(nullptr),
+m_irc(nullptr),
 m_cache(),
 m_language(TL_ENGLISH_UK),
 m_dextraEnabled(true),
@@ -110,9 +111,9 @@ m_status4(),
 m_status5(),
 m_latitude(0.0),
 m_longitude(0.0),
-m_whiteList(NULL),
-m_blackList(NULL),
-m_restrictList(NULL)
+m_whiteList(nullptr),
+m_blackList(nullptr),
+m_restrictList(nullptr)
 {
 	CHeaderData::initialise();
 	CG2Handler::initialise(MAX_ROUTES);
@@ -250,7 +251,7 @@ void* CDStarGatewayThread::Entry()
 	CRepeaterHandler::setDPlusEnabled(m_dplusEnabled);
 	CRepeaterHandler::setDCSEnabled(m_dcsEnabled);
 	CRepeaterHandler::setHeaderLogger(headerLogger);
-	CRepeaterHandler::setAPRSWriter(m_aprsWriter);
+	CRepeaterHandler::setAPRSHandlers(m_outgoingAprsHandler, m_incomingAprsHandler);
 	CRepeaterHandler::setInfoEnabled(m_infoEnabled);
 	CRepeaterHandler::setEchoEnabled(m_echoEnabled);
 	CRepeaterHandler::setDTMFEnabled(m_dtmfEnabled);
@@ -377,8 +378,8 @@ void* CDStarGatewayThread::Entry()
 				m_statusFileTimer.start();
 			}
 
-			if (m_aprsWriter != NULL)
-				m_aprsWriter->clock(ms);
+			if (m_outgoingAprsHandler != NULL)
+				m_outgoingAprsHandler->clock(ms);
 
 			if (m_logEnabled) {
 				m_statusTimer1.clock(ms);
@@ -469,9 +470,9 @@ void* CDStarGatewayThread::Entry()
 		delete m_remote;
 	}
 
-	if(m_aprsWriter != nullptr) {
-		m_aprsWriter->close();
-		delete m_aprsWriter;
+	if(m_outgoingAprsHandler != nullptr) {
+		m_outgoingAprsHandler->close();
+		delete m_outgoingAprsHandler;
 	}
 
 	if (headerLogger != NULL) {
@@ -636,9 +637,10 @@ void CDStarGatewayThread::setLog(bool enabled)
 	m_logEnabled = enabled;
 }
 
-void CDStarGatewayThread::setAPRSWriter(CAPRSHandler* writer)
+void CDStarGatewayThread::setAPRSWriters(CAPRSHandler* outgoingWriter, CAPRSHandler* incomingWriter)
 {
-	m_aprsWriter = writer;
+	m_outgoingAprsHandler = outgoingWriter;
+	m_incomingAprsHandler = incomingWriter;
 }
 
 void CDStarGatewayThread::setInfoEnabled(bool enabled)
@@ -1244,8 +1246,8 @@ void CDStarGatewayThread::writeStatus()
 CDStarGatewayStatusData* CDStarGatewayThread::getStatus() const
 {
 	bool aprsStatus = false;
-	if (m_aprsWriter != NULL)
-		aprsStatus = m_aprsWriter->isConnected();
+	if (m_outgoingAprsHandler != NULL)
+		aprsStatus = m_outgoingAprsHandler->isConnected();
 
 	CDStarGatewayStatusData* status = new CDStarGatewayStatusData(m_lastStatus, aprsStatus);
 

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2021-2022 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021, 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,13 +18,18 @@
 
 #pragma once
 
-#include "APRSIdFrameProvider.h"
+#include "IAPRSHandlerBackend.h"
 
-class CAPRSFixedIdFrameProvider : public CAPRSIdFrameProvider
+class CDummyAPRSHandlerBackend : public IAPRSHandlerBackend
 {
 public:
-    CAPRSFixedIdFrameProvider(const std::string& gateway);
+    CDummyAPRSHandlerBackend();
+    ~CDummyAPRSHandlerBackend();
 
-protected:
-    virtual bool buildAPRSFramesInt(const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
+    bool start();
+    bool isConnected() const;
+    void write(CAPRSFrame& frame);
+    void clock(unsigned int ms);
+    void stop();
+    void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
 };

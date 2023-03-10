@@ -24,8 +24,8 @@
 #include "StringUtils.h"
 #include "Log.h"
 
-CAPRSGPSDIdFrameProvider::CAPRSGPSDIdFrameProvider(std::string address, std::string port) :
-CAPRSIdFrameProvider(20U),
+CAPRSGPSDIdFrameProvider::CAPRSGPSDIdFrameProvider(const std::string& gateway, const std::string& address, const std::string& port) :
+CAPRSIdFrameProvider(gateway, 20U),
 m_gpsdAddress(address),
 m_gpsdPort(port),
 m_gpsdData(),
@@ -56,7 +56,7 @@ void CAPRSGPSDIdFrameProvider::close()
     }
 }
 
-bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
+bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std::vector<CAPRSFrame *>& frames)
 {
     if(!m_hasConnection) {
         this->start();
@@ -182,9 +182,9 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
     body.append(CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str()));
 
 
-    CAPRSFrame * frame = new CAPRSFrame(gateway + "-S",
+    CAPRSFrame * frame = new CAPRSFrame(m_gateway + "-S",
                                     "APD5T1",
-                                    { "TCPIP*", "qAC" , gateway + "-GS" },
+                                    { "TCPIP*", "qAC" , m_gateway + "-GS" },
                                     body, APFT_OBJECT);
 
 
@@ -201,9 +201,9 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const std::string& gateway, co
                 lat.c_str(), (rawLatitude < 0.0)  ? 'S' : 'N',
                 lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E');
 
-        frame = new CAPRSFrame(gateway,
+        frame = new CAPRSFrame(m_gateway,
                                     "APD5T2",
-                                    { "TCPIP*", "qAC" , gateway + "-GS" },
+                                    { "TCPIP*", "qAC" , m_gateway + "-GS" },
                                     body, APFT_POSITION);
 
         frames.push_back(frame);

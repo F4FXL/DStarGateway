@@ -51,10 +51,14 @@ CAPRSCollector::~CAPRSCollector()
 	m_collectors.clear();
 }
 
-void CAPRSCollector::writeHeader(const std::string& callsign)
+void CAPRSCollector::writeHeader(const CHeaderData& header)
 {
+	std::string mycall1 = header.getMyCall1();
+	std::string mycall2 = header.getMyCall2();
+
 	for(auto collector : m_collectors) {
-		collector->setMyCall(callsign);
+		collector->setMyCall1(mycall1);
+		collector->setMyCall2(mycall2);
 	}
 }
 
@@ -95,12 +99,12 @@ unsigned int CAPRSCollector::getData(unsigned char dataType, unsigned char* data
 	return 0U;
 }
 
-void CAPRSCollector::getData(std::function<void(const std::string&)> dataHandler)
+void CAPRSCollector::getData(std::function<void(const std::string&, const std::string&)> dataHandler)
 {
 	for(auto collector : m_collectors) {
 		std::string data;
 		if(collector->getData(data)) {
-			dataHandler(data);
+			dataHandler(data, collector->getMyCall1().append("/").append(collector->getMyCall2()));
 			collector->reset();
 		}
 	}

@@ -59,7 +59,8 @@ bool                      CRepeaterHandler::m_dtmfEnabled = true;
 
 CHeaderLogger*            CRepeaterHandler::m_headerLogger = NULL;
 
-CAPRSHandler*              CRepeaterHandler::m_aprsWriter  = NULL;
+CAPRSHandler*              CRepeaterHandler::m_outgoingAprsHandler  = NULL; //handles APRS/DPRS frames coming from radio to network
+CAPRSHandler*              CRepeaterHandler::m_incomingAprsHandler  = NULL; //handles APRS/DPRS frames coming from network to radio
 
 CCallsignList*            CRepeaterHandler::m_restrictList = NULL;
 
@@ -352,9 +353,10 @@ void CRepeaterHandler::setHeaderLogger(CHeaderLogger* logger)
 	m_headerLogger = logger;
 }
 
-void CRepeaterHandler::setAPRSWriter(CAPRSHandler* writer)
+void CRepeaterHandler::setAPRSHandlers(CAPRSHandler* outgoingAprsHandler, CAPRSHandler* incomingAprsHandler)
 {
-	m_aprsWriter = writer;
+	m_outgoingAprsHandler = outgoingAprsHandler;
+	m_incomingAprsHandler = incomingAprsHandler;
 }
 
 void CRepeaterHandler::setLocalAddress(const std::string& address)
@@ -613,8 +615,8 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	m_text.clear();
 
 	// Reset the APRS Writer if it's enabled
-	if (m_aprsWriter != NULL)
-		m_aprsWriter->writeHeader(m_rptCallsign, header);
+	if (m_outgoingAprsHandler != NULL)
+		m_outgoingAprsHandler->writeHeader(m_rptCallsign, header);
 
 	// Write to Header.log if it's enabled
 	if (m_headerLogger != NULL)
@@ -823,8 +825,8 @@ void CRepeaterHandler::processRepeater(CAMBEData& data)
 	if (m_drats != NULL)
 		m_drats->writeData(data);
 
-	if (m_aprsWriter != NULL)
-		m_aprsWriter->writeData(m_rptCallsign, data);
+	if (m_outgoingAprsHandler != NULL)
+		m_outgoingAprsHandler->writeData(m_rptCallsign, data);
 
 	if (m_text.empty() && !data.isEnd()) {
 		m_textCollector.writeData(data);
@@ -1173,6 +1175,9 @@ bool CRepeaterHandler::process(CHeaderData& header, DIRECTION, AUDIO_SOURCE sour
 	if (source == AS_DUP)
 		return true;
 
+	if(m_incomingAprsHandler != nullptr)
+		m_incomingAprsHandler->writeHeader(m_rptCallsign, header);
+
 	sendToIncoming(header);
 
 #ifdef USE_CCS
@@ -1211,6 +1216,9 @@ bool CRepeaterHandler::process(CAMBEData& data, DIRECTION, AUDIO_SOURCE source)
 	data.setDestination(m_address, m_port);
 
 	m_repeaterHandler->writeAMBE(data);
+
+	if(m_incomingAprsHandler != nullptr)
+		m_incomingAprsHandler->writeData(m_rptCallsign, data);
 
 	sendToIncoming(data);
 
@@ -2413,8 +2421,8 @@ void CRepeaterHandler::startupInt()
 			m_irc->rptrQTH(callsign, m_latitude, m_longitude, m_description1, m_description2, m_url);
 	}
 
-	if(m_aprsWriter != nullptr) {
-		m_aprsWriter->addReadAPRSCallback(this);
+	if(m_outgoingAprsHandler != nullptr) {
+		m_outgoingAprsHandler->addReadAPRSCallback(this);
 	}
 
 #ifdef USE_CCS
@@ -2564,8 +2572,8 @@ void CRepeaterHandler::writeLinkingTo(const std::string &callsign)
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
 
-	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeStatus(m_rptCallsign, text);
+	if(m_outgoingAprsHandler != nullptr)
+		m_outgoingAprsHandler->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
@@ -2619,8 +2627,8 @@ void CRepeaterHandler::writeLinkedTo(const std::string &callsign)
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
 
-	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeStatus(m_rptCallsign, text);
+	if(m_outgoingAprsHandler != nullptr)
+		m_outgoingAprsHandler->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector(callsign);
@@ -2674,8 +2682,8 @@ void CRepeaterHandler::writeNotLinked()
 	m_infoAudio->setStatus(m_linkStatus, m_linkRepeater, text);
 	triggerInfo();
 
-	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeStatus(m_rptCallsign, text);
+	if(m_outgoingAprsHandler != nullptr)
+		m_outgoingAprsHandler->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
@@ -2745,8 +2753,8 @@ void CRepeaterHandler::writeIsBusy(const std::string& callsign)
 	m_infoAudio->setTempStatus(m_linkStatus, m_linkRepeater, tempText);
 	triggerInfo();
 
-	if(m_aprsWriter != nullptr)
-		m_aprsWriter->writeStatus(m_rptCallsign, text);
+	if(m_outgoingAprsHandler != nullptr)
+		m_outgoingAprsHandler->writeStatus(m_rptCallsign, text);
 
 #ifdef USE_CCS
 	m_ccsHandler->setReflector();
