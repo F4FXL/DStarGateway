@@ -145,6 +145,7 @@ The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.7
+- [**Bugfix**] Crash on startup with Icom Hardware. Thanks to Josh AB9FT for reporting the issue.([#31](https://github.com/F4FXL/DStarGateway/issues/31))
 - [**Improvement**] Add/Fix DPRS Object support([#28](https://github.com/F4FXL/DStarGateway/issues/28))
 - [**Improvement**] Log incoming DPRS frames so they can be used in e.g. dashboards([#29](https://github.com/F4FXL/DStarGateway/issues/29))
 ## 5.2. Version 0.6
