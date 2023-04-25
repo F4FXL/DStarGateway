@@ -22,20 +22,30 @@
 
 namespace APRSUtilsTests
 {
-    class APRSUtils_calcGPSAIcomCRC : public ::testing::Test { 
+    class APRSUtils_dstarCallsignToAPRS : public ::testing::Test { 
     };
 
-    TEST_F(APRSUtils_calcGPSAIcomCRC, withCRCHeader)
+    TEST_F(APRSUtils_dstarCallsignToAPRS, noBlanks)
     {
-        auto crc = CAPRSUtils::calcGPSAIcomCRC("$$CRC6F5E,ABCDEF");
+        std::string call("N0CALL");
+        CAPRSUtils::dstarCallsignToAPRS(call);
 
-        EXPECT_EQ(crc, 0x6f5e) << "CRC shall be valid";
+        EXPECT_STRCASEEQ(call.c_str(), "N0CALL") << "Call shall not have changed";
     }
 
-    TEST_F(APRSUtils_calcGPSAIcomCRC, withoutCRCHeader)
+    TEST_F(APRSUtils_dstarCallsignToAPRS, withHyphen)
     {
-        auto crc = CAPRSUtils::calcGPSAIcomCRC("ABCDEF");
+        std::string call("N0CALL-H");
+        CAPRSUtils::dstarCallsignToAPRS(call);
 
-        EXPECT_EQ(crc, 0x6f5e) << "CRC shall be valid";
+        EXPECT_STRCASEEQ(call.c_str(), "N0CALL") << "-H shall have been removed";
+    }
+
+    TEST_F(APRSUtils_dstarCallsignToAPRS, threeBlanks)
+    {
+        std::string call("F4AB   B");
+        CAPRSUtils::dstarCallsignToAPRS(call);
+
+        EXPECT_STRCASEEQ(call.c_str(), "F4AB-B") << "-H shall have been removed";
     }
 }
