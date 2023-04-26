@@ -110,12 +110,12 @@ bool CNMEASentenceCollector::getDataInt(std::string& data)
 
     // 20230425 Fix for https://github.com/F4FXL/DStarGateway/issues/33
     size_t hyphenIndex = fromCall.find('-');
-    if(hyphenIndex == std::string::npos) {
-        fromCall.append("-5");
+    if(hyphenIndex != std::string::npos) {
+        fromCall = fromCall.substr(0, hyphenIndex);
 	}
 
     std::string aprsFrame(fromCall);
-    aprsFrame.append(">GPS30,DSTAR*:")
+    aprsFrame.append("-5>GPS30,DSTAR*:")
              .append(nmea);
 
     data.assign(aprsFrame);

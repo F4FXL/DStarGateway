@@ -82,6 +82,6 @@ namespace NMEASentenceCollectorTests
         m_collector->setMyCall2("5100");
         m_collector->getData(data);
 
-        EXPECT_TRUE(data.find("N0CALL") != std::string::npos) << "Callsign in APRS frame shall be N0CALL-H";
+        EXPECT_TRUE(data.find("N0CALL-5") != std::string::npos) << "Callsign in APRS frame shall be N0CALL";
     }
 }
