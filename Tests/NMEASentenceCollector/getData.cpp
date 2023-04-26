@@ -22,7 +22,7 @@
 
 namespace NMEASentenceCollectorTests
 {
-    class NMEASentenceCollectorTests_APRSFrame: public ::testing::Test
+    class NMEASentenceCollectorTests_getData: public ::testing::Test
     {
         protected:
             CNMEASentenceCollector * m_collector;
@@ -63,7 +63,7 @@ namespace NMEASentenceCollectorTests
         }
     };
 
-    TEST_F(NMEASentenceCollectorTests_APRSFrame, noSSIDinCallsign)
+    TEST_F(NMEASentenceCollectorTests_getData, noSSIDinCallsign)
     {
         std::string data;
 
@@ -71,10 +71,10 @@ namespace NMEASentenceCollectorTests
         m_collector->setMyCall2("5100");
         m_collector->getData(data);
 
-        EXPECT_TRUE(data.find("N0CALL-5") != std::string::npos) << "Callsign in APRS frame shall be N0CALL-5";
+        EXPECT_STREQ(data.c_str(), "N0CALL-5>GPS30,DSTAR*:$GPRMC,092751.000,A,5321.6802,N,00630.3371,W,0.06,31.66,280511,,,A*45");
     }
 
-    TEST_F(NMEASentenceCollectorTests_APRSFrame, SSIDinCallsign)
+    TEST_F(NMEASentenceCollectorTests_getData, SSIDinCallsign)
     {
         std::string data;
 
@@ -82,6 +82,6 @@ namespace NMEASentenceCollectorTests
         m_collector->setMyCall2("5100");
         m_collector->getData(data);
 
-        EXPECT_TRUE(data.find("N0CALL-5") != std::string::npos) << "Callsign in APRS frame shall be N0CALL-5";
+        EXPECT_STREQ(data.c_str(), "N0CALL-5>GPS30,DSTAR*:$GPRMC,092751.000,A,5321.6802,N,00630.3371,W,0.06,31.66,280511,,,A*45");
     }
 }
