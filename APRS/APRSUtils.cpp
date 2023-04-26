@@ -22,12 +22,6 @@
 
 void CAPRSUtils::dstarCallsignToAPRS(std::string& dstarCallsign)
 {
-	// 20230425 Fix for https://github.com/F4FXL/DStarGateway/issues/33
-    size_t hyphenIndex = dstarCallsign.find('-');
-    if(hyphenIndex != std::string::npos) {
-        dstarCallsign = dstarCallsign.substr(0, hyphenIndex);
-	}
-
 	if(dstarCallsign[dstarCallsign.length() - 1] == ' ') {
 		boost::trim(dstarCallsign);
 	} else {

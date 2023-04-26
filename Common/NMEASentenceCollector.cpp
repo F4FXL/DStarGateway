@@ -107,8 +107,15 @@ bool CNMEASentenceCollector::getDataInt(std::string& data)
 
     std::string fromCall = getMyCall1();
     CAPRSUtils::dstarCallsignToAPRS(fromCall);
+
+  	// 20230425 Fix for https://github.com/F4FXL/DStarGateway/issues/33
+    size_t hyphenIndex = fromCall.find('-');
+    if(hyphenIndex != std::string::npos) {
+        fromCall = fromCall.append("-5");
+	}
+
     std::string aprsFrame(fromCall);
-    aprsFrame.append("-5>GPS30,DSTAR*:")
+    aprsFrame.append(">GPS30,DSTAR*:")
              .append(nmea);
 
     data.assign(aprsFrame);

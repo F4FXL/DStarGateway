@@ -67,8 +67,8 @@ bool CHeardData::setIcomRepeaterData(const unsigned char *data, unsigned int len
 	std::string suser((const char *)data + 10U);
 	std::string srptr((const char *)data + 18U);
 
-	m_user     = suser.substr(LONG_CALLSIGN_LENGTH);
-	m_repeater = srptr.substr(LONG_CALLSIGN_LENGTH);
+	m_user     = suser.substr(0, LONG_CALLSIGN_LENGTH);
+	m_repeater = srptr.substr(0, LONG_CALLSIGN_LENGTH);
 
 	m_address = address;
 	m_port    = port;

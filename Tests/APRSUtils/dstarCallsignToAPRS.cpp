@@ -33,12 +33,12 @@ namespace APRSUtilsTests
         EXPECT_STRCASEEQ(call.c_str(), "N0CALL") << "Call shall not have changed";
     }
 
-    TEST_F(APRSUtils_dstarCallsignToAPRS, withHyphen)
+    TEST_F(APRSUtils_dstarCallsignToAPRS, twoBlanks)
     {
-        std::string call("N0CALL-H");
+        std::string call("F4ABC  B");
         CAPRSUtils::dstarCallsignToAPRS(call);
 
-        EXPECT_STRCASEEQ(call.c_str(), "N0CALL") << "-H shall have been removed";
+        EXPECT_STRCASEEQ(call.c_str(), "F4ABC-B") << "-H shall have been removed";
     }
 
     TEST_F(APRSUtils_dstarCallsignToAPRS, threeBlanks)
