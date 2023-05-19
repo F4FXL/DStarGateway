@@ -61,7 +61,7 @@ All the features found in ircddbGateway are supposed to be working. Except the o
 
 ### 2.4.2. Additional Features compared to ircddbGateway:
 - DPlus, DExtra and G2 NAT Traversal using ircddb network as rendez-vous server. I.e. it is not required to open firewall ports for Callsign Routing or Gateway calls. however it is still recommended to do so. But NAT Traversal will bring more flexibility when operating on CGNAT (Mobile) Networks.
-- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs. Yes, you can send messages to APRS stations and Vice Versa. Additionnally part of the message is sent as Text Dat in the slow data. This allows you to read the message dirdclty on your radio screen.
+- Forward RSMS1A app messages from/to  APRS-IS Network, yes you can send/receive messages to and from aprs. Yes, you can send messages to APRS stations and Vice Versa. Additionnally, part of the message is sent as Text Dat in the slow data. This allows you to read the message directly on your radio screen.
 - Repeater Link status is sent to APRS-IS as a status frame
 
 # 3. Building and installing
@@ -79,7 +79,7 @@ git fetch --tags
 latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
 git checkout $latestTag
 ```
-## 3.3. Get latest development version version
+## 3.3. Get latest development version
 ```
 git checkout develop
 ```
