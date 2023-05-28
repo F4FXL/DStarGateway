@@ -27,23 +27,25 @@
 class CAPRSIdFrameProvider
 {
 public:
-    CAPRSIdFrameProvider(unsigned int timeOut);
+    CAPRSIdFrameProvider(const std::string& gateway, unsigned int timeOut);
     virtual ~CAPRSIdFrameProvider();
 
-    bool buildAPRSFrames(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
+    bool buildAPRSFrames(const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames);
     void clock(unsigned int ms) { m_timer.clock(ms); }
     bool wantsToSend();
     virtual void start() { };
     virtual void close() { };
 
 protected:
-    virtual bool buildAPRSFramesInt(const std::string& gateway, const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames) = 0;
+    virtual bool buildAPRSFramesInt(const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames) = 0;
 
     void setTimeout(unsigned int timeout)
     { 
         m_timer.start(timeout);
     }
 
+protected:
+    std::string m_gateway;
 private:
     CTimer m_timer;
 };

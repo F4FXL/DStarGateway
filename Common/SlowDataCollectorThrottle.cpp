@@ -33,16 +33,27 @@ CSlowDataCollectorThrottle::~CSlowDataCollectorThrottle()
     delete m_collector;
 }
 
-std::string CSlowDataCollectorThrottle::getMyCall() const
+std::string CSlowDataCollectorThrottle::getMyCall1() const
 {
-    return m_collector->getMyCall();
+    return m_collector->getMyCall1();
 }
 
-void CSlowDataCollectorThrottle::setMyCall(const std::string& mycall)
+void CSlowDataCollectorThrottle::setMyCall1(const std::string& mycall)
 {
     m_isFirst = true;
-    m_collector->setMyCall(mycall);
+    m_collector->setMyCall1(mycall);
 }
+std::string CSlowDataCollectorThrottle::getMyCall2() const
+{
+    return m_collector->getMyCall2();
+}
+
+void CSlowDataCollectorThrottle::setMyCall2(const std::string& mycall)
+{
+    m_isFirst = true;
+    m_collector->setMyCall2(mycall);
+}
+
 bool CSlowDataCollectorThrottle::writeData(const unsigned char* data)
 {
     m_isComplete = false;

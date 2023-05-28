@@ -58,7 +58,7 @@ unsigned char CNMEASentenceCollector::calcXOR(const std::string& nmea)
     unsigned char res = 0U;
     
     if(!nmea.empty()) {
-        unsigned int i =  nmea[0] == '$' ?  1U : 0U; //skip $ it it is there
+        unsigned int i =  nmea[0] == '$' ?  1U : 0U; //skip $ if it is there
         while(i < nmea.length())
         {
             if(nmea[i] != '*') {
@@ -98,15 +98,22 @@ unsigned int CNMEASentenceCollector::getDataInt(unsigned char * data, unsigned i
 
 bool CNMEASentenceCollector::getDataInt(std::string& data)
 {
-    if(getMyCall().empty() || getSentence().empty())
+    if(getMyCall1().empty() || getSentence().empty())
         return false;
 
     data.clear();
     auto nmea = getSentence();
     fixUpNMEATimeStamp(nmea);
 
-    std::string fromCall = getMyCall();
+    std::string fromCall = getMyCall1();
     CAPRSUtils::dstarCallsignToAPRS(fromCall);
+
+    // 20230425 Fix for https://github.com/F4FXL/DStarGateway/issues/33
+    size_t hyphenIndex = fromCall.find('-');
+    if(hyphenIndex != std::string::npos) {
+        fromCall = fromCall.substr(0, hyphenIndex);
+	}
+
     std::string aprsFrame(fromCall);
     aprsFrame.append("-5>GPS30,DSTAR*:")
              .append(nmea);

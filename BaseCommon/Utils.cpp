@@ -70,7 +70,7 @@ void CUtils::dump(const char* title, const bool* data, unsigned int length)
 
 		output += "*'";
 
-		CLog::logInfo("%04X:  %s\n", offset / 8U, output.c_str());
+		CLog::logDebug("%04X:  %s\n", offset / 8U, output.c_str());
 
 		offset += 128U;
 	}
@@ -115,7 +115,7 @@ void CUtils::dumpRev(const char* title, const bool* data, unsigned int length)
 
 		output += "*";
 
-		CLog::logInfo("%04X:  %s\n", offset / 8U, output.c_str());
+		CLog::logDebug("%04X:  %s\n", offset / 8U, output.c_str());
 
 		offset += 128U;
 	}
@@ -157,7 +157,7 @@ void CUtils::dump(const char* title, const unsigned char* data, unsigned int len
 
 		output += "*";
 
-		CLog::logInfo("%04X:  %s\n", offset, output.c_str());
+		CLog::logDebug("%04X:  %s\n", offset, output.c_str());
 
 		offset += 16U;
 

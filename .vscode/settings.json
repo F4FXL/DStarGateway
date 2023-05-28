@@ -73,7 +73,25 @@
         "typeindex": "cpp",
         "variant": "cpp",
         "iostream": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "csignal": "cpp",
+        "cstdarg": "cpp",
+        "strstream": "cpp",
+        "codecvt": "cpp",
+        "numeric": "cpp",
+        "regex": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp"
+    },
+    "files.exclude": {
+        "**/.DS_Store": true,
+        "**/.git": true,
+        "**/.hg": true,
+        "**/.svn": true,
+        "**/*.d": true,
+        "**/*.o": true,
+        "**/CVS": true,
+        "**/Thumbs.db": true
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [

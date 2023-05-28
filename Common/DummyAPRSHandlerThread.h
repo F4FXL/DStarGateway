@@ -1,7 +1,5 @@
 /*
- *   Copyright (C) 2010-2015 by Jonathan Naylor G4KLX
- *   Copyright (c) 2017 by Thomas A. Early N7TAE
- *   Copyright (c) 2021 by Geoffrey Merck F4FXL / KC3FRA
+ *   Copyright (C) 2021, 2022 by Geoffrey Merck F4FXL / KC3FRA
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,13 +18,18 @@
 
 #pragma once
 
-#include <string>
+#include "IAPRSHandlerBackend.h"
 
-#include "GitVersion.h"
+class CDummyAPRSHandlerBackend : public IAPRSHandlerBackend
+{
+public:
+    CDummyAPRSHandlerBackend();
+    ~CDummyAPRSHandlerBackend();
 
-const std::string PRODUCT_NAME("DStarGateway");
-const std::string VENDOR_NAME("Geoffrey Merck F4FXL / KC3FRA and Contributors");
-const std::string VERSION("0.7");
-const std::string LONG_VERSION = VERSION + "-" + gitversion;
-const std::string FULL_PRODUCT_NAME = PRODUCT_NAME + " v" + VERSION + "-" + gitversion;
-const std::string SHORT_PRODUCT_NAME = "DStarGW v" + VERSION + "-" + gitversion;
+    bool start();
+    bool isConnected() const;
+    void write(CAPRSFrame& frame);
+    void clock(unsigned int ms);
+    void stop();
+    void addReadAPRSCallback(IReadAPRSFrameCallback* cb);
+};
