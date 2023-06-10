@@ -45,6 +45,7 @@ m_header()
 }
 
 CAMBEData::CAMBEData(const CAMBEData& data) :
+CNetworkDestination(data),
 m_rptSeq(data.m_rptSeq),
 m_outSeq(data.m_outSeq),
 m_id(data.m_id),
@@ -557,41 +558,14 @@ bool CAMBEData::isSync() const
 	return (m_outSeq & 0x1FU) == 0x00U;
 }
 
-void CAMBEData::setDestination(const in_addr& address, unsigned int port)
-{
-	m_yourAddress = address;
-	m_yourPort    = port;
-}
-
 void CAMBEData::setText(const std::string& text)
 {
 	m_text = text;
 }
 
-in_addr CAMBEData::getYourAddress() const
-{
-	return m_yourAddress;
-}
-
-unsigned int CAMBEData::getYourPort() const
-{
-	return m_yourPort;
-}
-
 unsigned int CAMBEData::getMyPort() const
 {
 	return m_myPort;
-}
-
-struct sockaddr_storage CAMBEData::getDestination() const
-{
-	struct sockaddr_storage dest;
-	::memset(&dest, 0, sizeof(sockaddr_storage));
-	dest.ss_family = AF_INET;
-	TOIPV4(dest)->sin_addr = m_yourAddress;
-	TOIPV4(dest)->sin_port = htons(m_yourPort);
-
-	return dest;
 }
 
 CHeaderData& CAMBEData::getHeader()

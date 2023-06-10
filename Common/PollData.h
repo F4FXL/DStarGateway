@@ -27,6 +27,7 @@
 
 class CPollData {
 public:
+	CPollData(const std::string& data1, const std::string& data2, DIRECTION direction, const sockaddr_storage& yourAddressAndPort, unsigned int myPort = 0U);
 	CPollData(const std::string& data1, const std::string& data2, DIRECTION direction, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort = 0U);
 	CPollData(const std::string& data, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort = 0U);
 	CPollData(const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort = 0U);
@@ -51,8 +52,7 @@ public:
 
 	bool         isDongle() const;
 
-	in_addr      getYourAddress() const;
-	unsigned int getYourPort() const;
+	sockaddr_storage getYourAddressAndPort();
 	unsigned int getMyPort() const;
 
 	DIRECTION    getDirection() const;
@@ -64,8 +64,7 @@ private:
 	DIRECTION    m_direction;
 	bool         m_dongle;
 	unsigned int m_length;
-	in_addr      m_yourAddress;
-	unsigned int m_yourPort;
+	sockaddr_storage m_yourAddressAndPort;
 	unsigned int m_myPort;
 };
 

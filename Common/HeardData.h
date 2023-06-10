@@ -40,6 +40,8 @@ public:
 
 	void setDestination(const in_addr& address, unsigned int port);
 
+	struct sockaddr_storage getDestination() const;
+
 	in_addr      getAddress() const;
 	unsigned int getPort() const;
 

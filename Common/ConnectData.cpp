@@ -28,8 +28,76 @@
 #include "Version.h"
 #include "Utils.h"
 #include "Log.h"
+#include "NetUtils.h"
 
 const char *HTML = "<table border=\"0\" width=\"95%%\"><tr><td width=\"4%%\"><img border=\"0\" src=%s></td><td width=\"96%%\"><font size=\"2\"><b>%s</b> DStarGateway %s</font></td></tr></table>";
+
+
+CConnectData::CConnectData(GATEWAY_TYPE gatewayType, const std::string& repeater, const std::string& reflector, CD_TYPE type, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_gatewayType(gatewayType),
+m_repeater(repeater),
+m_reflector(reflector),
+m_type(type),
+m_locator(),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+	assert(repeater.size());
+	assert(reflector.size());
+}
+
+CConnectData::CConnectData(const std::string& repeater, const std::string& reflector, CD_TYPE type, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_gatewayType(GT_REPEATER),
+m_repeater(repeater),
+m_reflector(reflector),
+m_type(type),
+m_locator(),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+	assert(repeater.size());
+	assert(reflector.size());
+}
+
+CConnectData::CConnectData(const std::string& repeater, CD_TYPE type, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_gatewayType(GT_REPEATER),
+m_repeater(repeater),
+m_reflector(),
+m_type(type),
+m_locator(),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+	assert(repeater.size());
+}
+
+CConnectData::CConnectData(const std::string& repeater, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_gatewayType(GT_REPEATER),
+m_repeater(repeater),
+m_reflector(),
+m_type(CT_UNLINK),
+m_locator(),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+	assert(repeater.size());
+}
+
+CConnectData::CConnectData(CD_TYPE type, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_gatewayType(GT_REPEATER),
+m_repeater(),
+m_reflector(),
+m_type(type),
+m_locator(),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+}
 
 CConnectData::CConnectData(GATEWAY_TYPE gatewayType, const std::string& repeater, const std::string& reflector, CD_TYPE type, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
 m_gatewayType(gatewayType),
@@ -37,13 +105,16 @@ m_repeater(repeater),
 m_reflector(reflector),
 m_type(type),
 m_locator(),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
 	assert(repeater.size());
 	assert(reflector.size());
+
+	m_yourAddressAndPort.ss_family = AF_INET6;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 }
 
 CConnectData::CConnectData(const std::string& repeater, const std::string& reflector, CD_TYPE type, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -52,13 +123,16 @@ m_repeater(repeater),
 m_reflector(reflector),
 m_type(type),
 m_locator(),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
 	assert(repeater.size());
 	assert(reflector.size());
+
+	m_yourAddressAndPort.ss_family = AF_INET6;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 }
 
 CConnectData::CConnectData(const std::string& repeater, CD_TYPE type, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -67,12 +141,15 @@ m_repeater(repeater),
 m_reflector(),
 m_type(type),
 m_locator(),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
 	assert(repeater.size());
+
+	m_yourAddressAndPort.ss_family = AF_INET6;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 }
 
 CConnectData::CConnectData(const std::string& repeater, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -81,12 +158,15 @@ m_repeater(repeater),
 m_reflector(),
 m_type(CT_UNLINK),
 m_locator(),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
 	assert(repeater.size());
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 }
 
 CConnectData::CConnectData(CD_TYPE type, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -95,11 +175,14 @@ m_repeater(),
 m_reflector(),
 m_type(type),
 m_locator(),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 }
 
 CConnectData::CConnectData() :
@@ -108,8 +191,7 @@ m_repeater("        "),
 m_reflector(),
 m_type(CT_LINK1),
 m_locator(),
-m_yourAddress(),
-m_yourPort(0U),
+m_yourAddressAndPort(),
 m_myPort(0U)
 {
 }

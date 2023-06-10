@@ -21,6 +21,8 @@
 #include <cassert>
 #include <cstring>
 
+#include "NetUtils.h"
+
 #include "HeardData.h"
 
 CHeardData::CHeardData() :
@@ -129,6 +131,19 @@ void CHeardData::setDestination(const in_addr& address, unsigned int port)
 {
 	m_address = address;
 	m_port    = port;
+}
+
+struct sockaddr_storage CHeardData::getDestination() const
+{
+{
+	struct sockaddr_storage dest;
+	::memset(&dest, 0, sizeof(sockaddr_storage));
+	dest.ss_family = AF_INET;
+	TOIPV4(dest)->sin_addr = m_address;
+	TOIPV4(dest)->sin_port = htons(m_port);
+
+	return dest;
+}
 }
 
 in_addr CHeardData::getAddress() const

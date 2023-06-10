@@ -23,6 +23,7 @@
 #include "Utils.h"
 #include "StringUtils.h"
 #include "Log.h"
+#include "NetUtils.h"
 
 unsigned int             CDCSHandler::m_maxReflectors = 0U;
 CDCSHandler**            CDCSHandler::m_reflectors = NULL;
@@ -46,8 +47,7 @@ m_xlxReflector(),
 m_isXlx(false),
 m_repeater(repeater),
 m_handler(protoHandler),
-m_yourAddress(address),
-m_yourPort(port),
+m_yourAddressAndPort(),
 m_myPort(0U),
 m_direction(direction),
 m_linkState(DCS_LINKING),
@@ -70,6 +70,10 @@ m_rptCall2()
 	assert(protoHandler != NULL);
 	assert(handler != NULL);
 	assert(port > 0U);
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = address;
+	SETPORT(m_yourAddressAndPort, (in_port_t)port);
 
 	m_myPort = protoHandler->getPort();
 
@@ -184,15 +188,13 @@ void CDCSHandler::getInfo(IReflectorCallback* handler, CRemoteRepeaterData& data
 
 void CDCSHandler::process(CAMBEData& data)
 {
-	in_addr   yourAddress = data.getYourAddress();
-	unsigned int yourPort = data.getYourPort();
+	auto destination = data.getDestination();
 	unsigned int myPort   = data.getMyPort();
 
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		CDCSHandler* reflector = m_reflectors[i];
 		if (reflector != NULL) {
-			if (reflector->m_yourAddress.s_addr == yourAddress.s_addr &&
-				reflector->m_yourPort           == yourPort &&
+			if (CNetUtils::match(reflector->m_yourAddressAndPort, destination, IMT_ADDRESS_AND_PORT) &&
 				reflector->m_myPort             == myPort) {
 				reflector->processInt(data);
 				return;
@@ -205,10 +207,9 @@ void CDCSHandler::process(CPollData& poll)
 {
 	std::string   reflector  = poll.getData1();
 	std::string   repeater   = poll.getData2();
-	in_addr   yourAddress = poll.getYourAddress();
-	unsigned int yourPort = poll.getYourPort();
-	unsigned int   myPort = poll.getMyPort();
-	unsigned int   length = poll.getLength();
+	sockaddr_storage yourDestination = poll.getYourAddressAndPort();
+	unsigned int  myPort = poll.getMyPort();
+	unsigned int  length = poll.getLength();
 
 	// Check to see if we already have a link
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
@@ -217,19 +218,16 @@ void CDCSHandler::process(CPollData& poll)
 		if (handler != NULL) {
 			if (handler->m_reflector == reflector &&
 				handler->m_repeater == repeater &&
-				handler->m_yourAddress.s_addr == yourAddress.s_addr &&
-				handler->m_yourPort  == yourPort &&
-				handler->m_myPort    == myPort &&
+				CNetUtils::match(handler->m_yourAddressAndPort, yourDestination, IMT_ADDRESS_AND_PORT) &&
 				handler->m_direction == DIR_OUTGOING &&
 				handler->m_linkState == DCS_LINKED &&
 				length == 22U) {
 				handler->m_pollInactivityTimer.start();
-				CPollData reply(handler->m_repeater, handler->m_reflector, handler->m_direction, handler->m_yourAddress, handler->m_yourPort);
+				CPollData reply(handler->m_repeater, handler->m_reflector, handler->m_direction, handler->m_yourAddressAndPort);
 				handler->m_handler->writePoll(reply);
 				return;
 			} else if (handler->m_reflector.substr(0, LONG_CALLSIGN_LENGTH - 1U) == reflector.substr(0, LONG_CALLSIGN_LENGTH - 1U) &&
-					   handler->m_yourAddress.s_addr == yourAddress.s_addr &&
-					   handler->m_yourPort  == yourPort &&
+					   CNetUtils::match(handler->m_yourAddressAndPort, yourDestination, IMT_ADDRESS_AND_PORT) &&
 					   handler->m_myPort    == myPort &&
 					   handler->m_direction == DIR_INCOMING &&
 					   handler->m_linkState == DCS_LINKED &&
@@ -262,8 +260,7 @@ void CDCSHandler::process(CConnectData& connect)
 	}
 
 	// else if type == CT_LINK1 or type == CT_LINK2
-	in_addr   yourAddress = connect.getYourAddress();
-	unsigned int yourPort = connect.getYourPort();
+	sockaddr_storage   yourAddressAndPort = connect.getYourAddressAndPort();
 	unsigned int   myPort = connect.getMyPort();
 
 	std::string repeaterCallsign = connect.getRepeater();
@@ -273,8 +270,7 @@ void CDCSHandler::process(CConnectData& connect)
 	for (unsigned int i = 0U; i < m_maxReflectors; i++) {
 		if (m_reflectors[i] != NULL) {
 			if (m_reflectors[i]->m_direction          == DIR_INCOMING &&
-			    m_reflectors[i]->m_yourAddress.s_addr == yourAddress.s_addr &&
-			    m_reflectors[i]->m_yourPort           == yourPort &&
+			    CNetUtils::match(m_reflectors[i]->m_yourAddressAndPort, yourAddressAndPort, IMT_ADDRESS_AND_PORT) &&
 			    m_reflectors[i]->m_myPort             == myPort &&
 			    m_reflectors[i]->m_repeater == reflectorCallsign &&
 			    m_reflectors[i]->m_reflector == repeaterCallsign)
@@ -286,7 +282,7 @@ void CDCSHandler::process(CConnectData& connect)
 	IReflectorCallback* handler = CRepeaterHandler::findDVRepeater(reflectorCallsign);
 	if (handler == NULL) {
 		CLog::logInfo("DCS connect to unknown reflector %s from %s", reflectorCallsign.c_str(), repeaterCallsign.c_str());
-		CConnectData reply(repeaterCallsign, reflectorCallsign, CT_NAK, connect.getYourAddress(), connect.getYourPort());
+		CConnectData reply(repeaterCallsign, reflectorCallsign, CT_NAK, connect.getYourAddressAndPort());
 		m_incoming->writeConnect(reply);
 		return;
 	}

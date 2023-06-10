@@ -24,6 +24,19 @@
 #include "PollData.h"
 #include "DStarDefines.h"
 #include "Utils.h"
+#include "NetUtils.h"
+
+CPollData::CPollData(const std::string& data1, const std::string& data2, DIRECTION direction, const sockaddr_storage& yourAddressAndPort, unsigned int myPort) :
+m_data1(data1),
+m_data2(data2),
+m_direction(direction),
+m_dongle(false),
+m_length(0U),
+m_yourAddressAndPort(yourAddressAndPort),
+m_myPort(myPort)
+{
+	assert(GETPORT(yourAddressAndPort) > 0U);
+}
 
 CPollData::CPollData(const std::string& data1, const std::string& data2, DIRECTION direction, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
 m_data1(data1),
@@ -31,11 +44,14 @@ m_data2(data2),
 m_direction(direction),
 m_dongle(false),
 m_length(0U),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 }
 
 CPollData::CPollData(const std::string& data, const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -44,11 +60,14 @@ m_data2(),
 m_direction(DIR_OUTGOING),
 m_dongle(false),
 m_length(0U),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 }
 
 CPollData::CPollData(const in_addr& yourAddress, unsigned int yourPort, unsigned int myPort) :
@@ -57,11 +76,14 @@ m_data2(),
 m_direction(DIR_OUTGOING),
 m_dongle(false),
 m_length(0U),
-m_yourAddress(yourAddress),
-m_yourPort(yourPort),
+m_yourAddressAndPort(),
 m_myPort(myPort)
 {
 	assert(yourPort > 0U);
+
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 }
 
 CPollData::CPollData() :
@@ -70,8 +92,7 @@ m_data2(),
 m_direction(DIR_OUTGOING),
 m_dongle(false),
 m_length(0U),
-m_yourAddress(),
-m_yourPort(0U),
+m_yourAddressAndPort(),
 m_myPort(0U)
 {
 }
@@ -91,8 +112,9 @@ bool CPollData::setDExtraData(const unsigned char* data, unsigned int length, co
 	m_dongle  = data[LONG_CALLSIGN_LENGTH] != 0x00;
 
 	m_length      = length;
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -111,8 +133,9 @@ bool CPollData::setDCSData(const unsigned char* data, unsigned int length, const
 			m_data2       = sdata.substr(9, LONG_CALLSIGN_LENGTH);
 			m_length      = length;
 			m_direction   = DIR_INCOMING;
-			m_yourAddress = yourAddress;
-			m_yourPort    = yourPort;
+			m_yourAddressAndPort.ss_family = AF_INET;
+			TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+			SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 			m_myPort      = myPort;
 			break;
 
@@ -122,8 +145,9 @@ bool CPollData::setDCSData(const unsigned char* data, unsigned int length, const
 			m_data2.push_back(sdata[17]);
 			m_length      = length;
 			m_direction   = DIR_OUTGOING;
-			m_yourAddress = yourAddress;
-			m_yourPort    = yourPort;
+			m_yourAddressAndPort.ss_family = AF_INET;
+			TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+			SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 			m_myPort      = myPort;
 			break;
 	}
@@ -140,8 +164,9 @@ bool CPollData::setCCSData(const unsigned char* data, unsigned int length, const
 	m_data1       = std::string((const char*)data);
 	m_data1.resize(25);
 	m_length      = length;
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -152,8 +177,9 @@ bool CPollData::setDPlusData(const unsigned char* /*data*/, unsigned int length,
 	assert(yourPort > 0U);
 
 	m_length      = length;
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	m_yourAddressAndPort.ss_family = AF_INET;
+	TOIPV4(m_yourAddressAndPort)->sin_addr = yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)myPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -265,14 +291,9 @@ bool CPollData::isDongle() const
 	return m_dongle;
 }
 
-in_addr CPollData::getYourAddress() const
+sockaddr_storage CPollData::getYourAddressAndPort()
 {
-	return m_yourAddress;
-}
-
-unsigned int CPollData::getYourPort() const
-{
-	return m_yourPort;
+	return m_yourAddressAndPort;
 }
 
 unsigned int CPollData::getMyPort() const

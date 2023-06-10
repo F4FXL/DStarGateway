@@ -23,9 +23,11 @@
 #include <string>
 
 #include <netinet/in.h>
+
+#include "NetworkDestination.h"
 #include "HeaderData.h"
 
-class CAMBEData {
+class CAMBEData : public CNetworkDestination {
 public:
 	CAMBEData();
 	CAMBEData(const CAMBEData& data);

@@ -112,8 +112,7 @@ private:
 	bool                 m_isXlx;	
 	std::string             m_repeater;
 	CDCSProtocolHandler* m_handler;
-	in_addr              m_yourAddress;
-	unsigned int         m_yourPort;
+	sockaddr_storage	m_yourAddressAndPort;
 	unsigned int         m_myPort;
 	DIRECTION            m_direction;
 	DCS_STATE            m_linkState;
