@@ -114,7 +114,7 @@ bool CVoiceTransmit::run()
 	if (!opened)
 		return false;
 
-	in_addr address = CUDPReaderWriter::lookup("127.0.0.1");
+	in_addr address = CUDPReaderWriter::lookup("192.168.234.2");//CUDPReaderWriter::lookup("127.0.0.1");
 
 	unsigned int id = CHeaderData::createId();
 
@@ -134,7 +134,7 @@ bool CVoiceTransmit::run()
 
 	if(!m_text.empty()) {
 		slowData = new CSlowDataEncoder();
-		// slowData->setHeaderData(*header);
+		slowData->setHeaderData(*header);
 		if(!m_text.empty()) slowData->setTextData(m_text);
 		if(!m_dprs.empty()) slowData->setGPSData(m_dprs);
 	}
