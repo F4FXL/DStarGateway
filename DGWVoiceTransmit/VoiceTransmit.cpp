@@ -114,7 +114,7 @@ bool CVoiceTransmit::run()
 	if (!opened)
 		return false;
 
-	in_addr address = CUDPReaderWriter::lookup("192.168.234.2");//CUDPReaderWriter::lookup("127.0.0.1");
+	in_addr address = CUDPReaderWriter::lookup("127.0.0.1");
 
 	unsigned int id = CHeaderData::createId();
 
@@ -155,7 +155,6 @@ bool CVoiceTransmit::run()
 		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		needed /= DSTAR_FRAME_TIME_MS;
 		unsigned char buffer[DV_FRAME_LENGTH_BYTES];
-		unsigned char slowDataBuffer[DATA_FRAME_LENGTH_BYTES];
 
 		while (out < needed) {
 			CAMBEData* ambe = m_store->getAMBE();
@@ -177,23 +176,14 @@ bool CVoiceTransmit::run()
 			}
 
 			ambe->getData(buffer, DV_FRAME_LENGTH_BYTES);
-			if(overrideSlowData) { // Override slowdata if specified so
-				// Insert sync bytes when the sequence number is zero, slow data otherwise
-				if (seqNo == 0U) {
-					::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-				} else {
-					slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
-				}
-				ambe->setData(buffer, DV_FRAME_LENGTH_BYTES);
+			// Insert sync bytes when the sequence number is zero, slow data otherwise
+			if (seqNo == 0U) {
+				::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
+			} else if (overrideSlowData) {
+				slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 			}
-			else {
-				if(seqNo == 0U) {
-					::memcpy(slowDataBuffer, buffer + VOICE_FRAME_LENGTH_BYTES, DATA_FRAME_LENGTH_BYTES);
-					::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-					ambe->setData(buffer, DV_FRAME_LENGTH_BYTES);
-				}
-			}
-
+			ambe->setData(buffer, DV_FRAME_LENGTH_BYTES);
+		
 			ambe->setSeq(seqNo);
 			ambe->setDestination(address, G2_DV_PORT);
 			ambe->setEnd(false);
