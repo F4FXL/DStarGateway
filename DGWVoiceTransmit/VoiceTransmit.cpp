@@ -132,9 +132,11 @@ bool CVoiceTransmit::run()
 	header->setRptCall2(m_callsign);
 	header->setDestination(address, G2_DV_PORT);
 
-	if(!m_text.empty()) {
+	bool overrideSlowData = !m_text.empty();
+
+	if(overrideSlowData) {
 		slowData = new CSlowDataEncoder();
-		// slowData->setHeaderData(*header);
+		slowData->setHeaderData(*header);
 		if(!m_text.empty()) slowData->setTextData(m_text);
 		if(!m_dprs.empty()) slowData->setGPSData(m_dprs);
 	}
@@ -152,6 +154,7 @@ bool CVoiceTransmit::run()
 	while (loop) {
 		unsigned int needed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		needed /= DSTAR_FRAME_TIME_MS;
+		unsigned char buffer[DV_FRAME_LENGTH_BYTES];
 
 		while (out < needed) {
 			CAMBEData* ambe = m_store->getAMBE();
@@ -172,20 +175,15 @@ bool CVoiceTransmit::run()
 				break;
 			}
 
-			if(slowData != nullptr) { // Override slowdata if specified so
-				unsigned char buffer[DV_FRAME_LENGTH_BYTES];
-				ambe->getData(buffer, DV_FRAME_LENGTH_BYTES);
-
-				// Insert sync bytes when the sequence number is zero, slow data otherwise
-				if (seqNo == 0U) {
-					::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
-				} else {
-					slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
-				}
-
-				ambe->setData(buffer, DV_FRAME_LENGTH_BYTES);
+			ambe->getData(buffer, DV_FRAME_LENGTH_BYTES);
+			// Insert sync bytes when the sequence number is zero, slow data otherwise
+			if (seqNo == 0U) {
+				::memcpy(buffer + VOICE_FRAME_LENGTH_BYTES, DATA_SYNC_BYTES, DATA_FRAME_LENGTH_BYTES);
+			} else if (overrideSlowData) {
+				slowData->getInterleavedData(buffer + VOICE_FRAME_LENGTH_BYTES);
 			}
-
+			ambe->setData(buffer, DV_FRAME_LENGTH_BYTES);
+		
 			ambe->setSeq(seqNo);
 			ambe->setDestination(address, G2_DV_PORT);
 			ambe->setEnd(false);

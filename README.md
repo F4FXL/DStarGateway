@@ -145,6 +145,7 @@ The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 0.7
+- [**Bugfix**] Fix #37 Unable to transmit multiple files (DGWVoiceTransmit) ([#37](https://github.com/F4FXL/DStarGateway/issues/37))
 - [**Bugfix**] Unknow repeater entries in log when using Icom Hardware ([#34](https://github.com/F4FXL/DStarGateway/issues/34))
 - [**Bugfix**] Malformed callsign in some cases when using DV-G (NMEA) ([#33](https://github.com/F4FXL/DStarGateway/issues/33))
 - [**Bugfix**] Crash on startup with Icom Hardware. Thanks to Josh AB9FT for reporting the issue.([#31](https://github.com/F4FXL/DStarGateway/issues/31))
