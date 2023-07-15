@@ -80,7 +80,7 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std:
 #else
 
 #ifndef STATUS_UNK
-#define STATUS_UNK STATUS_NO_FIX  #Dirty ack. because gpsd history doc just s*cks
+#define STATUS_UNK STATUS_NO_FIX  //Dirty ack. because gpsd history doc just s*cks
 #endif
 	
     if (m_gpsdData.fix.status == STATUS_UNK)
