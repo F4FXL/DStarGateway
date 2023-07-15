@@ -24,10 +24,9 @@
 
 #include <netinet/in.h>
 
-#include "NetworkDestination.h"
 #include "HeaderData.h"
 
-class CAMBEData : public CNetworkDestination {
+class CAMBEData {
 public:
 	CAMBEData();
 	CAMBEData(const CAMBEData& data);
@@ -73,7 +72,7 @@ public:
 	void setData(const unsigned char* data, unsigned int length);
 	unsigned int getData(unsigned char* data, unsigned int length) const;
 
-	void setDestination(const in_addr& address, unsigned int port);
+	void setDestination(const struct sockaddr_storage& yourAddressAndPort);
 
 	void setText(const std::string& text);
 
@@ -102,4 +101,5 @@ private:
 	unsigned int   m_errors;
 	std::string       m_text;
 	CHeaderData    m_header;
+	struct sockaddr_storage m_yourAddressAndPort;
 };

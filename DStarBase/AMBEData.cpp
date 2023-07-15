@@ -45,7 +45,6 @@ m_header()
 }
 
 CAMBEData::CAMBEData(const CAMBEData& data) :
-CNetworkDestination(data),
 m_rptSeq(data.m_rptSeq),
 m_outSeq(data.m_outSeq),
 m_id(data.m_id),

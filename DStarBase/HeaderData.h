@@ -119,8 +119,7 @@ private:
 	unsigned char* m_yourCall;
 	unsigned char* m_rptCall1;
 	unsigned char* m_rptCall2;
-	in_addr        m_yourAddress;
-	unsigned int   m_yourPort;
+	struct sockaddr_storage m_yourAddressAndport;
 	unsigned int   m_myPort;
 	unsigned int   m_errors;
 };

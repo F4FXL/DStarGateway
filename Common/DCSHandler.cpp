@@ -727,7 +727,7 @@ bool CDCSHandler::clockInt(unsigned int ms)
 		if (m_direction == DIR_OUTGOING) {
 			bool reconnect = m_destination->linkFailed(DP_DCS, GET_DISP_REFLECTOR(this), true);
 			if (reconnect) {
-				CConnectData reply(m_gatewayType, m_repeater, m_reflector, CT_LINK1, m_yourAddress, m_yourPort);
+				CConnectData reply(m_gatewayType, m_repeater, m_reflector, CT_LINK1, m_yourAddressAndPort);
 				m_handler->writeConnect(reply);
 				m_linkState = DCS_LINKING;
 				m_tryTimer.start(1U);
@@ -748,13 +748,13 @@ bool CDCSHandler::clockInt(unsigned int ms)
 	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired()) {
 		m_pollTimer.start();
 
-		CPollData poll(m_repeater, m_reflector, m_direction, m_yourAddress, m_yourPort);
+		CPollData poll(m_repeater, m_reflector, m_direction, m_yourAddressAndPort);
 		m_handler->writePoll(poll);
 	}
 
 	if (m_linkState == DCS_LINKING) {
 		if (m_tryTimer.isRunning() && m_tryTimer.hasExpired()) {
-			CConnectData reply(m_gatewayType, m_repeater, m_reflector, CT_LINK1, m_yourAddress, m_yourPort);
+			CConnectData reply(m_gatewayType, m_repeater, m_reflector, CT_LINK1, m_yourAddressAndPort);
 			m_handler->writeConnect(reply);
 
 			unsigned int timeout = calcBackoff();
@@ -764,7 +764,7 @@ bool CDCSHandler::clockInt(unsigned int ms)
 
 	if (m_linkState == DCS_UNLINKING) {
 		if (m_tryTimer.isRunning() && m_tryTimer.hasExpired()) {
-			CConnectData connect(m_repeater, m_reflector, CT_UNLINK, m_yourAddress, m_yourPort);
+			CConnectData connect(m_repeater, m_reflector, CT_UNLINK, m_yourAddressAndPort);
 			m_handler->writeConnect(connect);
 
 			unsigned int timeout = calcBackoff();
@@ -824,7 +824,7 @@ void CDCSHandler::writeAMBEInt(IReflectorCallback* handler, CAMBEData& data, DIR
 	header.setCQCQCQ();
 
 	data.setRptSeq(m_seqNo++);
-	data.setDestination(m_yourAddress, m_yourPort);
+	data.setDestination(m_yourAddressAndPort);
 	m_handler->writeData(data);
 }
 

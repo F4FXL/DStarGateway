@@ -88,7 +88,9 @@ public:
 
 protected:
 	CDPlusHandler(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port);
+	CDPlusHandler(IReflectorCallback* handler, const std::string& repeater, const std::string& reflector, CDPlusProtocolHandler* protoHandler, const struct sockaddr_storage& addressAndport);
 	CDPlusHandler(CDPlusProtocolHandler* protoHandler, const in_addr& address, unsigned int port);
+	CDPlusHandler(CDPlusProtocolHandler* protoHandler, const struct sockaddr_storage& addressAndport);
 	~CDPlusHandler();
 
 	void processInt(CHeaderData& header);
@@ -122,8 +124,7 @@ private:
 	std::string               m_callsign;
 	std::string               m_reflector;
 	CDPlusProtocolHandler* m_handler;
-	in_addr                m_yourAddress;
-	unsigned int           m_yourPort;
+	struct sockaddr_storage m_yourAddressAndPort;
 	unsigned int           m_myPort;
 	DIRECTION              m_direction;
 	DPLUS_STATE            m_linkState;

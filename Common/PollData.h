@@ -52,7 +52,7 @@ public:
 
 	bool         isDongle() const;
 
-	sockaddr_storage getYourAddressAndPort();
+	sockaddr_storage getYourAddressAndPort() const;
 	unsigned int getMyPort() const;
 
 	DIRECTION    getDirection() const;

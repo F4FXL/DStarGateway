@@ -92,7 +92,7 @@ bool CDExtraProtocolHandler::writePoll(const CPollData& poll)
 	CUtils::dump("Sending Poll", buffer, length);
 #endif
 
-	return m_socket.write(buffer, length, poll.getYourAddress(), poll.getYourPort());
+	return m_socket.write(buffer, length, poll.getYourAddressAndPort());
 }
 
 bool CDExtraProtocolHandler::writeConnect(const CConnectData& connect)
@@ -105,7 +105,7 @@ bool CDExtraProtocolHandler::writeConnect(const CConnectData& connect)
 #endif
 
 	for (unsigned int i = 0U; i < 2U; i++) {
-		bool res = m_socket.write(buffer, length, connect.getYourAddress(), connect.getYourPort());
+		bool res = m_socket.write(buffer, length, connect.getYourAddressAndPort());
 		if (!res)
 			return false;
 	}

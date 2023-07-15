@@ -238,8 +238,8 @@ bool CConnectData::setDExtraData(const unsigned char* data, unsigned int length,
 			return false;
 	}
 
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	TOIPV4(m_yourAddressAndPort)->sin_addr =  yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -285,8 +285,8 @@ bool CConnectData::setDCSData(const unsigned char* data, unsigned int length, co
 			return false;
 	}
 
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	TOIPV4(m_yourAddressAndPort)->sin_addr =  yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -312,8 +312,8 @@ bool CConnectData::setCCSData(const unsigned char* data, unsigned int length, co
 	else
 		return false;
 
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	TOIPV4(m_yourAddressAndPort)->sin_addr =  yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -357,8 +357,8 @@ bool CConnectData::setDPlusData(const unsigned char* data, unsigned int length, 
 			return false;
 	}
 
-	m_yourAddress = yourAddress;
-	m_yourPort    = yourPort;
+	TOIPV4(m_yourAddressAndPort)->sin_addr =  yourAddress;
+	SETPORT(m_yourAddressAndPort, (in_port_t)yourPort);
 	m_myPort      = myPort;
 
 	return true;
@@ -595,16 +595,6 @@ unsigned int CConnectData::getDPlusData(unsigned char *data, unsigned int length
 		default:
 			return 0U;
 	}
-}
-
-in_addr CConnectData::getYourAddress() const
-{
-	return m_yourAddress;
-}
-
-unsigned int CConnectData::getYourPort() const
-{
-	return m_yourPort;
 }
 
 unsigned int CConnectData::getMyPort() const

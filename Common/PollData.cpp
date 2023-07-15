@@ -291,7 +291,7 @@ bool CPollData::isDongle() const
 	return m_dongle;
 }
 
-sockaddr_storage CPollData::getYourAddressAndPort()
+sockaddr_storage CPollData::getYourAddressAndPort() const
 {
 	return m_yourAddressAndPort;
 }

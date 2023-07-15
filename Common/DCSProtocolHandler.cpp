@@ -73,7 +73,7 @@ bool CDCSProtocolHandler::writePoll(const CPollData& poll)
 	CUtils::dump("Sending Poll", buffer, length);
 #endif
 
-	return m_socket.write(buffer, length, poll.getYourAddress(), poll.getYourPort());
+	return m_socket.write(buffer, length, poll.getYourAddressAndPort());
 }
 
 bool CDCSProtocolHandler::writeConnect(const CConnectData& connect)
@@ -85,7 +85,7 @@ bool CDCSProtocolHandler::writeConnect(const CConnectData& connect)
 	CUtils::dump("Sending Connect", buffer, length);
 #endif
 
-	return m_socket.write(buffer, length, connect.getYourAddress(), connect.getYourPort());
+	return m_socket.write(buffer, length, connect.getYourAddressAndPort());
 }
 
 DCS_TYPE CDCSProtocolHandler::read()
