@@ -169,7 +169,11 @@ DAEMONIZE_RESULT CDaemon::daemonise(const std::string& pidFile, const std::strin
         char str[256];
 		sprintf(str, "%d\n", getpid());
 		/* Write PID to lockfile */
-		write(m_pid_fd, str, strlen(str));
+		ssize_t writeCount = write(m_pid_fd, str, strlen(str));
+		if(writeCount < 0) {
+			CLog::logFatal("Failed to write to PID File. Err: %d", errno);
+			return DR_FAILURE;
+		}
 	}
 
     return DR_CHILD;
