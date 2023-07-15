@@ -74,12 +74,17 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std:
 		return false;
 #endif
 
-#if GPSD_API_MAJOR_VERSION >= 10
-	if(m_gpsdData.fix.status == STATUS_NO_FIX)
-		return false;
-#else
+#if GPSD_API_MAJOR_VERSION < 10
 	if (m_gpsdData.status != STATUS_FIX)
 		return false;
+#elif GPSD_API_MAJOR_VERSION == 11
+	if(m_gpsdData.fix.status == STATUS_NO_FIX)
+		return false;
+#elif GPSD_API_MAJOR_VERSION <= 14
+	if(m_gpsdData.fix.status == STATUS_UNK)
+        return false;
+#elif 
+    #error Unsupported GPSD_API_MAJOR_VERSION
 #endif
 
 	bool latlonSet   = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
