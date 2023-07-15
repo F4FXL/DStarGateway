@@ -20,6 +20,7 @@
 #define	RemoteControlStarNetUser_H
 
 #include <string>
+#include <cstdint>
 
 class CRemoteControlStarNetUser {
 public:
