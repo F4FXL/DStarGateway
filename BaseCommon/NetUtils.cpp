@@ -125,14 +125,22 @@ void CNetUtils::getIPString(const struct sockaddr_storage& sas, std::string& str
 {
 	const struct sockaddr_storage* sasptr = &sas;
 	switch(sasptr->ss_family) {
-		char s[1024];
+		
         case AF_INET:
-            inet_ntop(AF_INET, &(TOIPV4(sas)->sin_addr), s, 1024);
+		{
+			char s[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(TOIPV4(sas)->sin_addr), s, INET_ADDRSTRLEN);
+			str.assign(s);
             break;
+		}
 
         case AF_INET6:
-			inet_ntop(AF_INET6, &(TOIPV6(sas)->sin6_addr), s, 1024);
+		{
+			char s[INET6_ADDRSTRLEN];
+			inet_ntop(AF_INET6, &(TOIPV6(sas)->sin6_addr), s, INET6_ADDRSTRLEN);
+			str.assign(s);
             break;
+		}
 
         default:
             str.clear();
