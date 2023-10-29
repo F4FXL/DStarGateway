@@ -42,4 +42,5 @@ public:
     static bool lookup(const std::string& hostname, sockaddr_storage& addr, struct addrinfo& hints);
     static bool match(const sockaddr_storage& addr1, const sockaddr_storage& addr2, IPMATCHTYPE type);
     static void setPort(struct sockaddr_storage& addr, in_port_t port);
+    static void getIPString(const struct sockaddr_storage& sa, std::string& string);
 };

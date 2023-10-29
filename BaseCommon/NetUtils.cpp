@@ -18,6 +18,7 @@
  */
 
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <cstring>
 
 #include "NetUtils.h"
@@ -118,4 +119,22 @@ void CNetUtils::setPort(struct sockaddr_storage& addr, in_port_t port)
 	default:
 		break;
 	}
+}
+
+void CNetUtils::getIPString(const struct sockaddr_storage& sas, std::string& str)
+{
+	const struct sockaddr_storage* sasptr = &sas;
+	switch(sasptr->ss_family) {
+		char s[1024];
+        case AF_INET:
+            inet_ntop(AF_INET, &(TOIPV4(sas)->sin_addr), s, 1024);
+            break;
+
+        case AF_INET6:
+			inet_ntop(AF_INET6, &(TOIPV6(sas)->sin6_addr), s, 1024);
+            break;
+
+        default:
+            str.clear();
+    }
 }
