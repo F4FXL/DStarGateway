@@ -586,7 +586,10 @@ void CDPlusHandler::gatewayUpdate(const std::string& gateway, const std::string&
 				if (!address.empty()) {
 					// A new address, change the value
 					CLog::logInfo("Changing IP address of D-Plus gateway or reflector %s to %s", gatewayBase.c_str(), address.c_str());
-					reflector->m_yourAddress.s_addr = ::inet_addr(address.c_str());
+					auto port = GETPORT(reflector->m_yourAddressAndPort);
+					CNetUtils::lookup(address, reflector->m_yourAddressAndPort);
+					SETPORT(reflector->m_yourAddressAndPort, port);
+					//reflector->m_yourAddress.s_addr = ::inet_addr(address.c_str());
 				} else {
 					CLog::logInfo("IP address for D-Plus gateway or reflector %s has been removed", gatewayBase.c_str());
 
