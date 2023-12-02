@@ -583,7 +583,7 @@ unsigned int CAMBEData::getMyPort() const
 	return m_myPort;
 }
 
-struct sockaddr_storage CAMBEData::getDestination() const
+struct sockaddr_storage CAMBEData::getYourAddressAndPort() const
 {
 	struct sockaddr_storage dest;
 	::memset(&dest, 0, sizeof(sockaddr_storage));

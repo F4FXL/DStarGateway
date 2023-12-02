@@ -80,7 +80,7 @@ bool CG2ProtocolHandler::writeAMBE(const CAMBEData& data)
 	CUtils::dump("Sending Data", buffer, length);
 #endif
 
-	assert(CNetUtils::match(data.getDestination(), m_address, IMT_ADDRESS_ONLY));
+	assert(CNetUtils::match(data.getYourAddressAndPort(), m_address, IMT_ADDRESS_ONLY));
 	//CLog::logTrace("Write ambe to %s:%u", inet_ntoa(addr), ntohs(TOIPV4(m_address)->sin_port));
 	return m_socket->write(buffer, length, m_address);
 }

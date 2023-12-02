@@ -141,12 +141,12 @@ bool CG2ProtocolHandlerPool::writeHeader(const CHeaderData& header)
 
 bool CG2ProtocolHandlerPool::writeAMBE(const CAMBEData& data)
 {
-    auto handler = findHandler(data.getDestination(), IMT_ADDRESS_AND_PORT);
+    auto handler = findHandler(data.getYourAddressAndPort(), IMT_ADDRESS_AND_PORT);
     if(handler == nullptr)
-        handler = findHandler(data.getDestination(), IMT_ADDRESS_ONLY);
+        handler = findHandler(data.getYourAddressAndPort(), IMT_ADDRESS_ONLY);
 
     if(handler == nullptr) {
-        handler = new CG2ProtocolHandler(&m_socket, data.getDestination(), G2_BUFFER_LENGTH);
+        handler = new CG2ProtocolHandler(&m_socket, data.getYourAddressAndPort(), G2_BUFFER_LENGTH);
         m_pool.push_back(handler);
         m_index = m_pool.end();
     }
