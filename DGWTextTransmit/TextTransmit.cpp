@@ -202,5 +202,5 @@ bool CTextTransmit::sendData(const CAMBEData& data)
 	unsigned char buffer[40U];
 	unsigned int length = data.getG2Data(buffer, 40U);
 
-	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
+return m_socket.write(buffer, length, data.getYourAddressAndPort());
 }

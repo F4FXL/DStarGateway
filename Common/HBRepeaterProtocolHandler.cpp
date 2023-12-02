@@ -73,7 +73,7 @@ bool CHBRepeaterProtocolHandler::writeAMBE(CAMBEData& data)
 	CUtils::dump("Sending Data", buffer, length);
 	return true;
 #else
-	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
+	return m_socket.write(buffer, length, data.getYourAddressAndPort());
 #endif
 }
 

@@ -1248,6 +1248,6 @@ bool CTimeServerThread::sendData(CUDPReaderWriter& socket, const CAMBEData& data
 	CUtils::dump(("Sending Data"), buffer, length);
 	return true;
 #else
-	return socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
+	return socket.write(buffer, length, data.getYourAddressAndPort());
 #endif
 }

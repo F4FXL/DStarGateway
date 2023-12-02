@@ -80,7 +80,7 @@ bool CDPlusProtocolHandler::writeAMBE(const CAMBEData& data)
 	CUtils::dump("Sending Data", buffer, length);
 #endif
 
-	return m_socket.write(buffer, length, data.getYourAddress(), data.getYourPort());
+	return m_socket.write(buffer, length, data.getYourAddressAndPort());
 }
 
 bool CDPlusProtocolHandler::writePoll(const CPollData& poll)
