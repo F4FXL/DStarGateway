@@ -585,13 +585,13 @@ unsigned int CAMBEData::getMyPort() const
 
 struct sockaddr_storage CAMBEData::getYourAddressAndPort() const
 {
-	struct sockaddr_storage dest;
-	::memset(&dest, 0, sizeof(sockaddr_storage));
-	dest.ss_family = AF_INET;
-	TOIPV4(dest)->sin_addr = m_yourAddress;
-	TOIPV4(dest)->sin_port = htons(m_yourPort);
+	struct sockaddr_storage addrAndPort;
+	::memset(&addrAndPort, 0, sizeof(sockaddr_storage));
+	addrAndPort.ss_family = AF_INET;
+	TOIPV4(addrAndPort)->sin_addr = m_yourAddress;
+	TOIPV4(addrAndPort)->sin_port = htons(m_yourPort);
 
-	return dest;
+	return addrAndPort;
 }
 
 CHeaderData& CAMBEData::getHeader()
