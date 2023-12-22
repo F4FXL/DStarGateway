@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build-dstargateway:
+  build-dstargateway-debug-gps:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -21,13 +21,81 @@ jobs:
             sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
           name: "Build"
-          command: "make -j 3 ENABLE_DEBUG=1 USE_GPSD=1"
+          command: "make ENABLE_DEBUG=1 USE_GPSD=1"
       - run:
           name: "Run Tests"
           command: "make run-tests ENABLE_DEBUG=1 USE_GPSD=1"
+
+  build-dstargateway-gps:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
+      - run:
+          name: "Build"
+          command: "make USE_GPSD=1"
+      - run:
+          name: "Run Tests"
+          command: "make run-tests USE_GPSD=1"
+
+  build-dstargateway-debug:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
+      - run:
+          name: "Build"
+          command: "make ENABLE_DEBUG=1"
+      - run:
+          name: "Run Tests"
+          command: "make run-tests ENABLE_DEBUG=1"
+
+  build-dstargateway-noopt:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
+      - run:
+          name: "Build"
+          command: "make"
+      - run:
+          name: "Run Tests"
+          command: "make run-tests"
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   dstar-gateway-workflow:
     jobs:
-      - build-dstargateway
+      - build-dstargateway-debug-gps
+      - build-dstargateway-gps
+      - build-dstargateway-debug
+      - build-dstargateway-noopt
+

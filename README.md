@@ -146,10 +146,11 @@ The testing framwework used is Google Test.
 
 # 5. Version History
 ## 5.1. Version 1.0
+- [**Improvement**] Improve CI to include all variants of build configurations ([#40](https://github.com/F4FXL/DStarGateway/issues/40))
 - [**Bugfix**] Fix #37 Unable to transmit multiple files (DGWVoiceTransmit) ([#37](https://github.com/F4FXL/DStarGateway/issues/37))
 - [**Bugfix**] Fix #36 Error1 Build fails in some environment ([#36](https://github.com/F4FXL/DStarGateway/issues/36))
 - [**Bugfix**] Fix #38 g++ 13 build ([#38](https://github.com/F4FXL/DStarGateway/issues/38))
-- [**Bugfix**] Add support for libgps API version greater than ([#39](https://github.com/F4FXL/DStarGateway/issues/39))
+- [**Bugfix**] Add support for libgps API version greater than 10([#39](https://github.com/F4FXL/DStarGateway/issues/39))
 ## 5.2. Version 0.7
 - [**Bugfix**] Unknow repeater entries in log when using Icom Hardware ([#34](https://github.com/F4FXL/DStarGateway/issues/34))
 - [**Bugfix**] Malformed callsign in some cases when using DV-G (NMEA) ([#33](https://github.com/F4FXL/DStarGateway/issues/33))
@@ -174,11 +175,11 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.5. Version 0.4
 - [**Improvement**] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
-- [**Bugfix**] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
+- [**Bugfix**] Positions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
 ## 5.6. Version 0.3
-- [**Improvement**] Get ride of libcongig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
+- [**Improvement**] Get rid of libconfig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.7. Version 0.2
 - [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
