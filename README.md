@@ -175,11 +175,11 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Trying to connect to ghost ircDDB when no ircDDB is configured
 ## 5.5. Version 0.4
 - [**Improvement**] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
-- [**Bugfix**] Posotions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
+- [**Bugfix**] Positions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
 ## 5.6. Version 0.3
-- [**Improvement**] Get ride of libcongig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
+- [**Improvement**] Get ride of libconfig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.7. Version 0.2
 - [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
