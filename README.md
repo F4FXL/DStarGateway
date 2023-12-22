@@ -179,7 +179,7 @@ The testing framwework used is Google Test.
 - [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
 ## 5.6. Version 0.3
-- [**Improvement**] Get ride of libconfig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
+- [**Improvement**] Get rid of libconfig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
 ## 5.7. Version 0.2
 - [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
