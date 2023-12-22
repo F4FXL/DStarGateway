@@ -72,12 +72,14 @@ public:
 	unsigned int getData(unsigned char* data, unsigned int length) const;
 
 	void setDestination(const in_addr& address, unsigned int port);
+	void setYourAddressAndPort(const struct sockaddr_storage& setYourAddressAndPort);
 
 	void setText(const std::string& text);
 
 	in_addr      getYourAddress() const;
 	unsigned int getYourPort() const;
 	struct sockaddr_storage getYourAddressAndPort() const;
+	
 	unsigned int getMyPort() const;
 
 	unsigned int getErrors() const;
