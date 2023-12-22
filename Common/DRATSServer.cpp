@@ -339,7 +339,7 @@ void* CDRATSServer::Entry()
 	}
 	catch (std::exception& e) {
 		std::string message(e.what());
-		CLog::logError("Exception raised in the D-RATS Server thread - \"%s\""), message.c_str();
+		CLog::logError("Exception raised in the D-RATS Server thread - \"%s\"", message.c_str());
 	}
 	catch (...) {
 		CLog::logError("Unknown exception raised in the D-RATS Server thread");
