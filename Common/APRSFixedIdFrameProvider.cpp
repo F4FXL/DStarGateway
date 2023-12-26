@@ -65,6 +65,8 @@ bool CAPRSFixedIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std
         band = "1.2";
     else if (entry->getFrequency() >= 420.0)
         band = "440";
+    else if (entry->getFrequency() >= 219.0)
+        band = "1.25m";
     else if (entry->getFrequency() >= 144.0)
         band = "2m";
     else if (entry->getFrequency() >= 50.0)
