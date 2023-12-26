@@ -151,6 +151,7 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Fix #36 Error1 Build fails in some environment ([#36](https://github.com/F4FXL/DStarGateway/issues/36))
 - [**Bugfix**] Fix #38 g++ 13 build ([#38](https://github.com/F4FXL/DStarGateway/issues/38))
 - [**Bugfix**] Add support for libgps API version greater than 10([#39](https://github.com/F4FXL/DStarGateway/issues/39))
+- [**Bugfix**] Fix Dongles requires a Frequency ([#15](https://github.com/F4FXL/DStarGateway/issues/15))
 ## 5.2. Version 0.7
 - [**Bugfix**] Unknow repeater entries in log when using Icom Hardware ([#34](https://github.com/F4FXL/DStarGateway/issues/34))
 - [**Bugfix**] Malformed callsign in some cases when using DV-G (NMEA) ([#33](https://github.com/F4FXL/DStarGateway/issues/33))
