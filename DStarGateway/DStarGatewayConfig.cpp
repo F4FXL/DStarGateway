@@ -312,7 +312,7 @@ bool CDStarGatewayConfig::loadGateway(const CConfig & cfg)
 	ret = cfg.getValue("gateway", "url", m_gateway.url, 0, 1024, "") && ret;
 	
 	std::string type;
-	ret = cfg.getValue("gateway", "type", type, "repeater", {"repeater", "hotspot"}) && ret;
+	ret = cfg.getValue("gateway", "type", type, "repeater", {"repeater", "hotspot", "dongle"}) && ret;
 	if(type == "repeater")		m_gateway.type = GT_REPEATER;
 	else if(type == "hotspot")	m_gateway.type = GT_HOTSPOT;
 
