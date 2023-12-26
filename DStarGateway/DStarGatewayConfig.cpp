@@ -241,7 +241,7 @@ bool CDStarGatewayConfig::loadRepeaters(const CConfig & cfg)
 			else if(reconnect == "fixed")	repeater->reflectorReconnect = RECONNECT_FIXED;
 		}
 
-		ret = cfg.getValue(section, "frequency", repeater->frequency, 0.1, 1500.0, 434.0) && ret;	
+		ret = cfg.getValue(section, "frequency", repeater->frequency, 0.0, 1500.0, 434.0) && ret;	
 		ret = cfg.getValue(section, "offset", repeater->offset, -50.0, 50.0, 0.0) && ret;
 		ret = cfg.getValue(section, "rangeKm", repeater->range, 0.0, 3000.0, 0.0) && ret;
 		ret = cfg.getValue(section, "latitude", repeater->latitude, -90.0, 90.0, m_gateway.latitude) && ret;
