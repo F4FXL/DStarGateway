@@ -188,9 +188,11 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std:
 
     body.append(CStringUtils::string_format("RNG%04.0lf %s %s\r\n", entry->getRange() * 0.6214, band.c_str(), desc.c_str()));
 
+    std::string toCall;
+    getToCall(entry->getType(), toCall);
 
     CAPRSFrame * frame = new CAPRSFrame(m_gateway + "-S",
-                                    "APD5T1",
+                                    toCall,
                                     { "TCPIP*", "qAC" , m_gateway + "-GS" },
                                     body, APFT_OBJECT);
 
@@ -209,7 +211,7 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std:
                 lon.c_str(), (rawLongitude < 0.0) ? 'W' : 'E');
 
         frame = new CAPRSFrame(m_gateway,
-                                    "APD5T2",
+                                    toCall,
                                     { "TCPIP*", "qAC" , m_gateway + "-GS" },
                                     body, APFT_POSITION);
 

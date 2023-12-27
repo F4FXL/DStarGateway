@@ -28,7 +28,7 @@
 
 class CAPRSEntry {
 public:
-	CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
+	CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl, GATEWAY_TYPE gwType);
 	~CAPRSEntry();
 
 	std::string getCallsign() const;
@@ -41,6 +41,7 @@ public:
 	double   getAGL() const;
 	CAPRSCollector* getCollector() const;
 	CAPRSEntryStatus& getStatus();
+	GATEWAY_TYPE getType() const;
 
 	// Transmission timer
 	void reset();
@@ -60,4 +61,5 @@ private:
 	bool            m_first;
 	CAPRSCollector* m_collector;
 	CAPRSEntryStatus m_linkStatus;
+	GATEWAY_TYPE	m_gatewayType;
 };

@@ -44,7 +44,7 @@ public:
 
 	void setIdFrameProvider(CAPRSIdFrameProvider * idFrameProvider) { m_idFrameProvider = idFrameProvider; }
 
-	void setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl);
+	void setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl, GATEWAY_TYPE gwType);
 
 	void writeHeader(const std::string& callsign, const CHeaderData& header);
 

@@ -35,6 +35,7 @@ public:
     bool wantsToSend();
     virtual void start() { };
     virtual void close() { };
+    static void getToCall(GATEWAY_TYPE gwType, std::string& toCall);
 
 protected:
     virtual bool buildAPRSFramesInt(const CAPRSEntry * aprsEntry, std::vector<CAPRSFrame *>& frames) = 0;

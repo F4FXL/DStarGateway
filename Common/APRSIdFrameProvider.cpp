@@ -56,3 +56,21 @@ bool CAPRSIdFrameProvider::wantsToSend()
 
     return false;
 }
+
+void CAPRSIdFrameProvider::getToCall(GATEWAY_TYPE gwType, std::string& toCall)
+{
+    switch(gwType)
+    {
+        case GT_REPEATER:
+            toCall.assign("APD5TR");
+            return;
+        case GT_HOTSPOT:
+            toCall.assign("APD5TH");
+            return;
+        case GT_DONGLE:
+            toCall.assign("APD5TD");
+            return;
+        default:
+            toCall.assign("APD5T0");
+    }
+}

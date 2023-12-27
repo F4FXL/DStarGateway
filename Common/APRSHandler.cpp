@@ -51,13 +51,13 @@ CAPRSHandler::~CAPRSHandler()
 	delete m_backend;
 }
 
-void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl)
+void CAPRSHandler::setPort(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl, GATEWAY_TYPE gwType)
 {
 	std::string temp = callsign;
 	temp.resize(LONG_CALLSIGN_LENGTH - 1U, ' ');
 	temp += band;
 
-	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, latitude, longitude, agl);
+	m_array[temp] = new CAPRSEntry(callsign, band, frequency, offset, range, latitude, longitude, agl, gwType);
 }
 
 bool CAPRSHandler::open()
@@ -182,9 +182,12 @@ void CAPRSHandler::sendStatusFrame(CAPRSEntry * entry)
 		body.insert(0, ">");
 
 	std::string sourCall = entry->getCallsign() + '-' + entry->getBand();
+
+	std::string toCall;
+	CAPRSIdFrameProvider::getToCall(entry->getType(), toCall);
 	
 	CAPRSFrame frame(sourCall,
-					 "APD5T3",
+					 toCall,
 					 { "TCPIP*", "qAC", sourCall + "S" },
 					 body,
 					 APFT_STATUS);

@@ -286,9 +286,9 @@ bool CDStarGatewayApp::createThread()
 								rptrConfig.band3);
 
 		if(outgoingAprsWriter != nullptr)
-			outgoingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+			outgoingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl, gatewayConfig.type);
 		if(incomingAprsWriter != nullptr)
-			incomingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl);
+			incomingAprsWriter->setPort(rptrConfig.callsign, rptrConfig.band, rptrConfig.frequency, rptrConfig.offset, rptrConfig.range, rptrConfig.latitude, rptrConfig.longitude, rptrConfig.agl, gatewayConfig.type);
 
 		if(!ddEnabled) ddEnabled = rptrConfig.band.length() > 1U;
 	}

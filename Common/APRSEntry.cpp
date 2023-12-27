@@ -21,7 +21,7 @@
 
 #include "APRSEntry.h"
 
-CAPRSEntry::CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl) :
+CAPRSEntry::CAPRSEntry(const std::string& callsign, const std::string& band, double frequency, double offset, double range, double latitude, double longitude, double agl, GATEWAY_TYPE gwType) :
 m_callsign(callsign),
 m_band(band),
 m_frequency(frequency),
@@ -33,7 +33,8 @@ m_agl(agl),
 m_timer(1000U, 10U),
 m_first(true),
 m_collector(NULL),
-m_linkStatus()
+m_linkStatus(),
+m_gatewayType(gwType)
 {
 	boost::trim(m_callsign);
 
@@ -93,6 +94,11 @@ CAPRSCollector* CAPRSEntry::getCollector() const
 CAPRSEntryStatus& CAPRSEntry::getStatus()
 {
 	return m_linkStatus;
+}
+
+GATEWAY_TYPE CAPRSEntry::getType() const
+{
+	return m_gatewayType;
 }
 
 void CAPRSEntry::reset()
