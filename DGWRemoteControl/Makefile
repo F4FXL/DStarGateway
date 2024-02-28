@@ -7,6 +7,7 @@ dgwremotecontrol: ../VersionInfo/GitVersion.h $(OBJS) ../DStarBase/DStarBase.a .
 
 %.o : %.cpp
 	$(CC) -I../Common -I../BaseCommon  -I../DStarBase -I../VersionInfo -DCFG_DIR='"$(CFG_DIR)"' $(CPPFLAGS) -MMD -MD -c $< -o $@
+-include $(DEPS)
 
 .PHONY clean:
 clean:

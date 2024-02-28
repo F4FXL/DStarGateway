@@ -7,6 +7,7 @@ dgwtimeserver: ../VersionInfo/GitVersion.h $(OBJS) ../DStarBase/DStarBase.a ../B
 
 %.o : %.cpp
 	$(CC) -I../BaseCommon -I../DStarBase -I../VersionInfo $(CPPFLAGS) -MMD -MD -c $< -o $@
+-include $(DEPS)
 
 .PHONY clean:
 clean:
