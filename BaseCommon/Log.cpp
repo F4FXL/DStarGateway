@@ -54,6 +54,8 @@ void CLog::finalise()
     }
 
     m_targets.clear();
+    m_prevMsg.clear();
+    m_prevMsgCount = 0;
 }
 
 void CLog::getTimeStamp(std::string & s)
