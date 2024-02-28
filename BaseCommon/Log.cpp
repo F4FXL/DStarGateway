@@ -27,6 +27,9 @@
 bool CLog::m_addedTargets(false);
 std::recursive_mutex CLog::m_targetsMutex;
 std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LOG_DEBUG) };
+std::string CLog::m_prevMsg = "";
+int CLog::m_prevMsgCount = 0;
+
 
 void CLog::addTarget(CLogTarget* target)
 {

@@ -35,6 +35,8 @@ private:
     static std::vector<CLogTarget *> m_targets;
     static bool m_addedTargets;
     static std::recursive_mutex m_targetsMutex;
+    static std::string m_prevMsg;
+    static int m_prevMsgCount;
 
     static void getTimeStamp(std::string& s);
 
@@ -68,12 +70,9 @@ private:
             break;
         }
 
-        std::string timestamp;
-        getTimeStamp(timestamp);
-
-        std::string f2("[%s] [%s] ");
+        std::string f2("[%s] ");
         f2.append(f);
-        CStringUtils::string_format_in_place(output, f2, timestamp.c_str(), severityStr.c_str(), args...);
+        CStringUtils::string_format_in_place(output, f2, severityStr.c_str(), args...);
         boost::trim_if(output, [](char c){ return c == '\n' || c == '\r' || c == ' ' || c == '\t'; });
         output.push_back('\n');
     }
@@ -117,15 +116,37 @@ public:
     {
         std::lock_guard lockTarget(m_targetsMutex);
 
+        if(m_targets.empty())
+            return;
+
+        std::string timestamp;
+        getTimeStamp(timestamp);
+
         std::string msg;
+        formatLogMessage(msg, severity, f, args...);
+
+        if(msg.compare(m_prevMsg) == 0) {
+            m_prevMsgCount++;
+            return;
+        }
+        else if(m_prevMsgCount != 0) {
+            formatLogMessage(msg, severity, "Previous message repeated %d times", m_prevMsgCount);
+        }
+
+        m_prevMsg.assign(msg);
+
+        std::string msgts;
+        CStringUtils::string_format_in_place(msgts, "[%s] %s", timestamp.c_str(), msg.c_str());
+
         for(auto target : m_targets) {
             if(severity >= target->getLevel()) {
-
-                if(msg.empty())
-                    formatLogMessage(msg, severity, f, args...);
-
-                target->printLog(msg);
+                target->printLog(msgts);
             }
+        }
+
+        if(m_prevMsgCount != 0) {
+            m_prevMsgCount = 0;
+            log(severity, f, args ...);
         }
     }
 };
