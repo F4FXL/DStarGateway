@@ -18,7 +18,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update
-            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
+            sudo apt-get -y install libgtest-dev libgmock-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
           name: "Build"
           command: "make ENABLE_DEBUG=1 USE_GPSD=1"
@@ -39,7 +39,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update
-            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev libgps-dev
+            sudo apt-get -y install libgtest-dev libgmock-dev libcurl4-openssl-dev libboost-dev libgps-dev
       - run:
           name: "Build"
           command: "make USE_GPSD=1"
@@ -60,7 +60,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update
-            sudo apt-get -y install libgtest-dev libcurl4-openssl-dev libboost-dev
+            sudo apt-get -y install libgtest-dev libgmock-dev libcurl4-openssl-dev libboost-dev
       - run:
           name: "Build"
           command: "make ENABLE_DEBUG=1"
