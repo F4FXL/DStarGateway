@@ -7,6 +7,7 @@ BaseCommon.a: $(OBJS)
 
 %.o : %.cpp
 	$(CC) $(CPPFLAGS) -MMD -MD -c $< -o $@
+-include $(DEPS)
 
 clean:
 	$(RM) *.o *.d BaseCommon.a

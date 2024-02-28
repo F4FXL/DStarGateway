@@ -20,4 +20,6 @@ endif
 clean:
 	$(RM) *.o *.d GitVersion.h
 
+.PHONY: FORCE
 FORCE:
+	@true

@@ -7,6 +7,7 @@ dstargateway: ../VersionInfo/GitVersion.h $(OBJS) ../APRS/APRS.a ../IRCDDB/IRCDD
 
 %.o : %.cpp
 	$(CC) -I../APRS -I../Common -I../BaseCommon -I../DStarBase -I../IRCDDB -I../VersionInfo $(CPPFLAGS) -MMD -MD -c $< -o $@
+-include $(DEPS)
 
 .PHONY clean:
 clean:
