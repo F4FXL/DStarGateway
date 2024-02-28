@@ -147,7 +147,7 @@ The testing framwework used is Google Test.
 # 5. Version History
 ## 5.1. Version 1.0
 - [**Improvement**] Improve CI to include all variants of build configurations ([#40](https://github.com/F4FXL/DStarGateway/issues/40))
-- [**Bugfix**] Fix #42 Cache not updated when answering ircddb gateway is only conected to one network ([#42](https://github.com/F4FXL/DStarGateway/issues/42))
+- [**Bugfix**] Fix #43 Cache not updated when answering ircddb gateway is only conected to one network ([#43](https://github.com/F4FXL/DStarGateway/issues/43))
 - [**Bugfix**] Fix #37 Unable to transmit multiple files (DGWVoiceTransmit) ([#37](https://github.com/F4FXL/DStarGateway/issues/37))
 - [**Bugfix**] Fix #36 Error1 Build fails in some environment ([#36](https://github.com/F4FXL/DStarGateway/issues/36))
 - [**Bugfix**] Fix #38 g++ 13 build ([#38](https://github.com/F4FXL/DStarGateway/issues/38))
