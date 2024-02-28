@@ -97,7 +97,7 @@ public:
 	}
 
 	/*
-		Updates the entry, but only if the timestamp is newer. if an address was already specified it is kept.
+		Updates the entry, but only if the timestamp is newer. 
 	*/
 	void Update(const std::string& user, const std::string& repeater, const std::string& gateway, const std::string& address, const std::string& timestamp, const std::string& remotePort)
 	{
@@ -108,9 +108,7 @@ public:
 			m_gateway = gateway;
 			m_timestamp = timestamp;
 			m_remotePort = remotePort;
-
-			if(m_address.empty() && !address.empty())
-				m_address = address;
+			m_address = address;
 		}
 		//wxLogMessage("After : %s"), toString());
 	}

@@ -7,6 +7,7 @@ dgwvoicetransmit: ../VersionInfo/GitVersion.h $(OBJS) ../DStarBase/DStarBase.a .
 
 %.o : %.cpp
 	$(CC) -I../BaseCommon -I../APRS -I../DStarBase -I../VersionInfo -DCFG_DIR='"$(CFG_DIR)"' $(CPPFLAGS) -MMD -MD -c $< -o $@
+-include $(DEPS)
 
 .PHONY clean:
 clean:
