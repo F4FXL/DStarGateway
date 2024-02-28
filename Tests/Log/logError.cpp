@@ -74,7 +74,7 @@ namespace LogErrorTests
         EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[ERROR  ] One Message\n"));
     }
 
-    TEST_F(Log_logError, ThreeIdenticalMessageOneDifferent) {
+    TEST_F(Log_logError, NineIdenticalMessageOneDifferent) {
         CLog::logError("One Message");
         CLog::logError("One Message");
         CLog::logError("One Message");        
