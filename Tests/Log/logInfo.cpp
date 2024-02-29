@@ -25,15 +25,15 @@
 
 using ::testing::EndsWith;
 
-namespace LogErrorTests
+namespace LogInfoTests
 {
-    class Log_logError: public ::testing::Test {
+    class Log_logInfo: public ::testing::Test {
         protected:
             CFakeLogTarget * m_logTarget;
 
         void SetUp() override
         {
-            m_logTarget = new CFakeLogTarget(LOG_ERROR);
+            m_logTarget = new CFakeLogTarget(LOG_INFO);
             CLog::addTarget((CLogTarget *)m_logTarget);
         }
 
@@ -43,32 +43,34 @@ namespace LogErrorTests
         }
     };
 
-    TEST_F(Log_logError, PutError) {
+    TEST_F(Log_logInfo, PutError) {
         CLog::logError("One Message");
 
         EXPECT_EQ(1, m_logTarget->m_messages.size()) << "There should be  one message in the log.";
         EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[ERROR  ] One Message\n"));
     }
 
-    TEST_F(Log_logError, PutDebug) {
+    TEST_F(Log_logInfo, PutDebug) {
         CLog::logDebug("One Message");
 
         EXPECT_EQ(0, m_logTarget->m_messages.size()) << "There should be no message in the log.";
     }
 
-    TEST_F(Log_logError, PutInfo) {
+    TEST_F(Log_logInfo, PutInfo) {
         CLog::logInfo("One Message");
 
-        EXPECT_EQ(0, m_logTarget->m_messages.size()) << "There should be no message in the log.";
+        EXPECT_EQ(1, m_logTarget->m_messages.size()) << "There should be one message in the log.";
+        EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[INFO   ] One Message\n"));
     }
 
-    TEST_F(Log_logError, PutWarning) {
+    TEST_F(Log_logInfo, PutWarning) {
         CLog::logWarning("One Message");
 
-        EXPECT_EQ(0, m_logTarget->m_messages.size()) << "There should be no message in the log.";
+        EXPECT_EQ(1, m_logTarget->m_messages.size()) << "There should be one message in the log.";
+        EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[WARNING] One Message\n"));
     }
 
-    TEST_F(Log_logError, PutTrace) {
+    TEST_F(Log_logInfo, PutTrace) {
         CLog::logTrace("One Message");
 
         EXPECT_EQ(0, m_logTarget->m_messages.size()) << "There should be no message in the log.";
