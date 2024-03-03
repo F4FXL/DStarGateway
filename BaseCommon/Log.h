@@ -36,7 +36,8 @@ private:
     static bool m_addedTargets;
     static std::recursive_mutex m_targetsMutex;
     static std::string m_prevMsg;
-    static int m_prevMsgCount;
+    static uint m_prevMsgCount;
+    static uint m_repeatThreshold;
 
     static void getTimeStamp(std::string& s);
 
@@ -78,9 +79,9 @@ private:
     }
 
 public:
-    
     static void addTarget(CLogTarget * target);
     static void finalise();
+    static uint& getRepeatThreshold();
 
     template<typename... Args> static void logTrace(const std::string & f, Args... args)
     {
@@ -119,22 +120,26 @@ public:
         if(m_targets.empty())
             return;
 
-        std::string timestamp;
-        getTimeStamp(timestamp);
-
         std::string msg;
         formatLogMessage(msg, severity, f, args...);
 
-        if(msg.compare(m_prevMsg) == 0) {
-            m_prevMsgCount++;
-            return;
-        }
-        else if(m_prevMsgCount != 0) {
-            formatLogMessage(msg, severity, "Previous message repeated %d times", m_prevMsgCount);
-        }
+        bool repeatedMsg = (msg.compare(m_prevMsg) == 0);
 
+        if(repeatedMsg && m_repeatThreshold > 0U) {
+            m_prevMsgCount++;
+            if(m_prevMsgCount >= m_repeatThreshold)
+                return;
+        }
+               
         m_prevMsg.assign(msg);
 
+        if(m_prevMsgCount >= m_repeatThreshold && !repeatedMsg && m_repeatThreshold > 0U) {
+            formatLogMessage(msg, severity, "Previous message repeated %d times", m_prevMsgCount - m_repeatThreshold + 1);
+            m_prevMsg.clear();
+        }
+        
+        std::string timestamp;
+        getTimeStamp(timestamp);
         std::string msgts;
         CStringUtils::string_format_in_place(msgts, "[%s] %s", timestamp.c_str(), msg.c_str());
 
@@ -144,7 +149,7 @@ public:
             }
         }
 
-        if(m_prevMsgCount != 0) {
+        if(m_prevMsgCount != 0 && !repeatedMsg) {
             m_prevMsgCount = 0;
             log(severity, f, args ...);
         }
