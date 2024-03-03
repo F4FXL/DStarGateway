@@ -181,6 +181,11 @@ bool CDStarGatewayConfig::loadLog(const CConfig & cfg)
 		else if(levelStr == "none")		m_log.displayLevel = LOG_NONE;
 	}
 
+	std::string thresholdStr;
+	ret = cfg.getValue("log", "repeatthreshold", thresholdStr, "2", {"disabled", "1", "2", "3", "4","5", "6", "7", "8", "9", "10"}) && ret;
+	if(thresholdStr == "disabled") m_log.repeatThreshold = 0;
+	else m_log.repeatThreshold = ::atoi(thresholdStr.c_str());
+
 	return ret;
 }
 
