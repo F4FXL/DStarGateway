@@ -90,7 +90,7 @@ namespace LogRepeatTests
         CLog::logError("One Message");
         CLog::logError("One Message");
 
-        EXPECT_EQ(1, m_logTarget->m_messages.size()) << "There should be two messages in the log.";
+        EXPECT_EQ(2, m_logTarget->m_messages.size()) << "There should be two messages in the log.";
         EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[ERROR  ] One Message\n"));
         EXPECT_THAT(m_logTarget->m_messages[1].c_str(), EndsWith("[ERROR  ] One Message\n"));
     }
@@ -109,7 +109,7 @@ namespace LogRepeatTests
         CLog::logError("Another Message");
         CLog::logError("And here is another Message");
 
-        EXPECT_EQ(4, m_logTarget->m_messages.size()) << "There should be two message in the log.";
+        EXPECT_EQ(5, m_logTarget->m_messages.size()) << "There should be two message in the log.";
         EXPECT_THAT(m_logTarget->m_messages[0].c_str(), EndsWith("[ERROR  ] One Message\n"));
         EXPECT_THAT(m_logTarget->m_messages[1].c_str(), EndsWith("[ERROR  ] One Message\n"));
         EXPECT_THAT(m_logTarget->m_messages[2].c_str(), EndsWith("[ERROR  ] Previous message repeated 7 times\n"));
