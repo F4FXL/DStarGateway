@@ -29,7 +29,7 @@ std::recursive_mutex CLog::m_targetsMutex;
 std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LOG_DEBUG) };
 std::string CLog::m_prevMsg = "";
 uint CLog::m_prevMsgCount = 0U;
-uint CLog::m_repeatThreshold = 1U;
+uint CLog::m_repeatThreshold = 2U;
 
 
 void CLog::addTarget(CLogTarget* target)
