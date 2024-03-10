@@ -18,19 +18,20 @@
   - [3.6. Installing](#36-installing)
   - [3.7. Configuring](#37-configuring)
   - [3.8. Updating host files](#38-updating-host-files)
-- [4. Contributing](#4-contributing)
-  - [4.1. Work Flow](#41-work-flow)
-  - [4.2. Continuous Integration](#42-continuous-integration)
-- [5. Version History](#5-version-history)
-  - [5.1. Version 1.0](#51-version-10)
-  - [5.2. Version 0.7](#52-version-07)
-  - [5.3. Version 0.6](#53-version-06)
-  - [5.4. Version 0.5](#54-version-05)
-  - [5.5. Version 0.4](#55-version-04)
-  - [5.6. Version 0.3](#56-version-03)
-  - [5.7. Version 0.2](#57-version-02)
-  - [5.8. Version 0.1](#58-version-01)
-- [6. Future](#6-future)
+- [4. Dashboard](#4-dashboard)
+- [5. Contributing](#5-contributing)
+  - [5.1. Work Flow](#51-work-flow)
+  - [5.2. Continuous Integration](#52-continuous-integration)
+- [6. Version History](#6-version-history)
+  - [6.1. Version 1.0](#61-version-10)
+  - [6.2. Version 0.7](#62-version-07)
+  - [6.3. Version 0.6](#63-version-06)
+  - [6.4. Version 0.5](#64-version-05)
+  - [6.5. Version 0.4](#65-version-04)
+  - [6.6. Version 0.3](#66-version-03)
+  - [6.7. Version 0.2](#67-version-02)
+  - [6.8. Version 0.1](#68-version-01)
+- [7. Future](#7-future)
 
 
 # 1. Introduction
@@ -133,19 +134,28 @@ To update host files, from within the source code directory, run
 sudo make newhostfiles
 sudo systemctl restart dstargateway.service
 ```
+# 4. Dashboard
+@johnhays K7VE has developed a nice lightweight NodeJS dashboard. Code and instructions can be found on his [GitHub](https://github.com/johnhays/dsgwdashboard). 
 
-# 4. Contributing
-## 4.1. Work Flow
+Here are some instances of it:
+- [https://kf7ufz.ampr.org](https://kf7ufz.ampr.org)
+- [https://nw7dr.ampr.org](https://nw7dr.ampr.org)
+- [https://n4arg.arrg.us](https://n4arg.arrg.us)
+- [https://nh6fu.ampr.org](https://nh6fu.ampr.org)
+
+
+# 5. Contributing
+## 5.1. Work Flow
 I Use [Git flow](https://danielkummer.github.io/git-flow-cheatsheet/) as my workflow. PR are welcome but pleasee observe following rules :
 - You have tested your code thoroughly
 - Compilation produces no warnings
 - Code formating rules are observed (these are very lousy though)
-## 4.2. Continuous Integration
+## 5.2. Continuous Integration
 I have added some basic CI using CircleCI [![F4FXL](https://circleci.com/gh/F4FXL/DStarGateway.svg?style=svg)](https://app.circleci.com/pipelines/github/F4FXL/DStarGateway?filter=all) I am trying to rewrite the code so that it can be put into some Behavior Driven Development scheme. This is a long haul task and I'll try do do it on the go while changing/adding stuff.
 The testing framwework used is Google Test.
 
-# 5. Version History
-## 5.1. Version 1.0
+# 6. Version History
+## 6.1. Version 1.0
 - [**Improvement**] Limit log reporting ([#44](https://github.com/F4FXL/DStarGateway/issues/44))
 - [**Improvement**] Improve CI to include all variants of build configurations ([#40](https://github.com/F4FXL/DStarGateway/issues/40))
 - [**Bugfix**] Fix #43 Cache not updated when answering ircddb gateway is only conected to one network ([#43](https://github.com/F4FXL/DStarGateway/issues/43))
@@ -154,13 +164,13 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Fix #38 g++ 13 build ([#38](https://github.com/F4FXL/DStarGateway/issues/38))
 - [**Bugfix**] Add support for libgps API version greater than 10([#39](https://github.com/F4FXL/DStarGateway/issues/39))
 - [**Bugfix**] Fix Dongles requires a Frequency ([#15](https://github.com/F4FXL/DStarGateway/issues/15))
-## 5.2. Version 0.7
+## 6.2. Version 0.7
 - [**Bugfix**] Unknow repeater entries in log when using Icom Hardware ([#34](https://github.com/F4FXL/DStarGateway/issues/34))
 - [**Bugfix**] Malformed callsign in some cases when using DV-G (NMEA) ([#33](https://github.com/F4FXL/DStarGateway/issues/33))
 - [**Bugfix**] Crash on startup with Icom Hardware. Thanks to Josh AB9FT for reporting the issue.([#31](https://github.com/F4FXL/DStarGateway/issues/31))
 - [**Improvement**] Add/Fix DPRS Object support([#28](https://github.com/F4FXL/DStarGateway/issues/28))
 - [**Improvement**] Log incoming DPRS frames so they can be used in e.g. dashboards([#29](https://github.com/F4FXL/DStarGateway/issues/29))
-## 5.3. Version 0.6
+## 6.3. Version 0.6
 - [**Improvement**] Add DRats Support ([#24](https://github.com/F4FXL/DStarGateway/issues/24))
 - [**Improvement**] Add call sign lists ([#22](https://github.com/F4FXL/DStarGateway/issues/22))
 - [**Improvement**] Add a way to override Slow Data in VoiceTransmit ([#23](https://github.com/F4FXL/DStarGateway/issues/23))
@@ -168,7 +178,7 @@ The testing framwework used is Google Test.
 - [**Improvement**] Gracefully exit on SIGINT and SIGTERM ([#21](https://github.com/F4FXL/DStarGateway/issues/21)). DStarGateway can also be run as a "forking" daemon. This might be required for distros still using sysv. Systemd can live without it.
 - [**Improvement**] Add text transmit utility dgwtexttransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
 - [**Improvement**] Add voice transmit utility dgwvoicetransmit ([#18](https://github.com/F4FXL/DStarGateway/issues/18))
-## 5.4. Version 0.5
+## 6.4. Version 0.5
 - [**Improvement**] Add remote control utility dgwremotecontrol ([#17](https://github.com/F4FXL/DStarGateway/issues/17))
 - [**Bugfix**] Two simultaneous incoming G2 streams would fail to be transmitted on dual band repeaters ([#16](https://github.com/F4FXL/DStarGateway/issues/16))
 - [**Improvement**] Add NAT Traversal for G2 and DExtra, using IRCDDB as a Rendez Vous server ([#5](https://github.com/F4FXL/DStarGateway/issues/5))
@@ -176,19 +186,19 @@ The testing framwework used is Google Test.
 - [**Bugfix**] Failed to download XLX Hosts when URL contains a = sign ([#14](https://github.com/F4FXL/DStarGateway/issues/14))
 - [**Bugfix**] Remote control connection failed ([#13](https://github.com/F4FXL/DStarGateway/issues/13))
 - [**Bugfix**] Trying to connect to ghost ircDDB when no ircDDB is configured
-## 5.5. Version 0.4
+## 6.5. Version 0.4
 - [**Improvement**] Add APRS status link feature ([#8](https://github.com/F4FXL/DStarGateway/issues/8))
 - [**Bugfix**] Positions received over radio were not sent to APRS-IS when GPDS connection failed. ([#7](https://github.com/F4FXL/DStarGateway/issues/7))
 - [**Improvement**] Bring back GPSD support ([#6](https://github.com/F4FXL/DStarGateway/issues/6))
 - [**Improvement**] Log enhancements ([#4](https://github.com/F4FXL/DStarGateway/issues/4))
-## 5.6. Version 0.3
+## 6.6. Version 0.3
 - [**Improvement**] Get rid of libconfig++ dependency. When upgrading from earlier version you need to manualy delete the config file before reinstalling.
-## 5.7. Version 0.2
+## 6.7. Version 0.2
 - [**Bugfix**] ircDDBFreeze when repeater not found ([#1](https://github.com/F4FXL/DStarGateway/issues/1))
 - Code sanitization
-## 5.8. Version 0.1
+## 6.8. Version 0.1
 First working version
-# 6. Future
+# 7. Future
 I started this during my 2021 seasons holiday. It took me almost 8 days to get to a workable version. Here are a couple of stuff I'd like to do :
 - &#9745; Better NatTraversal
   - No banging on every gateway: use ircDDB (or something else) as mitigation server to notify peer
