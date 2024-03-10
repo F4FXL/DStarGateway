@@ -27,6 +27,10 @@
 bool CLog::m_addedTargets(false);
 std::recursive_mutex CLog::m_targetsMutex;
 std::vector<CLogTarget *> CLog::m_targets = { new CLogConsoleTarget(LOG_DEBUG) };
+std::string CLog::m_prevMsg = "";
+uint CLog::m_prevMsgCount = 0U;
+uint CLog::m_repeatThreshold = 2U;
+
 
 void CLog::addTarget(CLogTarget* target)
 {
@@ -51,6 +55,13 @@ void CLog::finalise()
     }
 
     m_targets.clear();
+    m_prevMsg.clear();
+    m_prevMsgCount = 0;
+}
+
+uint& CLog::getRepeatThreshold()
+{
+    return CLog::m_repeatThreshold;
 }
 
 void CLog::getTimeStamp(std::string & s)

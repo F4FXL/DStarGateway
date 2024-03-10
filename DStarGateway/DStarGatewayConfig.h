@@ -88,6 +88,7 @@ typedef struct {
 	LOG_SEVERITY fileLevel;
 	std::string fileRoot;
 	bool fileRotate;
+	uint repeatThreshold;
 } TLog;
 
 typedef struct {
