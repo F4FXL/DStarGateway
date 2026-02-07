@@ -152,7 +152,7 @@ bool CDPlusProtocolHandler::readPackets()
 				return false;
 			default:
 				// An unknown type
-				// CUtils::dump("Unknown packet type from D-Plus", m_buffer, m_length);
+				CUtils::dump("Unknown packet type from D-Plus (DSVT)", m_buffer, m_length);
 				return true;
 		}
 	} else {
@@ -168,7 +168,7 @@ bool CDPlusProtocolHandler::readPackets()
 			return false;
 		} else {
 			// An unknown type
-			CUtils::dump("Unknown packet type from D-Plus", m_buffer, m_length);
+			CUtils::dump("Unknown packet type from D-Plus (Other)", m_buffer, m_length);
 			return true;
 		}
 	}
