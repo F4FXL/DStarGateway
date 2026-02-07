@@ -80,7 +80,7 @@ bool CAPRSGPSDIdFrameProvider::buildAPRSFramesInt(const CAPRSEntry * entry, std:
 #elif GPSD_API_MAJOR_VERSION == 11
 	if(m_gpsdData.fix.status == STATUS_NO_FIX)
 		return false;
-#elif GPSD_API_MAJOR_VERSION <= 14
+#elif GPSD_API_MAJOR_VERSION <= 16
 	if(m_gpsdData.fix.status == STATUS_UNK)
         return false;
 #elif 
