@@ -68,6 +68,9 @@ DGWTimeServer/dgwtimeserver: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBas
 DGWVoiceTransmit/dgwvoicetransmit: VersionInfo/GitVersion.h $(OBJS) DStarBase/DStarBase.a BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C DGWVoiceTransmit
 
+DHT/DHT.a: BaseCommon/BaseCommon.a FORCE
+	$(MAKE) -C DHT
+
 IRCDDB/IRCDDB.a: VersionInfo/GitVersion.h BaseCommon/BaseCommon.a FORCE
 	$(MAKE) -C IRCDDB
 
