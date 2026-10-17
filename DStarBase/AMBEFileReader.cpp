@@ -157,7 +157,7 @@ bool CAMBEFileReader::readIndex()
 bool CAMBEFileReader::lookup(const std::string &id, std::vector<CAMBEData *>& data)
 {
 	if(m_index.count(id) == 0U) {
-		CLog::logError("Cannot find the AMBE index for *%s*", id.c_str());
+		CLog::logDebug("Cannot find the AMBE index for *%s*", id.c_str());
 		return false;
 	}
 
