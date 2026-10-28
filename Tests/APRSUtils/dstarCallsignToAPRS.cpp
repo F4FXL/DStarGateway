@@ -25,6 +25,14 @@ namespace APRSUtilsTests
     class APRSUtils_dstarCallsignToAPRS : public ::testing::Test { 
     };
 
+    TEST_F(APRSUtils_dstarCallsignToAPRS, emptyString)
+    {
+        std::string call("");
+        CAPRSUtils::dstarCallsignToAPRS(call);
+
+        EXPECT_STRCASEEQ(call.c_str(), "") << "Call shall be empty";
+    }
+
     TEST_F(APRSUtils_dstarCallsignToAPRS, noBlanks)
     {
         std::string call("N0CALL");
