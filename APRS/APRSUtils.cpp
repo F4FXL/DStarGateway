@@ -22,6 +22,9 @@
 
 void CAPRSUtils::dstarCallsignToAPRS(std::string& dstarCallsign)
 {
+	if(dstarCallsign.empty())
+		return;
+
 	if(dstarCallsign[dstarCallsign.length() - 1] == ' ') {
 		boost::trim(dstarCallsign);
 	} else {
