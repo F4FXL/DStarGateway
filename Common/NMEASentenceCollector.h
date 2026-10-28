@@ -34,7 +34,6 @@ protected:
     bool isValidSentence(const std::string& sentence);
 
 private:
-    static void dstarCallsignToAPRS(std::string& call);
     static bool isValidNMEA(const std::string& nmea);
     static unsigned char calcXOR(const std::string& nmea);
     static void fixUpNMEATimeStamp(std::string& nmea);
