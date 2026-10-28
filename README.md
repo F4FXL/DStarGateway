@@ -158,6 +158,7 @@ The testing framwework used is Google Test.
 
 # 6. Version History
 ## 6.1. Version 1.0
+- [**Bugfix**] Fix crash on empty RS-MS1A sender field, thanks @ewpratten ([#71](https://github.com/F4FXL/DStarGateway/pull/71))
 - [**Bugfix**] Fix duplicate G2 routes ([#64](https://github.com/F4FXL/DStarGateway/issues/64))
 - [**Bugfix**] Fix decoding of DTMF commands with leading 0 ([#61](https://github.com/F4FXL/DStarGateway/issues/61))
 - [**Improvement**] Add second French voice ([#60](https://github.com/F4FXL/DStarGateway/issues/60))
