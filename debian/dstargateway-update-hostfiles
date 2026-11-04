@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Refresh the reflector host files in /usr/share/dstargateway from Pi-Star.
+# This is the packaged equivalent of upstream's "make newhostfiles". It is run
+# by dstargateway-hostfiles.service (and once by the postinst).
+#
+# A failed download keeps the host files of the previous run, so the gateway
+# never ends up without reflector lists.
+#
+# Override DATA_DIR when [Paths] data in /etc/dstargateway/dstargateway.cfg
+# points somewhere else than the packaged /usr/share/dstargateway.
+#
+set -u
+
+DATA_DIR="${DATA_DIR:-/usr/share/dstargateway}"
+HOSTFILES_URL="${HOSTFILES_URL:-http://www.pistar.uk/downloads}"
+HOSTFILES="DExtra_Hosts.txt DCS_Hosts.txt DPlus_Hosts.txt"
+
+rc=0
+
+for name in $HOSTFILES; do
+	# download to a temporary file in the same directory, so that the running
+	# gateway either sees the old or the new file, never a partial one
+	tmp=$(mktemp "$DATA_DIR/.$name.XXXXXX") || exit 1
+
+	if curl -fsSL --max-time 120 -o "$tmp" "$HOSTFILES_URL/$name"; then
+		chmod 0644 "$tmp"
+		mv -f "$tmp" "$DATA_DIR/$name"
+		echo "dstargateway: $name updated"
+	else
+		rm -f "$tmp"
+		echo "dstargateway: $name could not be downloaded, keeping the installed copy" >&2
+		rc=1
+	fi
+done
+
+exit $rc

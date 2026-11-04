@@ -20,6 +20,7 @@
 #define	RemoteControlStarNetGroup_H
 
 #include <vector>
+#include <cstdint>
 
 #include "RemoteControlStarNetUser.h"
 

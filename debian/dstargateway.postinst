@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# Create the unprivileged daemon account and the log directory. The service is
+# enabled but deliberately not started, the call sign and the repeater settings
+# in /etc/dstargateway/dstargateway.cfg have to be edited first.
+#
+set -e
+
+case "$1" in
+	configure)
+		if ! getent group dstar >/dev/null; then
+			addgroup --system dstar
+		fi
+
+		if ! getent passwd dstar >/dev/null; then
+			adduser --system --ingroup dstar --no-create-home \
+				--home /nonexistent --shell /usr/sbin/nologin \
+				--gecos "D-STAR Gateway" dstar
+		fi
+
+		install -d -o dstar -g dstar -m 0755 /var/log/dstargateway
+
+		if [ -d /run/systemd/system ]; then
+			systemd-tmpfiles --create /usr/lib/tmpfiles.d/dstargateway.conf >/dev/null 2>&1 || true
+			systemctl --system daemon-reload >/dev/null 2>&1 || true
+			systemctl --system enable dstargateway.service dgwtimeserver.service >/dev/null 2>&1 || true
+
+			# keep the reflector host files fresh, and pull them right away so
+			# that a fresh install does not have to wait for the first timer run
+			systemctl --system enable dstargateway-hostfiles.timer >/dev/null 2>&1 || true
+			systemctl --system start dstargateway-hostfiles.timer >/dev/null 2>&1 || true
+			systemctl --system start --no-block dstargateway-hostfiles.service >/dev/null 2>&1 || true
+		fi
+
+		echo "DStarGateway is installed but not started yet."
+		echo "Edit /etc/dstargateway/dstargateway.cfg, then run:"
+		echo "    systemctl restart dstargateway.service"
+		;;
+
+	abort-upgrade | abort-remove | abort-deconfigure)
+		;;
+
+	*)
+		echo "$0 called with unknown argument '$1'" >&2
+		exit 1
+		;;
+esac
+
+exit 0

@@ -1,0 +1,147 @@
+#!/usr/bin/make -f
+#
+# Debhelper free packaging for DStarGateway.
+#
+#   fakeroot dpkg-buildpackage -b -us -uc -d
+#   debian/rules binary            (same, without the .buildinfo/.changes files)
+#
+# Installed layout:
+#   /usr/bin/                    dstargateway, dgwremotecontrol, dgwtexttransmit,
+#                                dgwtimeserver, dgwvoicetransmit
+#   /usr/sbin/                   dstargateway-update-hostfiles
+#   /etc/dstargateway/*.cfg      configuration files (dpkg conffiles)
+#   /usr/share/dstargateway/     host files and the voice (.ambe/.indx) files
+#   /usr/lib/systemd/system/     dstargateway.service, dgwtimeserver.service,
+#                                dstargateway-hostfiles.{service,timer}
+#   /usr/lib/tmpfiles.d/         dstargateway.conf, creates /run/dstargateway
+#   /var/log/dstargateway/       created by postinst, owned by the dstar user
+#
+# The reflector host files are the ones "make newhostfiles" downloads, fetched
+# at build time and refreshed later on by dstargateway-hostfiles.timer.
+#
+# The binaries are linked against the libraries of the build host: a build on
+# Debian 13 / Raspberry Pi OS trixie (GCC 14, glibc 2.38) yields binaries that
+# need glibc >= 2.38 and libstdc++ >= 13.2 (GLIBCXX_3.4.32). Build the package
+# on the target system, or inside a chroot/container of the target release, when
+# the machine that runs it is older than that.
+
+PKG         := $(shell dpkg-parsechangelog -S Source)
+DEB_VERSION := $(shell dpkg-parsechangelog -S Version)
+DEB_ARCH    := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
+# debian/rules runs with the source tree as working directory, the resulting
+# package is written next to it (that is where dpkg-genchanges picks it up).
+SRCDIR := $(CURDIR)
+OUTDIR := $(CURDIR)/..
+STAGE  := debian/$(PKG)
+
+BIN_DIR  := /usr/bin
+SBIN_DIR := /usr/sbin
+CFG_DIR  := /etc/dstargateway
+DATA_DIR := /usr/share/dstargateway
+LOG_DIR  := /var/log/dstargateway
+RUN_DIR  := /run/dstargateway
+DOC_DIR  := /usr/share/doc/$(PKG)
+
+# Reflector host files, same source as upstream's "make newhostfiles" target.
+# FETCH_HOSTFILES=0, or a build machine without network access, falls back to
+# the (much older) copies in Data/.
+HOSTFILES        := DExtra_Hosts.txt DCS_Hosts.txt DPlus_Hosts.txt
+HOSTFILES_URL    ?= http://www.pistar.uk/downloads
+FETCH_HOSTFILES  ?= 1
+
+UNITS := dstargateway.service dgwtimeserver.service \
+         dstargateway-hostfiles.service dstargateway-hostfiles.timer
+
+BINARIES := DStarGateway/dstargateway \
+            DGWRemoteControl/dgwremotecontrol \
+            DGWTextTransmit/dgwtexttransmit \
+            DGWTimeServer/dgwtimeserver \
+            DGWVoiceTransmit/dgwvoicetransmit
+
+# The example configurations carry the upstream /usr/local paths, rewrite those
+# to the directories this package uses.
+CONFIG_SED := -e 's|/usr/local/share/dstargateway.d/|$(DATA_DIR)/|g' \
+              -e 's|/var/log/dstargateway/|$(LOG_DIR)/|g' \
+              -e 's|/var/run/dstargateway/|$(RUN_DIR)/|g'
+
+.PHONY: all build clean binary binary-arch binary-indep
+
+all: build
+
+build:
+	$(MAKE) -C $(SRCDIR) CFG_DIR=$(CFG_DIR)
+
+clean:
+	-$(MAKE) -C $(SRCDIR) clean
+	rm -rf $(STAGE)
+	rm -f debian/files debian/$(PKG).substvars
+
+binary: binary-arch
+
+binary-indep: build
+
+binary-arch: build
+	rm -rf $(STAGE)
+	install -d $(STAGE)/DEBIAN \
+	           $(STAGE)$(BIN_DIR) \
+	           $(STAGE)$(SBIN_DIR) \
+	           $(STAGE)$(CFG_DIR) \
+	           $(STAGE)$(DATA_DIR) \
+	           $(STAGE)$(DOC_DIR) \
+	           $(STAGE)/usr/lib/systemd/system \
+	           $(STAGE)/usr/lib/tmpfiles.d
+
+	set -e ; for bin in $(BINARIES) ; do \
+		install -m 0755 $(SRCDIR)/$$bin $(STAGE)$(BIN_DIR)/ ; \
+	done
+
+	install -m 0644 $(SRCDIR)/Data/*.ambe $(SRCDIR)/Data/*.indx $(SRCDIR)/Data/*.txt $(STAGE)$(DATA_DIR)/
+
+	set -e ; for f in $(HOSTFILES) ; do \
+		if [ "$(FETCH_HOSTFILES)" = "1" ] && \
+		   curl -fsSL --max-time 60 -o $(STAGE)$(DATA_DIR)/$$f.new $(HOSTFILES_URL)/$$f ; then \
+			chmod 0644 $(STAGE)$(DATA_DIR)/$$f.new ; \
+			mv -f $(STAGE)$(DATA_DIR)/$$f.new $(STAGE)$(DATA_DIR)/$$f ; \
+			echo "host files: $$f downloaded from $(HOSTFILES_URL)" ; \
+		else \
+			rm -f $(STAGE)$(DATA_DIR)/$$f.new ; \
+			echo "host files: using the older copy of $$f from $(SRCDIR)/Data" ; \
+			install -m 0644 $(SRCDIR)/Data/$$f $(STAGE)$(DATA_DIR)/$$f ; \
+		fi ; \
+	done
+
+	sed $(CONFIG_SED) $(SRCDIR)/DStarGateway/example.cfg > $(STAGE)$(CFG_DIR)/dstargateway.cfg
+	sed $(CONFIG_SED) $(SRCDIR)/DGWTimeServer/example.cfg > $(STAGE)$(CFG_DIR)/dgwtimeserver.cfg
+	install -m 0644 $(SRCDIR)/DGWRemoteControl/example.cfg $(STAGE)$(CFG_DIR)/dgwremotecontrol.cfg
+	chmod 0644 $(STAGE)$(CFG_DIR)/*.cfg
+
+	install -m 0755 debian/$(PKG)-update-hostfiles $(STAGE)$(SBIN_DIR)/$(PKG)-update-hostfiles
+
+	set -e ; for unit in $(UNITS) ; do \
+		sed -e 's|%CFG_DIR%|$(CFG_DIR)|g' \
+		    -e 's|/usr/local/bin/|$(BIN_DIR)/|g' debian/$$unit > $(STAGE)/usr/lib/systemd/system/$$unit ; \
+		chmod 0644 $(STAGE)/usr/lib/systemd/system/$$unit ; \
+	done
+
+	install -m 0644 debian/$(PKG).tmpfiles $(STAGE)/usr/lib/tmpfiles.d/$(PKG).conf
+	install -m 0644 $(SRCDIR)/README.md $(STAGE)$(DOC_DIR)/README.md
+	install -m 0644 $(SRCDIR)/LICENSE $(STAGE)$(DOC_DIR)/LICENSE
+	install -m 0644 debian/copyright $(STAGE)$(DOC_DIR)/copyright
+	gzip -9nc debian/changelog > $(STAGE)$(DOC_DIR)/changelog.Debian.gz
+	chmod 0644 $(STAGE)$(DOC_DIR)/changelog.Debian.gz
+
+	install -m 0755 debian/$(PKG).postinst $(STAGE)/DEBIAN/postinst
+	install -m 0755 debian/$(PKG).prerm $(STAGE)/DEBIAN/prerm
+	install -m 0755 debian/$(PKG).postrm $(STAGE)/DEBIAN/postrm
+	install -m 0644 debian/$(PKG).conffiles $(STAGE)/DEBIAN/conffiles
+
+	dpkg-shlibdeps -Tdebian/$(PKG).substvars \
+		$(STAGE)$(BIN_DIR)/dstargateway \
+		$(STAGE)$(BIN_DIR)/dgwremotecontrol \
+		$(STAGE)$(BIN_DIR)/dgwtexttransmit \
+		$(STAGE)$(BIN_DIR)/dgwtimeserver \
+		$(STAGE)$(BIN_DIR)/dgwvoicetransmit
+	dpkg-gencontrol -p$(PKG) -P$(STAGE) -Tdebian/$(PKG).substvars
+
+	dpkg-deb --build --root-owner-group $(STAGE) $(OUTDIR)/$(PKG)_$(DEB_VERSION)_$(DEB_ARCH).deb

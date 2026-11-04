@@ -37,7 +37,8 @@ TEST_F(Utils_swap_endian_be, SwapUINT32_be) {
 
 
 TEST_F(Utils_swap_endian_be, blabla) {
-    std::vector<char> charsToEscape = {-17, 0, 17, 19, 128-2, -25, 26, 128-3, -1, 36, 13, 44};
+    // explicit casts keep the byte values identical on platforms where char is unsigned
+    std::vector<char> charsToEscape = {(char)-17, (char)0, (char)17, (char)19, (char)(128-2), (char)-25, (char)26, (char)(128-3), (char)-1, (char)36, (char)13, (char)44};
 
     for(unsigned int i = 1U; i < charsToEscape.size(); i++) {
         CLog::logDebug("%08x - %08x", charsToEscape[i], (unsigned char)charsToEscape[i]);

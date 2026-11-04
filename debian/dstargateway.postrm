@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# On purge the log directory and the unprivileged dstar account are dropped.
+#
+set -e
+
+case "$1" in
+	purge)
+		rm -rf /var/log/dstargateway
+		rm -rf /run/dstargateway
+
+		if getent passwd dstar >/dev/null; then
+			deluser --system dstar >/dev/null 2>&1 || true
+		fi
+
+		if getent group dstar >/dev/null; then
+			delgroup --system dstar >/dev/null 2>&1 || true
+		fi
+		;;
+
+	remove | upgrade | failed-upgrade | abort-install | abort-upgrade | disappear)
+		;;
+
+	*)
+		echo "$0 called with unknown argument '$1'" >&2
+		exit 1
+		;;
+esac
+
+if [ -d /run/systemd/system ]; then
+	systemctl --system daemon-reload >/dev/null 2>&1 || true
+fi
+
+exit 0

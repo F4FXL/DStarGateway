@@ -1,0 +1,4 @@
+# The daemon can be run in "old school" daemon mode with a pid file, see the
+# [Daemon] section of /etc/dstargateway/dstargateway.cfg. systemd takes care of
+# the pid file otherwise.
+d /run/dstargateway 0755 dstar dstar - -

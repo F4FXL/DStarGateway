@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily update of the DStarGateway reflector host files
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

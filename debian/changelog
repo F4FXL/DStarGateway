@@ -1,0 +1,21 @@
+dstargateway (0.7-2) unstable; urgency=medium
+
+  * Ship the reflector host files the way "make newhostfiles" fetches them:
+    DExtra_Hosts.txt, DCS_Hosts.txt and DPlus_Hosts.txt are downloaded from
+    Pi-Star at build time, with the copies from Data/ as an offline fallback.
+  * Add dstargateway-update-hostfiles, dstargateway-hostfiles.service and
+    dstargateway-hostfiles.timer to refresh the host files daily on the
+    installed system.
+  * The postinst triggers one host file update and enables the timer.
+
+ -- Geoffrey Merck <F4FXL@users.noreply.github.com>  Fri, 16 Oct 2026 01:10:00 +0200
+
+dstargateway (0.7-1) unstable; urgency=medium
+
+  * Local build of upstream DStarGateway 0.7 (git 0c1dbb5).
+  * Files are installed in /usr/bin, /etc/dstargateway, /usr/share/dstargateway
+    and /var/log/dstargateway instead of the upstream /usr/local tree.
+  * systemd units dstargateway.service and dgwtimeserver.service are enabled,
+    but not started, so the configuration can be edited first.
+
+ -- Geoffrey Merck <F4FXL@users.noreply.github.com>  Fri, 16 Oct 2026 00:01:52 +0200

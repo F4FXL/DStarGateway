@@ -563,6 +563,14 @@ void CRepeaterHandler::processRepeater(CHeaderData& header)
 	m_flag2    = header.getFlag2();
 	m_flag3    = header.getFlag3();
 
+	const std::string myCall = boost::algorithm::trim_copy(m_myCall1);
+	const std::string rpt1Call = boost::algorithm::trim_copy(m_rptCall1);
+	const std::string rpt2Call = boost::algorithm::trim_copy(m_rptCall2);
+	if (myCall.empty() || rpt1Call.empty() || rpt2Call.empty()) {
+		CLog::logWarning("Incomplete D-Star header: MY='%s' RPT1='%s' RPT2='%s'; check the radio My Call Sign and repeater/gateway settings",
+		                 myCall.c_str(), rpt1Call.c_str(), rpt2Call.c_str());
+	}
+
 	if (m_hwType == HW_ICOM) {
 		unsigned char band1 = header.getBand1();
 		unsigned char band2 = header.getBand2();

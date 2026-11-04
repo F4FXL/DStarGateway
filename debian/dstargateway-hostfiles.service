@@ -1,0 +1,14 @@
+[Unit]
+Description=DStarGateway reflector host file update
+Documentation=https://github.com/F4FXL/DStarGateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/dstargateway-update-hostfiles
+# point the updater at another directory when [Paths] data is not the packaged
+# /usr/share/dstargateway
+#Environment=DATA_DIR=/var/lib/dstargateway
+# a host file that cannot be downloaded is not an error, the previous one stays
+SuccessExitStatus=0 1

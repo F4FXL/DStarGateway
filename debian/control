@@ -1,0 +1,32 @@
+Source: dstargateway
+Section: hamradio
+Priority: optional
+Maintainer: Geoffrey Merck <F4FXL@users.noreply.github.com>
+Homepage: https://github.com/F4FXL/DStarGateway
+Build-Depends: dpkg-dev,
+               build-essential,
+               libcurl4-openssl-dev | libcurl-dev,
+               libboost-dev
+Standards-Version: 4.6.2
+
+Package: dstargateway
+Architecture: any
+# The systemd unit runs "host google.com" before starting the daemon, which
+# comes from bind9-host.
+Depends: ${shlibs:Depends},
+         adduser,
+         bind9-host,
+         curl
+Description: D-STAR gateway with DPlus, DExtra, DCS, G2, ircDDB and APRS support
+ DStarGateway is a wxWidgets free port of ircddbGateway. It gives a D-STAR
+ repeater or hotspot access to the DPlus, DExtra, DCS and G2 reflector
+ networks, keeps the call sign routing information in the ircDDB network up
+ to date and can exchange position and text messages with the APRS-IS
+ network.
+ .
+ This package contains the gateway daemon, the D-RATS remote control, the
+ time server and the text/voice transmit helpers, the systemd units, example
+ configuration files in /etc/dstargateway and the host/voice data files in
+ /usr/share/dstargateway. The reflector host files are downloaded at build
+ time and refreshed daily by dstargateway-hostfiles.timer, which replaces the
+ manual "make newhostfiles" step.
